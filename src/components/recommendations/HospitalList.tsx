@@ -1,0 +1,539 @@
+import React, { useState } from 'react';
+import {
+  MapPin,
+  Car,
+  Clock,
+  UserCheck,
+  Star,
+  CheckCircle,
+  ArrowRight,
+  Sparkles,
+  ShieldCheck,
+} from 'lucide-react';
+import { Hospital, Doctor, TriageResult } from '../../types';
+import { hospitalQueueService } from '../../services/hospitalQueueService';
+
+interface HospitalListProps {
+  triage: TriageResult;
+  onSelectHospitalAndDoctor: (hospital: Hospital, doctor: Doctor) => void;
+}
+
+export const HospitalList: React.FC<HospitalListProps> = ({
+  triage,
+  onSelectHospitalAndDoctor,
+}) => {
+  const hospitals = hospitalQueueService.getRecommendedHospitals(triage);
+
+  // Selected hospital and doctor states
+  const [selectedHospId, setSelectedHospId] = useState<string>(hospitals[0]?.id || '');
+  const [selectedDocIdByHosp, setSelectedDocIdByHosp] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    hospitals.forEach((h) => {
+      const bestDoc = hospitalQueueService.getBestMatchingDoctor(h, triage);
+      initial[h.id] = bestDoc.id;
+    });
+    return initial;
+  });
+
+  const handleDoctorChange = (hospId: string, docId: string) => {
+    setSelectedDocIdByHosp({
+      ...selectedDocIdByHosp,
+      [hospId]: docId,
+    });
+  };
+
+  const currentHospital = hospitals.find((h) => h.id === selectedHospId) || hospitals[0];
+  const currentDocId = selectedDocIdByHosp[currentHospital.id] || currentHospital.doctors[0].id;
+  const currentDoctor = currentHospital.doctors.find((d) => d.id === currentDocId) || currentHospital.doctors[0];
+
+  const handleProceed = () => {
+    onSelectHospitalAndDoctor(currentHospital, currentDoctor);
+  };
+
+  return (
+    <div className="hospital-rec-container animate-fade-in">
+      {/* Header Banner */}
+      <div className="rec-header">
+        <div>
+          <div className="rec-badge-row">
+            <span className={`badge ${triage.level === 'RED' ? 'badge-red' : 'badge-yellow'}`}>
+              {triage.level} Triage Priority
+            </span>
+            <span className="spec-match-pill">
+              <Sparkles size={12} /> Matching {triage.suggestedSpecialties.join(' & ')}
+            </span>
+          </div>
+          <h2 className="rec-title">Recommended Hospitals & Specialist Doctors</h2>
+          <p className="rec-subtitle">
+            Ranked by AI matching of your medical history, clinical urgency, proximity, and active emergency desk capacity.
+          </p>
+        </div>
+
+        {/* 3-Tier Queue Info Card */}
+        <div className="queue-tip-card">
+          <ShieldCheck size={18} className="text-teal flex-shrink-0" />
+          <div className="queue-tip-text">
+            <strong>3-Tier Hospital Queue Buffer:</strong> When you select your preferred hospital below, SUGASTHA will automatically queue the next two closest hospitals as priority backups, guaranteeing failover if the first desk is occupied.
+          </div>
+        </div>
+      </div>
+
+      {/* Hospital Cards Feed */}
+      <div className="hospitals-list-feed">
+        {hospitals.map((hosp, index) => {
+          const isSelectedHosp = hosp.id === selectedHospId;
+          const activeDocId = selectedDocIdByHosp[hosp.id] || hosp.doctors[0].id;
+          const activeDoc = hosp.doctors.find((d) => d.id === activeDocId) || hosp.doctors[0];
+
+          return (
+            <div
+              key={hosp.id}
+              onClick={() => setSelectedHospId(hosp.id)}
+              className={`card hospital-card card-interactive ${
+                isSelectedHosp ? 'selected-hospital-card' : ''
+              }`}
+            >
+              {/* Card Top: Name, Distance & Accreditation */}
+              <div className="hosp-card-header">
+                <div className="hosp-main-info">
+                  <div className="rank-indicator">#{index + 1}</div>
+                  <div>
+                    <div className="hosp-name-row">
+                      <h3 className="hosp-name">{hosp.name}</h3>
+                      {hosp.nabhAccredited && (
+                        <span className="nabh-badge" title="National Accreditation Board for Hospitals">
+                          NABH
+                        </span>
+                      )}
+                    </div>
+                    <div className="hosp-address">
+                      <MapPin size={13} className="text-muted" />
+                      <span>{hosp.address}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Selection Radio Indicator */}
+                <div className={`selection-radio ${isSelectedHosp ? 'checked' : ''}`}>
+                  {isSelectedHosp && <div className="radio-inner"></div>}
+                </div>
+              </div>
+
+              {/* Proximity, Travel & Estimated Fare Strip */}
+              <div className="travel-fare-strip">
+                <div className="strip-item">
+                  <MapPin size={14} className="text-teal" />
+                  <span className="strip-val">{hosp.distanceKm} km</span>
+                  <span className="strip-sub">Distance</span>
+                </div>
+
+                <div className="strip-item">
+                  <Clock size={14} className="text-amber" />
+                  <span className="strip-val">~{hosp.estimatedTravelTimeMinutes} mins</span>
+                  <span className="strip-sub">Est. Travel</span>
+                </div>
+
+                <div className="strip-item fare-item">
+                  <Car size={14} className="text-emerald" />
+                  <div className="fare-col">
+                    <span className="strip-val">Auto: ₹{hosp.fareEstimates.autoFare} | Cab: ₹{hosp.fareEstimates.cabFare}</span>
+                    <span className="strip-sub">Average Estimated Fare</span>
+                  </div>
+                </div>
+
+                <div className="strip-item desk-item">
+                  <span className={`status-dot ${hosp.emergencyQueueStatus === 'NORMAL' ? 'dot-green' : 'dot-yellow'}`}></span>
+                  <span className="strip-val">{hosp.emergencyQueueStatus} Queue</span>
+                  <span className="strip-sub">Bed Capacity</span>
+                </div>
+              </div>
+
+              {/* Doctor Selection Section */}
+              <div className="doctor-select-section">
+                <div className="doc-section-title">
+                  <UserCheck size={15} className="text-teal" />
+                  <span>Choose Consulting Doctor / Specialist at this Hospital:</span>
+                </div>
+
+                <div className="doctors-chips-grid">
+                  {hosp.doctors.map((doc) => {
+                    const isDocSelected = doc.id === activeDocId;
+                    return (
+                      <div
+                        key={doc.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedHospId(hosp.id);
+                          handleDoctorChange(hosp.id, doc.id);
+                        }}
+                        className={`doc-chip ${isDocSelected ? 'active-doc-chip' : ''}`}
+                      >
+                        <div className="doc-chip-top">
+                          <strong className="doc-name">{doc.name}</strong>
+                          <span className="doc-rating">
+                            <Star size={11} className="text-amber fill-amber" /> {doc.rating}
+                          </span>
+                        </div>
+                        <span className="doc-spec text-teal">{doc.specialization}</span>
+                        <div className="doc-slot-row">
+                          <span className="doc-exp">{doc.experienceYears} yrs exp</span>
+                          <span className="doc-slot">{doc.availableSlotToday}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Selected Highlight Footer */}
+              {isSelectedHosp && (
+                <div className="selected-confirmation-pill">
+                  <CheckCircle size={15} className="text-emerald" />
+                  <span>
+                    Selected for Primary Consultation: <strong>{activeDoc.name}</strong> ({activeDoc.specialization})
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Sticky Bottom Action Drawer */}
+      <div className="selection-cta-drawer">
+        <div className="selected-summary-col">
+          <span className="summary-label">Primary Consultation Request:</span>
+          <div className="selected-entity-title">
+            <strong>{currentHospital.name}</strong> • <span>{currentDoctor.name}</span>
+          </div>
+          <span className="queue-note">
+            Next 2 hospitals in list will be automatically registered as priority fallback queue.
+          </span>
+        </div>
+
+        <button
+          onClick={handleProceed}
+          className="btn btn-primary btn-lg book-request-btn"
+        >
+          <span>Proceed with Consultation Request</span>
+          <ArrowRight size={18} />
+        </button>
+      </div>
+
+      <style>{`
+        .hospital-rec-container {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+        .rec-header {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+        .rec-badge-row {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          margin-bottom: 0.5rem;
+          flex-wrap: wrap;
+        }
+        .spec-match-pill {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          background: rgba(14, 165, 233, 0.12);
+          border: 1px solid rgba(14, 165, 233, 0.35);
+          color: #38bdf8;
+          font-size: 0.75rem;
+          padding: 3px 10px;
+          border-radius: var(--radius-full);
+          font-weight: 500;
+        }
+        .rec-title {
+          font-size: 1.55rem;
+        }
+        .rec-subtitle {
+          font-size: 0.88rem;
+          color: var(--text-secondary);
+        }
+        .queue-tip-card {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.75rem;
+          background: rgba(14, 165, 233, 0.08);
+          border: 1px solid rgba(14, 165, 233, 0.3);
+          border-radius: var(--radius-sm);
+          padding: 0.85rem 1.1rem;
+        }
+        .queue-tip-text {
+          font-size: 0.82rem;
+          color: var(--text-secondary);
+          line-height: 1.45;
+        }
+        .queue-tip-text strong {
+          color: #38bdf8;
+        }
+        .hospitals-list-feed {
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+        }
+        .hospital-card {
+          display: flex;
+          flex-direction: column;
+          gap: 1.1rem;
+          cursor: pointer;
+          border: 1px solid var(--border-subtle);
+          position: relative;
+        }
+        .selected-hospital-card {
+          border-color: var(--brand-primary);
+          background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(15, 23, 42, 0.95) 100%);
+          box-shadow: 0 0 25px rgba(14, 165, 233, 0.2);
+        }
+        .hosp-card-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+        }
+        .hosp-main-info {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.85rem;
+        }
+        .rank-indicator {
+          width: 32px;
+          height: 32px;
+          border-radius: var(--radius-xs);
+          background: var(--bg-surface-3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 0.85rem;
+          color: var(--brand-accent);
+          flex-shrink: 0;
+        }
+        .hosp-name-row {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          flex-wrap: wrap;
+        }
+        .hosp-name {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: #ffffff;
+        }
+        .nabh-badge {
+          font-size: 0.65rem;
+          font-weight: 800;
+          background: rgba(16, 185, 129, 0.15);
+          color: #10b981;
+          border: 1px solid rgba(16, 185, 129, 0.4);
+          padding: 1px 6px;
+          border-radius: var(--radius-xs);
+        }
+        .hosp-address {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          font-size: 0.8rem;
+          color: var(--text-muted);
+          margin-top: 3px;
+        }
+        .selection-radio {
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          border: 2px solid var(--border-subtle);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .selection-radio.checked {
+          border-color: var(--brand-primary);
+        }
+        .radio-inner {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: var(--brand-primary);
+        }
+        .travel-fare-strip {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 0.75rem;
+          background: rgba(0, 0, 0, 0.35);
+          padding: 0.75rem 1rem;
+          border-radius: var(--radius-sm);
+          border: 1px solid var(--border-subtle);
+        }
+        .strip-item {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .strip-val {
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #ffffff;
+        }
+        .strip-sub {
+          font-size: 0.7rem;
+          color: var(--text-muted);
+        }
+        .status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          display: inline-block;
+          margin-bottom: 2px;
+        }
+        .dot-green {
+          background: #10b981;
+          box-shadow: 0 0 6px #10b981;
+        }
+        .dot-yellow {
+          background: #f59e0b;
+          box-shadow: 0 0 6px #f59e0b;
+        }
+        .doctor-select-section {
+          display: flex;
+          flex-direction: column;
+          gap: 0.6rem;
+        }
+        .doc-section-title {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: var(--text-secondary);
+        }
+        .doctors-chips-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+          gap: 0.65rem;
+        }
+        .doc-chip {
+          background: var(--bg-surface-2);
+          border: 1px solid var(--border-subtle);
+          padding: 0.75rem;
+          border-radius: var(--radius-sm);
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+          transition: all var(--transition-fast);
+        }
+        .doc-chip:hover {
+          border-color: var(--border-highlight);
+        }
+        .doc-chip.active-doc-chip {
+          background: rgba(14, 165, 233, 0.15);
+          border-color: var(--brand-primary);
+        }
+        .doc-chip-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .doc-name {
+          font-size: 0.85rem;
+          color: #ffffff;
+        }
+        .doc-rating {
+          font-size: 0.72rem;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 2px;
+        }
+        .fill-amber {
+          fill: #f59e0b;
+        }
+        .doc-spec {
+          font-size: 0.75rem;
+        }
+        .doc-slot-row {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.7rem;
+          color: var(--text-muted);
+          margin-top: 2px;
+        }
+        .doc-slot {
+          color: #10b981;
+          font-weight: 500;
+        }
+        .selected-confirmation-pill {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: rgba(16, 185, 129, 0.12);
+          border: 1px solid rgba(16, 185, 129, 0.3);
+          padding: 0.5rem 0.85rem;
+          border-radius: var(--radius-sm);
+          font-size: 0.8rem;
+          color: #ffffff;
+        }
+        .selection-cta-drawer {
+          position: sticky;
+          bottom: 1rem;
+          background: rgba(15, 23, 42, 0.95);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid var(--border-highlight);
+          border-radius: var(--radius-md);
+          padding: 1.1rem 1.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+          z-index: 50;
+        }
+        .selected-summary-col {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .summary-label {
+          font-size: 0.72rem;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .selected-entity-title {
+          font-size: 1.05rem;
+          color: #ffffff;
+        }
+        .selected-entity-title strong {
+          color: #38bdf8;
+        }
+        .queue-note {
+          font-size: 0.75rem;
+          color: #94a3b8;
+        }
+        .book-request-btn {
+          padding: 0.85rem 1.75rem;
+        }
+        @media (max-width: 768px) {
+          .travel-fare-strip {
+            grid-template-columns: 1fr 1fr;
+          }
+          .selection-cta-drawer {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+            bottom: calc(var(--bottom-nav-height) + 0.5rem);
+          }
+          .book-request-btn {
+            width: 100%;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};

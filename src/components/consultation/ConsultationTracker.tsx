@@ -1,0 +1,570 @@
+import React, { useState } from 'react';
+import {
+  Clock,
+  CheckCircle2,
+  Building2,
+  UserCheck,
+  Layers,
+  ArrowRight,
+  Sparkles,
+  RefreshCw,
+  QrCode,
+  FileCheck,
+} from 'lucide-react';
+import { ConsultationRequest, HealthcareJourneySummary } from '../../types';
+import { consultationService } from '../../services/consultationService';
+import { QrCodeDisplay } from './QrCodeDisplay';
+import { Modal } from '../common/Modal';
+
+interface ConsultationTrackerProps {
+  consultation: ConsultationRequest;
+  onConsultationUpdated: (updated: ConsultationRequest) => void;
+  onJourneyCompleted: (summary: HealthcareJourneySummary) => void;
+  onClose?: () => void;
+}
+
+export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
+  consultation,
+  onConsultationUpdated,
+  onJourneyCompleted,
+}) => {
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [activeQueuePriority, setActiveQueuePriority] = useState<number>(
+    consultation.queueState.activePriority
+  );
+
+  // Status timeline steps
+  const steps = [
+    { key: 'REQUEST_CREATED', label: 'Request Created', desc: 'Symptom & triage bundle compiled' },
+    { key: 'PENDING', label: 'Hospital Dispatched', desc: 'Awaiting primary hospital acceptance' },
+    { key: 'CONFIRMED', label: 'Confirmed & Token Issued', desc: 'Hospital accepted consultation desk' },
+    { key: 'COMPLETED', label: 'Consultation Completed', desc: 'ABHA health summary updated' },
+  ];
+
+  const getStepIndex = (status: string) => {
+    switch (status) {
+      case 'REQUEST_CREATED':
+        return 0;
+      case 'PENDING':
+        return 1;
+      case 'HOSPITAL_ACCEPTED':
+      case 'CONFIRMED':
+        return 2;
+      case 'COMPLETED':
+        return 3;
+      default:
+        return 1;
+    }
+  };
+
+  const currentStepIdx = getStepIndex(consultation.status);
+
+  // Backend / Webhook Simulation triggers (User-side test harness)
+  const handleSimulateHospitalAccept = () => {
+    setIsProcessing(true);
+    setTimeout(() => {
+      const updated = consultationService.confirmConsultation(consultation);
+      setIsProcessing(false);
+      onConsultationUpdated(updated);
+    }, 600);
+  };
+
+  const handleSimulateHospitalFailover = () => {
+    setIsProcessing(true);
+    setTimeout(() => {
+      const updated = consultationService.failoverToNextBackupHospital(
+        consultation,
+        'Hospital ER Capacity at Maximum Threshold'
+      );
+      setActiveQueuePriority(updated.queueState.activePriority);
+      setIsProcessing(false);
+      onConsultationUpdated(updated);
+    }, 700);
+  };
+
+  const handleCompleteHealthcareJourney = async () => {
+    setIsProcessing(true);
+    const summary = await consultationService.completeHealthcareJourney(
+      consultation,
+      null,
+      ['Type 2 Diabetes (Active)', 'Hypertension Stage 1']
+    );
+    setIsProcessing(false);
+    onJourneyCompleted(summary);
+  };
+
+  const activeNode =
+    consultation.queueState.queueNodes.find((n) => n.status === 'PENDING_RESPONSE') ||
+    consultation.queueState.queueNodes.find((n) => n.status === 'ACCEPTED') ||
+    consultation.queueState.queueNodes[0];
+
+  return (
+    <div className="tracker-wrapper animate-fade-in">
+      {/* Top Banner with 5-digit number and QR trigger */}
+      <div className="card tracker-top-card">
+        <div className="tracker-id-row">
+          <div className="id-col">
+            <span className="label">ACTIVE CONSULTATION REQUEST</span>
+            <h2 className="consult-id font-mono">{consultation.id}</h2>
+          </div>
+
+          <div className="token-highlight-chip">
+            <span className="token-chip-label">CONSULTATION TOKEN:</span>
+            <strong className="token-chip-num">#{consultation.consultationNumber}</strong>
+          </div>
+
+          <button onClick={() => setShowQrModal(true)} className="btn btn-secondary btn-sm">
+            <QrCode size={16} className="text-teal" />
+            <span>View QR Pass</span>
+          </button>
+        </div>
+
+        {/* Status Callout Banner */}
+        <div
+          className={`status-callout ${
+            consultation.status === 'CONFIRMED' ? 'callout-confirmed' : 'callout-pending'
+          }`}
+        >
+          {consultation.status === 'CONFIRMED' ? (
+            <CheckCircle2 size={24} className="text-emerald flex-shrink-0" />
+          ) : (
+            <Clock size={24} className="text-amber flex-shrink-0" />
+          )}
+          <div className="callout-text">
+            <h4>
+              {consultation.status === 'CONFIRMED'
+                ? `Hospital Confirmed: ${consultation.confirmedDoctorName || activeNode.doctorName}`
+                : `Awaiting Confirmation from ${activeNode.hospitalName}`}
+            </h4>
+            <p>
+              {consultation.status === 'CONFIRMED'
+                ? `Your consultation request has been accepted by ${consultation.selectedHospital.name}. Present your 5-digit token #${consultation.consultationNumber} or QR code at arrival.`
+                : `Your consultation request is active in the hospital backend queue. Backup hospital fallback buffers are standing by.`}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Progress Timeline Tracker */}
+      <div className="card timeline-card">
+        <h3 className="section-title">Consultation Lifecycle Tracker</h3>
+        <div className="tracker-steps-line">
+          {steps.map((step, idx) => {
+            const isCompleted = idx < currentStepIdx;
+            const isCurrent = idx === currentStepIdx;
+            return (
+              <div
+                key={step.key}
+                className={`tracker-step-item ${isCompleted ? 'completed' : ''} ${
+                  isCurrent ? 'current' : ''
+                }`}
+              >
+                <div className="step-marker">
+                  {isCompleted ? <CheckCircle2 size={16} /> : idx + 1}
+                </div>
+                <div className="step-info">
+                  <span className="step-title">{step.label}</span>
+                  <span className="step-sub">{step.desc}</span>
+                </div>
+                {idx < steps.length - 1 && <div className="step-connector"></div>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 3-Tier Multi-Hospital Queue State */}
+      <div className="card queue-tracking-card">
+        <div className="queue-card-top">
+          <div className="flex-row items-center gap-2">
+            <Layers size={18} className="text-teal" />
+            <h3 className="section-title">3-Tier Hospital Queue Buffer Status</h3>
+          </div>
+          <span className="badge badge-info">Active Tier: Priority {activeQueuePriority}</span>
+        </div>
+
+        <p className="queue-explanation">
+          SUGASTHA maintains a live 3-tiered buffer. The selected primary hospital receives Priority 1. If unavailable, the next equipped backup hospital in the buffer receives the referral automatically:
+        </p>
+
+        <div className="queue-nodes-stream">
+          {consultation.queueState.queueNodes.map((node) => {
+            const isNodeActive = node.status === 'PENDING_RESPONSE';
+            const isNodeAccepted = node.status === 'ACCEPTED';
+            const isNodePassed = node.status === 'PASSED_TO_NEXT';
+
+            return (
+              <div
+                key={node.priorityOrder}
+                className={`queue-node-box ${
+                  isNodeAccepted
+                    ? 'node-accepted'
+                    : isNodeActive
+                    ? 'node-active'
+                    : isNodePassed
+                    ? 'node-passed'
+                    : 'node-queued'
+                }`}
+              >
+                <div className="node-rank-badge">
+                  Tier {node.priorityOrder}
+                  {node.priorityOrder === 1 ? ' (Primary)' : ' (Backup)'}
+                </div>
+
+                <div className="node-details">
+                  <div className="node-hosp-row">
+                    <Building2 size={15} className="text-muted" />
+                    <strong>{node.hospitalName}</strong>
+                  </div>
+                  <div className="node-doc-row">
+                    <UserCheck size={14} className="text-teal" />
+                    <span>
+                      {node.doctorName} • {node.doctorSpecialization}
+                    </span>
+                  </div>
+                  {node.rejectionReason && (
+                    <span className="rejection-hint">Reason: {node.rejectionReason}</span>
+                  )}
+                </div>
+
+                <div className="node-status-pill">
+                  {isNodeAccepted ? (
+                    <span className="badge badge-green">ACCEPTED</span>
+                  ) : isNodeActive ? (
+                    <span className="badge badge-yellow">AWAITING RESPONSE</span>
+                  ) : isNodePassed ? (
+                    <span className="badge badge-red">TRANSFERRED TO BACKUP</span>
+                  ) : (
+                    <span className="badge badge-info">IN STANDBY QUEUE</span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Backend / External Hospital API Testing Toolbar */}
+      <div className="card test-api-toolbar">
+        <div className="toolbar-header">
+          <div className="flex-row items-center gap-2">
+            <Sparkles size={16} className="text-amber" />
+            <span className="font-semibold text-sm">
+              Hospital Backend Interconnection Testing Suite
+            </span>
+          </div>
+          <span className="test-tool-badge">API READY / NO HOSPITAL UI</span>
+        </div>
+        <p className="toolbar-desc">
+          Because the hospital system is developed separately by another team, use these incoming webhook triggers to verify the user-side tracker reacts correctly to external hospital decisions:
+        </p>
+
+        <div className="toolbar-actions">
+          {consultation.status === 'PENDING' && (
+            <>
+              <button
+                type="button"
+                onClick={handleSimulateHospitalAccept}
+                disabled={isProcessing}
+                className="btn btn-primary btn-sm"
+              >
+                <CheckCircle2 size={15} />
+                <span>Simulate: Hospital Accepts Request (Confirm)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSimulateHospitalFailover}
+                disabled={isProcessing || consultation.queueState.activePriority >= 3}
+                className="btn btn-secondary btn-sm"
+              >
+                <RefreshCw size={14} />
+                <span>Simulate: Hospital Busy $\to$ Failover to Backup</span>
+              </button>
+            </>
+          )}
+
+          {consultation.status === 'CONFIRMED' && (
+            <button
+              type="button"
+              onClick={handleCompleteHealthcareJourney}
+              disabled={isProcessing}
+              className="btn btn-primary btn-sm btn-finish"
+            >
+              <FileCheck size={16} />
+              <span>Complete Consultation Journey & Sync to ABHA Record</span>
+              <ArrowRight size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* QR Code Pass Modal */}
+      <Modal
+        isOpen={showQrModal}
+        onClose={() => setShowQrModal(false)}
+        title="Consultation Pass & QR Verification"
+        subtitle="Present this slip at hospital desk or digital check-in kiosk"
+        maxWidth="460px"
+      >
+        <QrCodeDisplay consultation={consultation} size={200} />
+      </Modal>
+
+      <style>{`
+        .tracker-wrapper {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+        .tracker-top-card {
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+        }
+        .tracker-id-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 1rem;
+        }
+        .id-col {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .id-col .label {
+          font-size: 0.68rem;
+          font-weight: 700;
+          color: var(--text-muted);
+          letter-spacing: 0.06em;
+        }
+        .consult-id {
+          font-size: 1.35rem;
+          color: #ffffff;
+        }
+        .token-highlight-chip {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: rgba(14, 165, 233, 0.12);
+          border: 1px solid rgba(14, 165, 233, 0.35);
+          padding: 0.45rem 1rem;
+          border-radius: var(--radius-full);
+        }
+        .token-chip-label {
+          font-size: 0.72rem;
+          color: var(--text-muted);
+          font-weight: 700;
+        }
+        .token-chip-num {
+          font-family: var(--font-display);
+          font-size: 1.3rem;
+          color: var(--brand-accent);
+        }
+        .status-callout {
+          display: flex;
+          align-items: flex-start;
+          gap: 1rem;
+          padding: 1.1rem 1.25rem;
+          border-radius: var(--radius-sm);
+        }
+        .callout-pending {
+          background: rgba(245, 158, 11, 0.12);
+          border: 1px solid rgba(245, 158, 11, 0.35);
+        }
+        .callout-confirmed {
+          background: rgba(16, 185, 129, 0.12);
+          border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+        .callout-text h4 {
+          font-size: 1.05rem;
+          color: #ffffff;
+        }
+        .callout-text p {
+          font-size: 0.85rem;
+          color: var(--text-secondary);
+          margin-top: 2px;
+        }
+        .timeline-card {
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+        }
+        .tracker-steps-line {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 0.5rem;
+          position: relative;
+        }
+        .tracker-step-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          gap: 0.5rem;
+          position: relative;
+        }
+        .step-marker {
+          width: 34px;
+          height: 34px;
+          border-radius: 50%;
+          background: var(--bg-surface-3);
+          border: 2px solid var(--border-subtle);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 0.85rem;
+          color: var(--text-muted);
+          z-index: 2;
+        }
+        .tracker-step-item.completed .step-marker {
+          background: #10b981;
+          border-color: #10b981;
+          color: #ffffff;
+        }
+        .tracker-step-item.current .step-marker {
+          border-color: var(--brand-primary);
+          background: var(--brand-primary);
+          color: #ffffff;
+          box-shadow: 0 0 12px var(--brand-primary-glow);
+        }
+        .step-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .step-title {
+          font-size: 0.82rem;
+          font-weight: 600;
+          color: #ffffff;
+        }
+        .step-sub {
+          font-size: 0.7rem;
+          color: var(--text-muted);
+        }
+        .step-connector {
+          position: absolute;
+          top: 17px;
+          left: 50%;
+          width: 100%;
+          height: 2px;
+          background: var(--border-subtle);
+          z-index: 1;
+        }
+        .tracker-step-item.completed .step-connector {
+          background: #10b981;
+        }
+        .queue-tracking-card {
+          display: flex;
+          flex-direction: column;
+          gap: 1.1rem;
+        }
+        .queue-card-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .queue-explanation {
+          font-size: 0.85rem;
+          color: var(--text-secondary);
+        }
+        .queue-nodes-stream {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+        .queue-node-box {
+          display: grid;
+          grid-template-columns: auto 1fr auto;
+          align-items: center;
+          gap: 1rem;
+          padding: 0.85rem 1.1rem;
+          border-radius: var(--radius-sm);
+          background: var(--bg-surface-2);
+          border: 1px solid var(--border-subtle);
+        }
+        .node-active {
+          border-color: var(--brand-primary);
+          background: rgba(14, 165, 233, 0.1);
+        }
+        .node-accepted {
+          border-color: #10b981;
+          background: rgba(16, 185, 129, 0.1);
+        }
+        .node-passed {
+          opacity: 0.65;
+          border-color: rgba(239, 68, 68, 0.3);
+        }
+        .node-rank-badge {
+          font-size: 0.72rem;
+          font-weight: 700;
+          color: var(--brand-accent);
+        }
+        .node-details {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .node-hosp-row, .node-doc-row {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.85rem;
+        }
+        .rejection-hint {
+          font-size: 0.72rem;
+          color: #f87171;
+        }
+        .test-api-toolbar {
+          background: rgba(245, 158, 11, 0.06);
+          border: 1px dashed rgba(245, 158, 11, 0.35);
+          display: flex;
+          flex-direction: column;
+          gap: 0.85rem;
+          padding: 1.25rem;
+        }
+        .toolbar-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .test-tool-badge {
+          font-size: 0.68rem;
+          font-weight: 700;
+          color: #fb923c;
+          background: rgba(249, 115, 22, 0.15);
+          padding: 2px 6px;
+          border-radius: var(--radius-xs);
+        }
+        .toolbar-desc {
+          font-size: 0.8rem;
+          color: var(--text-muted);
+        }
+        .toolbar-actions {
+          display: flex;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+        }
+        .btn-finish {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        @media (max-width: 768px) {
+          .tracker-steps-line {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+          .step-connector {
+            display: none;
+          }
+          .queue-node-box {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
