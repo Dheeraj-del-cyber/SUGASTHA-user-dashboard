@@ -198,7 +198,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           place-items: center;
           width: 28px;
           height: 24px;
-          transform: translateY(3px);
+          transform: translateY(5px);
           transition: transform 0.2s ease, color 0.2s ease;
         }
 

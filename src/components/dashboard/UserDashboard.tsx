@@ -25,7 +25,7 @@ interface UserDashboardProps {
   onSelectOption?: (symptomText: string, route: 'TELECONSULTATION' | 'HOSPITAL_VISIT') => void;
 }
 
-const COMMON_SYMPTOMS = ['Fever', 'Cough', 'Headache'];
+const COMMON_SYMPTOMS = ['Fever', 'Cough', 'Headache', 'Fatigue'];
 
 const FEATURE_SLIDES = [
   {
@@ -605,25 +605,26 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         }
 
         .symptom-suggestions-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.6rem;
-          align-items: center;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.55rem;
         }
 
         .symptom-suggestion-chip {
-          display: inline-flex;
+          display: flex;
           align-items: center;
+          justify-content: center;
           gap: 0.4rem;
-          padding: 0.5rem 1rem;
-          border-radius: var(--radius-full);
-          font-size: 0.9rem;
+          padding: 0.65rem 1rem;
+          border-radius: var(--radius-md);
+          font-size: 0.88rem;
           font-weight: 600;
           background: var(--pastel-light-blue);
           color: var(--brand-primary);
-          border: 1px solid var(--pastel-sky-blue);
+          border: 1.5px solid var(--pastel-sky-blue);
           transition: all var(--transition-fast);
           cursor: pointer;
+          width: 100%;
         }
 
         .symptom-suggestion-chip:hover {
