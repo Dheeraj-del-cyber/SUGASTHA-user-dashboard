@@ -53,10 +53,11 @@ const BODY_REGION_LABELS: Record<string, string> = {
 };
 
 export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
-  profile,
   onSubmit,
   isAnalyzing,
 }) => {
+  // `profile` prop retained for interface compatibility; no longer displayed
+  void ({} as SymptomInputFormProps['profile']);
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([
     'Chest Pain / Discomfort',
     'Shortness of Breath',
