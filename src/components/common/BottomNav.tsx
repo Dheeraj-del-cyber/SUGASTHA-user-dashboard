@@ -29,7 +29,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         className={`nav-item ${activeTab === 'triage' ? 'active' : ''}`}
       >
         <Stethoscope size={20} />
-        <span>AI Triage</span>
+        <span>Check Symptoms</span>
       </button>
 
       <button
@@ -40,7 +40,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           <Clock size={20} />
           {hasActiveConsultation && <span className="nav-ping"></span>}
         </div>
-        <span>Tracking</span>
+        <span>My Visit</span>
       </button>
 
       <button
@@ -48,7 +48,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         className={`nav-item ${activeTab === 'records' ? 'active' : ''}`}
       >
         <FileText size={20} />
-        <span>ABHA Records</span>
+        <span>Records</span>
       </button>
 
       <style>{`

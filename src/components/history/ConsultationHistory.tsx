@@ -21,9 +21,9 @@ export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ histor
     <div className="history-view-container animate-fade-in">
       <div className="history-header">
         <div>
-          <h3 className="section-title">Consultation & Verification Pass History</h3>
+          <h3 className="section-title">Your Hospital Passes</h3>
           <p className="section-subtitle">
-            All your generated consultation tokens and scannable QR passes are permanently archived here for hospital desk verification.
+            Passes from your past visits. Show them at the hospital desk.
           </p>
         </div>
       </div>
@@ -31,9 +31,9 @@ export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ histor
       {history.length === 0 ? (
         <div className="card empty-history-card">
           <Clock size={36} className="text-muted" />
-          <h4>No Consultation History Yet</h4>
+          <h4>No passes yet</h4>
           <p className="text-secondary text-sm">
-            When you complete a symptom evaluation and book a consultation, your records and passes will appear here.
+            When you book a visit, your pass will appear here.
           </p>
         </div>
       ) : (
@@ -42,8 +42,8 @@ export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ histor
             <div key={item.id} className="card history-item-card">
               <div className="history-card-top">
                 <div>
-                  <span className="token-tag">TOKEN #{item.consultationNumber}</span>
-                  <h4 className="item-id font-mono">{item.id}</h4>
+                  <span className="token-tag">PIN #{item.consultationNumber}</span>
+                  <h4 className="item-id">{item.selectedHospital.name}</h4>
                 </div>
 
                 <div className="history-top-badges">
@@ -56,9 +56,21 @@ export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ histor
                         : 'badge-green'
                     }`}
                   >
-                    {item.triageLevel} Triage
+                    {item.triageLevel === 'RED'
+                      ? 'Urgent'
+                      : item.triageLevel === 'YELLOW'
+                      ? 'Soon'
+                      : 'Normal'}
                   </span>
-                  <span className="badge badge-green">{item.status}</span>
+                  <span className="badge badge-green">
+                    {item.status === 'CONFIRMED'
+                      ? 'Visit confirmed'
+                      : item.status === 'PENDING'
+                      ? 'Waiting for hospital'
+                      : item.status === 'COMPLETED'
+                      ? 'Visit completed'
+                      : 'Visit updated'}
+                  </span>
                 </div>
               </div>
 
@@ -95,7 +107,7 @@ export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ histor
                 </div>
               </div>
 
-              {/* QR Verification Action */}
+              {/* View Pass Action */}
               <div className="history-card-footer">
                 <span className="symptoms-hint">
                   Symptoms: {item.primarySymptoms.slice(0, 2).join(', ')}
@@ -106,7 +118,7 @@ export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ histor
                   className="btn btn-secondary btn-sm"
                 >
                   <QrCode size={14} className="text-teal" />
-                  <span>Show QR Pass & Token</span>
+                  <span>View Pass</span>
                 </button>
               </div>
             </div>
@@ -118,8 +130,8 @@ export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ histor
       <Modal
         isOpen={!!selectedPass}
         onClose={() => setSelectedPass(null)}
-        title="Archived Consultation Pass"
-        subtitle="Verification Token for Hospital Check-in"
+        title="Your Hospital Pass"
+        subtitle="Show this at the hospital desk"
         maxWidth="440px"
       >
         {selectedPass && <QrCodeDisplay consultation={selectedPass} size={200} />}

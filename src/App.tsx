@@ -250,7 +250,7 @@ export const App: React.FC = () => {
             }}
             className={`view-tab ${activeSubView === 'DASHBOARD' ? 'active' : ''}`}
           >
-            Dashboard
+            Home
           </button>
           <button
             onClick={() => {
@@ -263,7 +263,7 @@ export const App: React.FC = () => {
                 : ''
             }`}
           >
-            AI Triage & Symptoms
+            Check Symptoms
           </button>
           {activeConsultation && (
             <button
@@ -273,7 +273,7 @@ export const App: React.FC = () => {
               }}
               className={`view-tab ${activeSubView === 'TRACKER' ? 'active' : ''}`}
             >
-              Active Queue Tracker
+              My Visit Status
             </button>
           )}
           <button
@@ -283,7 +283,7 @@ export const App: React.FC = () => {
             }}
             className={`view-tab ${activeSubView === 'RECORDS' ? 'active' : ''}`}
           >
-            ABHA Health Records ({records.length})
+            My Health Records ({records.length})
           </button>
           <button
             onClick={() => {
@@ -292,7 +292,7 @@ export const App: React.FC = () => {
             }}
             className={`view-tab ${activeSubView === 'HISTORY' ? 'active' : ''}`}
           >
-            Consultation Passes ({consultationHistory.length})
+            Hospital Passes ({consultationHistory.length})
           </button>
         </div>
 

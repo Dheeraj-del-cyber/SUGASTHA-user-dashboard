@@ -40,8 +40,8 @@ export const AbhaRecoverModal: React.FC<AbhaRecoverModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Recover / Retrieve ABHA ID"
-      subtitle="Find your existing 14-digit ABHA ID using your registered phone or Aadhaar"
+      title="Find your ABHA number"
+      subtitle="We can find it using your mobile number or Aadhaar"
       maxWidth="460px"
     >
       <div className="recover-container">
@@ -50,12 +50,12 @@ export const AbhaRecoverModal: React.FC<AbhaRecoverModalProps> = ({
             <div className="info-box">
               <ShieldAlert size={18} className="text-amber" />
               <span>
-                Enter your mobile number linked to Aadhaar or previously used during ABHA registration.
+                Enter the mobile number linked to your Aadhaar. We will find your ABHA number for you.
               </span>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Registered Mobile Number or Aadhaar</label>
+              <label className="form-label">Your mobile number or Aadhaar number</label>
               <input
                 type="text"
                 className="form-input"
@@ -67,7 +67,7 @@ export const AbhaRecoverModal: React.FC<AbhaRecoverModalProps> = ({
             </div>
 
             <button type="submit" className="btn btn-primary btn-lg w-full" disabled={loading}>
-              {loading ? 'Searching National ABDM Registry...' : 'Retrieve ABHA ID'}
+              {loading ? 'Looking for your ABHA number...' : 'Find My ABHA Number'}
               <Search size={18} />
             </button>
           </form>
@@ -76,9 +76,9 @@ export const AbhaRecoverModal: React.FC<AbhaRecoverModalProps> = ({
             <div className="icon-circle">
               <CheckCircle2 size={40} className="text-emerald" />
             </div>
-            <h4 className="recovered-title">ABHA ID Located!</h4>
+            <h4 className="recovered-title">We found your ABHA number!</h4>
             <p className="recovered-desc">
-              We found your official Ayushman Bharat record linked to {recoveredData.maskedMobile}.
+              It is linked to {recoveredData.maskedMobile}.
             </p>
 
             <div className="card details-card">
@@ -99,16 +99,15 @@ export const AbhaRecoverModal: React.FC<AbhaRecoverModalProps> = ({
               }}
               className="btn btn-primary btn-lg w-full"
             >
-              Sign In with this ABHA ID
+              Sign in with this number
               <ArrowRight size={18} />
             </button>
           </div>
         )}
 
-        <div className="back-row">
-          <button type="button" className="btn-back" onClick={onBackToLogin}>
-            Back to Sign In
-          </button>
+        <div className="back-row">            <button type="button" className="btn-back" onClick={onBackToLogin}>
+              Back to login
+            </button>
         </div>
       </div>
 

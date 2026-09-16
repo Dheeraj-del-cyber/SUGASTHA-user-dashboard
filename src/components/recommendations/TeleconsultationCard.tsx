@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Video, ShieldCheck, ExternalLink, Code2, CheckCircle2 } from 'lucide-react';
+import { Video, ExternalLink, Code2, CheckCircle2 } from 'lucide-react';
 import { TriageResult, AbhaProfile } from '../../types';
 
 interface TeleconsultationCardProps {
@@ -52,15 +52,14 @@ export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
           </div>
           <div className="header-meta">
             <div className="tag-row">
-              <span className="gov-tele-tag">NATIONAL TELECONSULTATION SERVICE</span>
-              <span className="badge badge-green">eSanjeevani 2.0 Ready</span>
+              <span className="gov-tele-tag">DOCTOR ON VIDEO CALL</span>
             </div>
-            <h2 className="tele-title">eSanjeevani Teleconsultation Recommended</h2>
+            <h2 className="tele-title">Talk to a doctor from home</h2>
           </div>
         </div>
 
         <p className="tele-desc">
-          Based on your <strong>{triage.level} Triage assessment</strong>, your symptoms are clinically stable and best addressed via government certified teleconsultation. You can consult directly with an empaneled medical specialist from the comfort and safety of your home.
+          No need to travel. A government doctor will call you and give advice and medicine.
         </p>
       </div>
 
@@ -69,50 +68,46 @@ export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
         <div className="benefit-item">
           <CheckCircle2 size={18} className="text-emerald" />
           <div>
-            <strong>Zero Waiting Queues</strong>
-            <p>Connect to an available OPD doctor within 10-15 minutes.</p>
+            <strong>Short wait</strong>
+            <p>Talk to a doctor in about 10-15 minutes.</p>
           </div>
         </div>
         <div className="benefit-item">
           <CheckCircle2 size={18} className="text-emerald" />
           <div>
-            <strong>Free Government OPD</strong>
-            <p>100% cashless consultation under Ayushman Bharat initiatives.</p>
+            <strong>Free</strong>
+            <p>The government video consultation costs nothing.</p>
           </div>
         </div>
         <div className="benefit-item">
           <CheckCircle2 size={18} className="text-emerald" />
           <div>
-            <strong>ABDM Digital Prescription</strong>
-            <p>Official digitally signed e-prescription directly saved to your ABHA.</p>
+            <strong>Prescription saved</strong>
+            <p>Your prescription is saved to your health records.</p>
           </div>
         </div>
       </div>
 
-      {/* eSanjeevani API Integration Readiness Box */}
+      {/* Developer-only API inspector (collapsed by default) */}
       <div className="api-ready-box">
-        <div className="api-ready-header">
-          <div className="flex-row items-center gap-2">
-            <ShieldCheck size={16} className="text-teal" />
-            <span className="font-semibold text-sm">eSanjeevani API Interconnection Spec</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowApiInspect(!showApiInspect)}
-            className="btn-inspect-payload"
-          >
-            <Code2 size={14} />
-            <span>{showApiInspect ? 'Hide API Payload' : 'Inspect API Contract'}</span>
-          </button>
-        </div>
-        <p className="api-ready-text">
-          The "Connect to eSanjeevani" action transmits a validated ABDM referral bundle directly to the National Teleconsultation Gateway.
-        </p>
+        <button
+          type="button"
+          className="dev-toggle-btn"
+          onClick={() => setShowApiInspect(!showApiInspect)}
+        >
+          <Code2 size={14} />
+          <span>{showApiInspect ? 'Hide developer details' : 'Developer details'}</span>
+        </button>
 
         {showApiInspect && (
-          <pre className="api-code-block animate-fade-in">
-            {JSON.stringify(apiPayload, null, 2)}
-          </pre>
+          <>
+            <p className="api-ready-text">
+              eSanjeevani referral API contract (for development/demo only):
+            </p>
+            <pre className="api-code-block animate-fade-in">
+              {JSON.stringify(apiPayload, null, 2)}
+            </pre>
+          </>
         )}
       </div>
 
@@ -122,14 +117,14 @@ export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
           onClick={onSwitchToHospitalVisit}
           className="btn btn-secondary btn-sm"
         >
-          <span>Prefer a Physical Hospital Visit Instead?</span>
+          <span>I prefer to go to a hospital</span>
         </button>
 
         <button
           onClick={onBookTeleconsultation}
           className="btn btn-primary btn-lg connect-tele-btn"
         >
-          <span>Connect to eSanjeevani</span>
+          <span>Book Doctor Call</span>
           <ExternalLink size={18} />
         </button>
       </div>
@@ -234,19 +229,21 @@ export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
           flex-wrap: wrap;
           gap: 0.5rem;
         }
-        .btn-inspect-payload {
+        .dev-toggle-btn {
           display: flex;
           align-items: center;
           gap: 4px;
-          font-size: 0.75rem;
-          color: var(--brand-accent);
-          background: rgba(14, 165, 233, 0.12);
+          font-size: 0.72rem;
+          color: var(--text-muted);
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px dashed var(--border-subtle);
           padding: 4px 8px;
           border-radius: var(--radius-xs);
+          width: fit-content;
           transition: all var(--transition-fast);
         }
-        .btn-inspect-payload:hover {
-          background: rgba(14, 165, 233, 0.25);
+        .dev-toggle-btn:hover {
+          color: var(--text-secondary);
         }
         .api-ready-text {
           font-size: 0.8rem;

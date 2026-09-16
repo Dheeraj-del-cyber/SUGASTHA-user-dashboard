@@ -7,7 +7,6 @@ import {
   Star,
   CheckCircle,
   ArrowRight,
-  Sparkles,
   ShieldCheck,
 } from 'lucide-react';
 import { Hospital, Doctor, TriageResult } from '../../types';
@@ -57,15 +56,12 @@ export const HospitalList: React.FC<HospitalListProps> = ({
         <div>
           <div className="rec-badge-row">
             <span className={`badge ${triage.level === 'RED' ? 'badge-red' : 'badge-yellow'}`}>
-              {triage.level} Triage Priority
-            </span>
-            <span className="spec-match-pill">
-              <Sparkles size={12} /> Matching {triage.suggestedSpecialties.join(' & ')}
+              {triage.level === 'RED' ? 'Urgent care needed' : 'See a doctor today'}
             </span>
           </div>
-          <h2 className="rec-title">Recommended Hospitals & Specialist Doctors</h2>
+          <h2 className="rec-title">Choose Hospital</h2>
           <p className="rec-subtitle">
-            Ranked by AI matching of your medical history, clinical urgency, proximity, and active emergency desk capacity.
+            Pick a hospital near you. Then choose a doctor.
           </p>
         </div>
 
@@ -73,7 +69,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
         <div className="queue-tip-card">
           <ShieldCheck size={18} className="text-teal flex-shrink-0" />
           <div className="queue-tip-text">
-            <strong>3-Tier Hospital Queue Buffer:</strong> When you select your preferred hospital below, SUGASTHA will automatically queue the next two closest hospitals as priority backups, guaranteeing failover if the first desk is occupied.
+            <strong>Do not worry if this hospital is full.</strong> We will automatically try the next nearby hospitals for you.
           </div>
         </div>
       </div>
@@ -96,15 +92,11 @@ export const HospitalList: React.FC<HospitalListProps> = ({
               {/* Card Top: Name, Distance & Accreditation */}
               <div className="hosp-card-header">
                 <div className="hosp-main-info">
-                  <div className="rank-indicator">#{index + 1}</div>
+                  <div className="rank-indicator">{index === 0 ? '★' : index + 1}</div>
                   <div>
                     <div className="hosp-name-row">
                       <h3 className="hosp-name">{hosp.name}</h3>
-                      {hosp.nabhAccredited && (
-                        <span className="nabh-badge" title="National Accreditation Board for Hospitals">
-                          NABH
-                        </span>
-                      )}
+                      {index === 0 && <span className="nabh-badge">Best match for you</span>}
                     </div>
                     <div className="hosp-address">
                       <MapPin size={13} className="text-muted" />
@@ -119,7 +111,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
                 </div>
               </div>
 
-              {/* Proximity, Travel & Estimated Fare Strip */}
+              {/* Travel & Wait Strip */}
               <div className="travel-fare-strip">
                 <div className="strip-item">
                   <MapPin size={14} className="text-teal" />
@@ -130,21 +122,21 @@ export const HospitalList: React.FC<HospitalListProps> = ({
                 <div className="strip-item">
                   <Clock size={14} className="text-amber" />
                   <span className="strip-val">~{hosp.estimatedTravelTimeMinutes} mins</span>
-                  <span className="strip-sub">Est. Travel</span>
+                  <span className="strip-sub">Travel time</span>
                 </div>
 
                 <div className="strip-item fare-item">
                   <Car size={14} className="text-emerald" />
                   <div className="fare-col">
-                    <span className="strip-val">Auto: ₹{hosp.fareEstimates.autoFare} | Cab: ₹{hosp.fareEstimates.cabFare}</span>
-                    <span className="strip-sub">Average Estimated Fare</span>
+                    <span className="strip-val">Auto ₹{hosp.fareEstimates.autoFare} • Cab ₹{hosp.fareEstimates.cabFare}</span>
+                    <span className="strip-sub">Approx. fare</span>
                   </div>
                 </div>
 
                 <div className="strip-item desk-item">
                   <span className={`status-dot ${hosp.emergencyQueueStatus === 'NORMAL' ? 'dot-green' : 'dot-yellow'}`}></span>
-                  <span className="strip-val">{hosp.emergencyQueueStatus} Queue</span>
-                  <span className="strip-sub">Bed Capacity</span>
+                  <span className="strip-val">{hosp.emergencyQueueStatus === 'NORMAL' ? 'Not crowded' : 'A little busy'}</span>
+                  <span className="strip-sub">Right now</span>
                 </div>
               </div>
 
@@ -152,7 +144,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
               <div className="doctor-select-section">
                 <div className="doc-section-title">
                   <UserCheck size={15} className="text-teal" />
-                  <span>Choose Consulting Doctor / Specialist at this Hospital:</span>
+                  <span>Choose a doctor at this hospital:</span>
                 </div>
 
                 <div className="doctors-chips-grid">
@@ -176,8 +168,8 @@ export const HospitalList: React.FC<HospitalListProps> = ({
                         </div>
                         <span className="doc-spec text-teal">{doc.specialization}</span>
                         <div className="doc-slot-row">
-                          <span className="doc-exp">{doc.experienceYears} yrs exp</span>
-                          <span className="doc-slot">{doc.availableSlotToday}</span>
+                          <span className="doc-exp">{doc.experienceYears} yrs experience</span>
+                          <span className="doc-slot">Free at: {doc.availableSlotToday}</span>
                         </div>
                       </div>
                     );
@@ -190,7 +182,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
                 <div className="selected-confirmation-pill">
                   <CheckCircle size={15} className="text-emerald" />
                   <span>
-                    Selected for Primary Consultation: <strong>{activeDoc.name}</strong> ({activeDoc.specialization})
+                    Your doctor: <strong>{activeDoc.name}</strong> ({activeDoc.specialization})
                   </span>
                 </div>
               )}
@@ -202,12 +194,12 @@ export const HospitalList: React.FC<HospitalListProps> = ({
       {/* Sticky Bottom Action Drawer */}
       <div className="selection-cta-drawer">
         <div className="selected-summary-col">
-          <span className="summary-label">Primary Consultation Request:</span>
+          <span className="summary-label">Your visit will be at:</span>
           <div className="selected-entity-title">
             <strong>{currentHospital.name}</strong> • <span>{currentDoctor.name}</span>
           </div>
           <span className="queue-note">
-            Next 2 hospitals in list will be automatically registered as priority fallback queue.
+            If this hospital is full, we will try the next one for you.
           </span>
         </div>
 
@@ -215,7 +207,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
           onClick={handleProceed}
           className="btn btn-primary btn-lg book-request-btn"
         >
-          <span>Proceed with Consultation Request</span>
+          <span>Book Visit</span>
           <ArrowRight size={18} />
         </button>
       </div>

@@ -13,18 +13,11 @@ export const QrCodeDisplay: React.FC<QrCodeDisplayProps> = ({
   size = 180,
 }) => {
   const [copiedToken, setCopiedToken] = useState(false);
-  const [copiedId, setCopiedId] = useState(false);
 
   const handleCopyToken = () => {
     navigator.clipboard.writeText(consultation.consultationNumber);
     setCopiedToken(true);
     setTimeout(() => setCopiedToken(false), 2000);
-  };
-
-  const handleCopyId = () => {
-    navigator.clipboard.writeText(consultation.id);
-    setCopiedId(true);
-    setTimeout(() => setCopiedId(false), 2000);
   };
 
   const handlePrint = () => {
@@ -38,28 +31,33 @@ export const QrCodeDisplay: React.FC<QrCodeDisplayProps> = ({
         <div className="pass-top">
           <div className="pass-brand">
             <ShieldCheck size={18} className="text-teal" />
-            <span>SUGASTHA CONSULTATION TOKEN PASS</span>
+            <span>SUGASTHA HOSPITAL PASS</span>
           </div>
-          <button onClick={handlePrint} className="btn-print" title="Print Consultation Slip">
+          <button onClick={handlePrint} className="btn-print" title="Print this pass">
             <Printer size={14} />
-            <span>Print Pass</span>
+            <span>Print</span>
           </button>
         </div>
 
-        {/* Five-Digit Verification Number Highlight */}
+        {/* Show-at-hospital instruction */}
+        <div className="pass-instruction">
+          <strong>Show this QR code at the hospital desk.</strong>
+        </div>
+
+        {/* Five-Digit Check-in PIN */}
         <div className="token-number-hero">
-          <span className="token-label">5-DIGIT VERIFICATION TOKEN</span>
+          <span className="token-label">YOUR CHECK-IN PIN</span>
           <div className="token-number-box">
             <span className="token-hash">#</span>
             <strong className="token-digits">{consultation.consultationNumber}</strong>
-            <button onClick={handleCopyToken} className="btn-copy-token" title="Copy 5-digit token">
+            <button onClick={handleCopyToken} className="btn-copy-token" title="Copy check-in PIN">
               {copiedToken ? <Check size={14} className="text-green" /> : <Copy size={14} />}
             </button>
           </div>
-          <span className="token-sub">Present this 5-digit number at the hospital reception/desk</span>
+          <span className="token-sub">You can also say this 5-digit number at the desk</span>
         </div>
 
-        {/* High-Resolution Scannable QR Code */}
+        {/* Scannable QR Code */}
         <div className="qr-canvas-wrapper">
           <div className="qr-white-frame">
             <QRCodeSVG
@@ -73,20 +71,32 @@ export const QrCodeDisplay: React.FC<QrCodeDisplayProps> = ({
           </div>
           <div className="qr-caption">
             <QrCode size={14} className="text-teal" />
-            <span>Encrypted ABDM Fast-Track Verification QR</span>
+            <span>Scan at the hospital entrance</span>
           </div>
         </div>
 
-        {/* Consultation ID & Hospital Details */}
+        {/* Hospital & Visit Details */}
         <div className="pass-details-grid">
+          <div className="detail-item full-col">
+            <span className="det-label">Hospital</span>
+            <strong className="det-val">{consultation.selectedHospital.name}</strong>
+          </div>
+
+          <div className="detail-item full-col">
+            <span className="det-label">Doctor</span>
+            <strong className="det-val text-teal">
+              {consultation.selectedDoctor.name} ({consultation.selectedDoctor.specialization})
+            </strong>
+          </div>
+
           <div className="detail-item">
-            <span className="det-label">Consultation ID</span>
-            <div className="flex-row items-center gap-1">
-              <strong className="det-val font-mono">{consultation.id}</strong>
-              <button onClick={handleCopyId} className="btn-icon-sub">
-                {copiedId ? <Check size={12} className="text-green" /> : <Copy size={12} />}
-              </button>
-            </div>
+            <span className="det-label">Date</span>
+            <strong className="det-val">{new Date(consultation.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</strong>
+          </div>
+
+          <div className="detail-item">
+            <span className="det-label">Time</span>
+            <strong className="det-val">{consultation.appointmentSlot}</strong>
           </div>
 
           <div className="detail-item">
@@ -100,20 +110,14 @@ export const QrCodeDisplay: React.FC<QrCodeDisplayProps> = ({
                   : 'badge-info'
               }`}
             >
-              {consultation.status}
+              {consultation.status === 'CONFIRMED'
+                ? 'Visit confirmed'
+                : consultation.status === 'PENDING'
+                ? 'Waiting for hospital'
+                : consultation.status === 'COMPLETED'
+                ? 'Visit completed'
+                : 'Visit updated'}
             </span>
-          </div>
-
-          <div className="detail-item full-col">
-            <span className="det-label">Consulting Facility</span>
-            <strong className="det-val">{consultation.selectedHospital.name}</strong>
-          </div>
-
-          <div className="detail-item full-col">
-            <span className="det-label">Assigned Doctor</span>
-            <strong className="det-val text-teal">
-              {consultation.selectedDoctor.name} ({consultation.selectedDoctor.specialization})
-            </strong>
           </div>
         </div>
       </div>
@@ -168,6 +172,17 @@ export const QrCodeDisplay: React.FC<QrCodeDisplayProps> = ({
         .btn-print:hover {
           color: #ffffff;
           background: rgba(255, 255, 255, 0.12);
+        }
+        .pass-instruction {
+          width: 100%;
+          text-align: center;
+          font-size: 1rem;
+          font-weight: 700;
+          color: #ffffff;
+          background: rgba(14, 165, 233, 0.12);
+          border: 1px solid rgba(14, 165, 233, 0.35);
+          padding: 0.6rem 0.75rem;
+          border-radius: var(--radius-sm);
         }
         .token-number-hero {
           display: flex;

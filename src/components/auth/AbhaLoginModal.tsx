@@ -33,7 +33,7 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
 
   const handleSendOtp = () => {
     if (!identifier.trim()) {
-      setErrorMsg('Please enter a valid ABHA Number or ABHA Address.');
+      setErrorMsg('Please enter your ABHA number first.');
       return;
     }
     setErrorMsg('');
@@ -55,7 +55,7 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
       onClose();
     } catch {
       setLoading(false);
-      setErrorMsg('Unable to verify ABHA credentials. Please try again.');
+      setErrorMsg('We could not log you in. Please check your details and try again.');
     }
   };
 
@@ -68,16 +68,16 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Ayushman Bharat Digital Mission (ABDM)"
-      subtitle="Sign in securely using your citizen ABHA ID or ABHA Address"
+      title="Log in with your ABHA number"
+      subtitle="Your health records are accessed only with your permission."
       maxWidth="480px"
     >
       <form onSubmit={handleLoginSubmit} className="abha-login-form">
-        {/* Quick Demo Pre-fills */}
+        {/* Quick Demo Pre-fills (demo helper) */}
         <div className="demo-accounts-pill">
           <div className="demo-pill-header">
             <Sparkles size={14} className="text-amber" />
-            <span>Quick Test ABDM Profiles:</span>
+            <span>Try a demo account:</span>
           </div>
           <div className="demo-btns-row">
             <button
@@ -85,14 +85,14 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
               className="btn-demo-tag"
               onClick={() => handleQuickDemoFill('91-4523-8901-2345')}
             >
-              Rajesh (Diabetic/Cardiac)
+              Rajesh
             </button>
             <button
               type="button"
               className="btn-demo-tag"
               onClick={() => handleQuickDemoFill('91-7890-1234-5678')}
             >
-              Ananya (Viral/Allergy)
+              Ananya
             </button>
           </div>
         </div>
@@ -100,14 +100,14 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
         {/* Input Identifier */}
         <div className="form-group">
           <label className="form-label">
-            ABHA Number (14 digits) or ABHA Address
+            Enter your ABHA number
           </label>
           <div className="input-with-icon">
             <ShieldCheck size={18} className="input-icon" />
             <input
               type="text"
               className="form-input"
-              placeholder="e.g. 91-4523-8901-2345 or user@abdm"
+              placeholder="14 digits, like 91-4523-8901-2345"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               required
@@ -123,7 +123,7 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
             onClick={() => setAuthMode('OTP')}
           >
             <Smartphone size={16} />
-            <span>Aadhaar / Mobile OTP</span>
+            <span>Send me a code (OTP)</span>
           </button>
           <button
             type="button"
@@ -131,11 +131,11 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
             onClick={() => setAuthMode('PASSWORD')}
           >
             <KeyRound size={16} />
-            <span>ABHA Password</span>
+            <span>Use my password</span>
           </button>
         </div>
 
-        {/* OTP / Secret Step */}
+        {/* OTP / Password Step */}
         {authMode === 'OTP' ? (
           <div className="form-group">
             {!otpSent ? (
@@ -145,11 +145,11 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
                 onClick={handleSendOtp}
                 disabled={loading}
               >
-                {loading ? 'Sending OTP to linked phone...' : 'Generate 6-Digit OTP'}
+                {loading ? 'Sending code to your phone...' : 'Send code to my phone'}
               </button>
             ) : (
               <div className="otp-container animate-fade-in">
-                <label className="form-label">Enter 6-Digit OTP sent to linked mobile</label>
+                <label className="form-label">Enter the 6-digit code on your phone</label>
                 <input
                   type="text"
                   maxLength={6}
@@ -160,14 +160,14 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
                   required
                 />
                 <span className="otp-hint text-teal">
-                  Demo OTP code auto-filled. Click Login below to authenticate.
+                  Demo code is already filled. Just press Continue below.
                 </span>
               </div>
             )}
           </div>
         ) : (
           <div className="form-group">
-            <label className="form-label">ABHA Portal Password</label>
+            <label className="form-label">Enter your ABHA password</label>
             <input
               type="password"
               className="form-input"
@@ -185,7 +185,7 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
           className="btn btn-primary btn-lg w-full"
           disabled={loading || (authMode === 'OTP' && !otpSent)}
         >
-          {loading ? 'Authenticating with ABDM...' : 'Verify & Sign In'}
+          {loading ? 'Checking your details...' : 'Verify & Continue'}
           <ArrowRight size={18} />
         </button>
 
@@ -199,7 +199,7 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
               onOpenRegister();
             }}
           >
-            Don't have an ABHA ID? <strong>Register / Create</strong>
+            No ABHA number? <strong>Create one</strong>
           </button>
           <span className="aux-divider">•</span>
           <button
@@ -210,7 +210,7 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
               onOpenRecover();
             }}
           >
-            Forgot ABHA ID? <strong>Recover</strong>
+            Forgot your ABHA number? <strong>Find it</strong>
           </button>
         </div>
       </form>

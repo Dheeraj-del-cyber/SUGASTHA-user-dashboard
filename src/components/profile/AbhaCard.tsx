@@ -26,8 +26,8 @@ export const AbhaCard: React.FC<AbhaCardProps> = ({ profile }) => {
               <ShieldCheck size={22} className="text-amber" />
             </div>
             <div className="gov-text">
-              <span className="gov-india">NATIONAL HEALTH AUTHORITY</span>
-              <span className="gov-abdm">Ayushman Bharat Digital Mission (ABDM)</span>
+              <span className="gov-india">GOVERNMENT OF INDIA</span>
+              <span className="gov-abdm">Ayushman Bharat Health Account</span>
             </div>
           </div>
           <div className="abha-logo-badge">ABHA</div>
@@ -42,7 +42,7 @@ export const AbhaCard: React.FC<AbhaCardProps> = ({ profile }) => {
             ) : (
               <User size={38} className="text-muted" />
             )}
-            <span className="kyc-badge">KYC OK</span>
+            <span className="kyc-badge">VERIFIED</span>
           </div>
 
           {/* Citizen Details */}
@@ -88,7 +88,7 @@ export const AbhaCard: React.FC<AbhaCardProps> = ({ profile }) => {
         {/* Card Footer with ABHA Number */}
         <div className="card-footer-bar">
           <div className="number-col">
-            <span className="num-label">ABHA NUMBER</span>
+            <span className="num-label">YOUR ABHA NUMBER</span>
             <div className="num-row">
               <strong className="num-digits">{profile.abhaNumber}</strong>
               <button onClick={handleCopy} className="btn-copy-num" title="Copy ABHA Number">

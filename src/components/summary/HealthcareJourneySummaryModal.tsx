@@ -40,19 +40,19 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="SUGASTHA Healthcare Journey Summary"
-      subtitle="Comprehensive clinical encounter record compiled for ABHA integration"
+      title="Visit Summary"
+      subtitle="What happened during your visit"
       maxWidth="620px"
     >
       <div className="journey-modal-body animate-fade-in">
-        {/* Verification Strip */}
+        {/* PIN & Date Strip */}
         <div className="summary-token-strip">
           <div>
-            <span className="text-xs text-muted">CONSULTATION NUMBER</span>
+            <span className="text-xs text-muted">YOUR CHECK-IN PIN</span>
             <strong className="token-display">#{summary.consultationNumber}</strong>
           </div>
           <div className="text-right">
-            <span className="text-xs text-muted">ENCOUNTER DATE</span>
+            <span className="text-xs text-muted">DATE</span>
             <div className="flex-row items-center gap-1">
               <Calendar size={13} className="text-muted" />
               <strong>{summary.date}</strong>
@@ -60,10 +60,10 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
           </div>
         </div>
 
-        {/* Section 1: Clinical Symptoms & History Considered */}
+        {/* Section 1: Your symptoms */}
         <div className="summary-section-box">
           <h4 className="section-title-sm">
-            <Activity size={15} className="text-teal" /> 1. Reported Symptoms & Considered ABHA History
+            <Activity size={15} className="text-teal" /> Your symptoms
           </h4>
           <div className="symptoms-tags-row">
             {summary.reportedSymptoms.map((sym, i) => (
@@ -74,7 +74,7 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
           </div>
           {summary.consideredMedicalHistory.length > 0 && (
             <div className="history-considered-row">
-              <span className="text-xs text-muted">Past Medical Records Corroborated:</span>
+              <span className="text-xs text-muted">Your health history used:</span>
               <p className="text-xs text-secondary">
                 {summary.consideredMedicalHistory.join(' • ')}
               </p>
@@ -82,10 +82,10 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
           )}
         </div>
 
-        {/* Section 2: AI Triage & Recommendation */}
+        {/* Section 2: Your health priority */}
         <div className="summary-section-box">
           <h4 className="section-title-sm">
-            <ShieldCheck size={15} className="text-teal" /> 2. System-Generated Clinical Triage
+            <ShieldCheck size={15} className="text-teal" /> Your health priority
           </h4>
           <div className="triage-pill-row">
             <span
@@ -97,44 +97,41 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
                   : 'badge-green'
               }`}
             >
-              {summary.triageOutcome.level} Priority
+              {summary.triageOutcome.level === 'RED'
+                ? 'Urgent — go now'
+                : summary.triageOutcome.level === 'YELLOW'
+                ? 'See a doctor soon'
+                : 'Normal visit'}
             </span>
             <span className="rec-path">
-              Route: <strong>{summary.recommendationType.replace('_', ' ')}</strong>
+              Care: <strong>{summary.recommendationType === 'TELECONSULTATION' ? 'Doctor video call' : 'Hospital visit'}</strong>
             </span>
           </div>
-          <p className="triage-rationale-text">{summary.triageOutcome.rationale}</p>
         </div>
 
-        {/* Section 3: Hospital, Doctor & Queue Details */}
+        {/* Section 3: Hospital & doctor */}
         {summary.hospitalDetails && (
           <div className="summary-section-box">
             <h4 className="section-title-sm">
-              <Building2 size={15} className="text-teal" /> 3. Healthcare Provider & Queue Execution
+              <Building2 size={15} className="text-teal" /> Where you went
             </h4>
             <div className="provider-details-grid">
               <div>
-                <span className="text-muted text-xs">Consulted Facility:</span>
+                <span className="text-muted text-xs">Hospital:</span>
                 <p className="font-semibold text-white">{summary.hospitalDetails.hospitalName}</p>
               </div>
               <div>
-                <span className="text-muted text-xs">Attending Physician:</span>
+                <span className="text-muted text-xs">Doctor:</span>
                 <p className="font-semibold text-teal">{summary.hospitalDetails.doctorName}</p>
-              </div>
-              <div className="full-col">
-                <span className="text-muted text-xs">Queue Progression Buffer:</span>
-                <p className="text-xs text-secondary font-mono">
-                  {summary.hospitalDetails.queueProgression}
-                </p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Section 4: Journey Timeline Events */}
+        {/* Section 4: What happened (short) */}
         <div className="summary-section-box">
           <h4 className="section-title-sm">
-            <Clock size={15} className="text-teal" /> 4. Journey Timeline Events
+            <Clock size={15} className="text-teal" /> What happened
           </h4>
           <div className="events-timeline-list">
             {summary.eventsTimeline.map((ev, i) => (
@@ -142,21 +139,20 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
                 <span className="event-bullet"></span>
                 <div className="event-content">
                   <strong>{ev.event}</strong>
-                  <p>{ev.description}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ABHA Synchronization Action */}
+        {/* Save to records */}
         <div className="abha-sync-card">
           <div className="flex-row items-center gap-2">
             <FileText size={20} className="text-teal" />
             <div>
-              <strong className="text-white">Update ABHA Health Locker</strong>
+              <strong className="text-white">Save to Health Records</strong>
               <p className="text-xs text-muted">
-                Save this full clinical encounter record to your permanent ABDM health profile.
+                Keep this visit in your health records. Only you can see it.
               </p>
             </div>
           </div>
@@ -169,12 +165,12 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
             {synced ? (
               <>
                 <CheckCircle2 size={15} className="text-emerald" />
-                <span>Synced to ABHA!</span>
+                <span>Saved!</span>
               </>
             ) : (
               <>
                 <ShieldCheck size={15} />
-                <span>Sync to ABHA Record</span>
+                <span>Save to Health Records</span>
               </>
             )}
           </button>

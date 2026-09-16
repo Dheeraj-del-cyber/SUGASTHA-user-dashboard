@@ -22,6 +22,8 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
   onProceedRecommendation,
   onReevaluate,
 }) => {
+  const [showWhy, setShowWhy] = React.useState(false);
+
   const getLevelConfig = (lvl: TriageLevel) => {
     switch (lvl) {
       case 'RED':
@@ -29,8 +31,8 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
           icon: <AlertOctagon size={32} />,
           badgeClass: 'badge-red',
           borderClass: 'border-red-glow',
-          title: 'RED – HIGH / EMERGENCY PRIORITY',
-          badgeText: 'Emergency Level 1',
+          title: 'You need urgent medical care',
+          badgeText: 'Urgent — go now',
           accentColor: '#ef4444',
           bgBanner: 'linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(15, 23, 42, 0.9) 100%)',
         };
@@ -39,8 +41,8 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
           icon: <AlertTriangle size={32} />,
           badgeClass: 'badge-yellow',
           borderClass: 'border-yellow-glow',
-          title: 'YELLOW – MODERATE PRIORITY',
-          badgeText: 'Moderate Priority',
+          title: 'Please see a doctor soon',
+          badgeText: 'See a doctor today',
           accentColor: '#f59e0b',
           bgBanner: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(15, 23, 42, 0.9) 100%)',
         };
@@ -50,8 +52,8 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
           icon: <CheckCircle size={32} />,
           badgeClass: 'badge-green',
           borderClass: 'border-green-glow',
-          title: 'GREEN – LOW PRIORITY',
-          badgeText: 'Low Priority / Ambulatory',
+          title: 'You can visit a doctor normally',
+          badgeText: 'Not an emergency',
           accentColor: '#10b981',
           bgBanner: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(15, 23, 42, 0.9) 100%)',
         };
@@ -69,7 +71,7 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
             {config.icon}
           </div>
           <div className="triage-title-group">
-            <div className="triage-level-label">SYSTEM-DETERMINED CLINICAL TRIAGE</div>
+            <div className="triage-level-label">YOUR HEALTH PRIORITY</div>
             <h2 className="triage-main-title" style={{ color: config.accentColor }}>
               {config.title}
             </h2>
@@ -78,64 +80,62 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
 
         <p className="triage-summary-text">{triage.summary}</p>
 
-        {/* Urgency & Risk Score Strip */}
+        {/* Urgency & Care Strip */}
         <div className="triage-vitals-strip">
           <div className="vital-item">
             <Clock size={15} className="text-muted" />
-            <span className="vital-label">Urgency Window:</span>
+            <span className="vital-label">See a doctor:</span>
             <strong className="vital-value">{triage.urgencyWindow}</strong>
           </div>
 
           <div className="vital-item">
-            <Activity size={15} className="text-muted" />
-            <span className="vital-label">Clinical Risk Index:</span>
-            <strong className="vital-value">{triage.vitalsRiskScore} / 100</strong>
-          </div>
-
-          <div className="vital-item">
             <ShieldCheck size={15} className="text-teal" />
-            <span className="vital-label">Target Care Pathway:</span>
+            <span className="vital-label">Suggested care:</span>
             <strong className="vital-value text-teal">
-              {triage.recommendedRoute === 'HOSPITAL_VISIT' ? 'Hospital In-Person Visit' : 'eSanjeevani Teleconsultation'}
+              {triage.recommendedRoute === 'HOSPITAL_VISIT' ? 'Go to a hospital' : 'Doctor on video call'}
             </strong>
           </div>
         </div>
       </div>
 
-      {/* Rationale & Considered Key Factors */}
+      {/* Expandable "Why this priority?" section */}
       <div className="factors-section">
-        <h4 className="factors-heading">
-          Key Clinical Factors Considered by AI Engine:
-        </h4>
-        <div className="factors-list">
-          {triage.clinicalFactors.map((factor, idx) => (
-            <div key={idx} className="factor-card">
-              <div className="factor-header">
-                <span className="factor-title">{factor.title}</span>
-                <span
-                  className={`factor-source-badge ${
-                    factor.source === 'ABHA_CHRONIC_HISTORY' ? 'source-abha' : 'source-symptom'
-                  }`}
-                >
-                  {factor.source === 'ABHA_CHRONIC_HISTORY'
-                    ? 'ABHA Medical History'
-                    : factor.source === 'PAST_RECORDS'
-                    ? 'ABHA Past Records'
-                    : 'Reported Symptoms'}
-                </span>
+        <button type="button" className="why-toggle-btn" onClick={() => setShowWhy(!showWhy)}>
+          <Activity size={16} className="text-teal" />
+          <span>Why this priority?</span>
+          <span className="why-chevron">{showWhy ? '▲' : '▼'}</span>
+        </button>
+        {showWhy && (
+          <div className="factors-list">
+            {triage.clinicalFactors.map((factor, idx) => (
+              <div key={idx} className="factor-card">
+                <div className="factor-header">
+                  <span className="factor-title">{factor.title}</span>
+                  <span
+                    className={`factor-source-badge ${
+                      factor.source === 'ABHA_CHRONIC_HISTORY' ? 'source-abha' : 'source-symptom'
+                    }`}
+                  >
+                    {factor.source === 'ABHA_CHRONIC_HISTORY'
+                      ? 'Your health history'
+                      : factor.source === 'PAST_RECORDS'
+                      ? 'Past records'
+                      : 'Your symptoms'}
+                  </span>
+                </div>
+                <p className="factor-desc">{factor.description}</p>
               </div>
-              <p className="factor-desc">{factor.description}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Recommended Specialities */}
       {triage.suggestedSpecialties.length > 0 && (
         <div className="specialties-row">
-          <span className="spec-label">Suggested Specializations:</span>
+          <span className="spec-label">Doctor type you may need:</span>
           <div className="spec-tags">
-            {triage.suggestedSpecialties.map((spec, i) => (
+            {triage.suggestedSpecialties.slice(0, 3).map((spec, i) => (
               <span key={i} className="spec-badge">
                 {spec}
               </span>
@@ -148,11 +148,11 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
       <div className="triage-action-footer">
         <button onClick={onReevaluate} className="btn btn-secondary btn-sm">
           <RotateCcw size={15} />
-          <span>Adjust Symptoms</span>
+          <span>Change Symptoms</span>
         </button>
 
         <button onClick={onProceedRecommendation} className="btn btn-primary btn-lg proceed-btn">
-          <span>Proceed to Recommendation</span>
+          <span>{triage.recommendedRoute === 'HOSPITAL_VISIT' ? 'See Hospitals' : 'Get Doctor Call'}</span>
           <ArrowRight size={18} />
         </button>
       </div>
@@ -242,6 +242,26 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
           display: flex;
           flex-direction: column;
           gap: 1rem;
+        }
+        .why-toggle-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          width: fit-content;
+          padding: 0.35rem 0.75rem;
+          border-radius: var(--radius-sm);
+          background: var(--bg-surface-2);
+          border: 1px solid var(--border-subtle);
+        }
+        .why-toggle-btn:hover {
+          border-color: var(--border-highlight);
+        }
+        .why-chevron {
+          font-size: 0.6rem;
+          color: var(--text-muted);
         }
         .factors-heading {
           font-size: 1.05rem;

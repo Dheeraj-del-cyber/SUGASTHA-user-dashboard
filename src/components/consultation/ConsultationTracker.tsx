@@ -30,16 +30,14 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
 }) => {
   const [showQrModal, setShowQrModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [activeQueuePriority, setActiveQueuePriority] = useState<number>(
-    consultation.queueState.activePriority
-  );
+  const [showDevTools, setShowDevTools] = useState(false);
 
-  // Status timeline steps
+  // Status timeline steps (patient-friendly wording; internal state keys unchanged)
   const steps = [
-    { key: 'REQUEST_CREATED', label: 'Request Created', desc: 'Symptom & triage bundle compiled' },
-    { key: 'PENDING', label: 'Hospital Dispatched', desc: 'Awaiting primary hospital acceptance' },
-    { key: 'CONFIRMED', label: 'Confirmed & Token Issued', desc: 'Hospital accepted consultation desk' },
-    { key: 'COMPLETED', label: 'Consultation Completed', desc: 'ABHA health summary updated' },
+    { key: 'REQUEST_CREATED', label: 'Visit booked', desc: 'Your request was sent' },
+    { key: 'PENDING', label: 'Waiting for hospital', desc: 'The hospital is checking' },
+    { key: 'CONFIRMED', label: 'Visit confirmed', desc: 'Get your hospital pass' },
+    { key: 'COMPLETED', label: 'Visit completed', desc: 'Summary saved to records' },
   ];
 
   const getStepIndex = (status: string) => {
@@ -77,7 +75,6 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
         consultation,
         'Hospital ER Capacity at Maximum Threshold'
       );
-      setActiveQueuePriority(updated.queueState.activePriority);
       setIsProcessing(false);
       onConsultationUpdated(updated);
     }, 700);
@@ -101,22 +98,22 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
 
   return (
     <div className="tracker-wrapper animate-fade-in">
-      {/* Top Banner with 5-digit number and QR trigger */}
+      {/* Top Banner with PIN and QR trigger */}
       <div className="card tracker-top-card">
         <div className="tracker-id-row">
           <div className="id-col">
-            <span className="label">ACTIVE CONSULTATION REQUEST</span>
-            <h2 className="consult-id font-mono">{consultation.id}</h2>
+            <span className="label">YOUR VISIT</span>
+            <h2 className="consult-id">{consultation.selectedHospital.name}</h2>
           </div>
 
           <div className="token-highlight-chip">
-            <span className="token-chip-label">CONSULTATION TOKEN:</span>
+            <span className="token-chip-label">CHECK-IN PIN:</span>
             <strong className="token-chip-num">#{consultation.consultationNumber}</strong>
           </div>
 
           <button onClick={() => setShowQrModal(true)} className="btn btn-secondary btn-sm">
             <QrCode size={16} className="text-teal" />
-            <span>View QR Pass</span>
+            <span>View Hospital Pass</span>
           </button>
         </div>
 
@@ -134,13 +131,13 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
           <div className="callout-text">
             <h4>
               {consultation.status === 'CONFIRMED'
-                ? `Hospital Confirmed: ${consultation.confirmedDoctorName || activeNode.doctorName}`
-                : `Awaiting Confirmation from ${activeNode.hospitalName}`}
+                ? 'Visit confirmed!'
+                : `Waiting for ${activeNode.hospitalName}`}
             </h4>
             <p>
               {consultation.status === 'CONFIRMED'
-                ? `Your consultation request has been accepted by ${consultation.selectedHospital.name}. Present your 5-digit token #${consultation.consultationNumber} or QR code at arrival.`
-                : `Your consultation request is active in the hospital backend queue. Backup hospital fallback buffers are standing by.`}
+                ? `Go to ${consultation.selectedHospital.name} at your appointment time. Show your QR pass or PIN #${consultation.consultationNumber} at the desk.`
+                : `The hospital is checking your request. If they are full, we will try the next hospital for you.`}
             </p>
           </div>
         </div>
@@ -148,7 +145,7 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
 
       {/* Progress Timeline Tracker */}
       <div className="card timeline-card">
-        <h3 className="section-title">Consultation Lifecycle Tracker</h3>
+        <h3 className="section-title">What is happening</h3>
         <div className="tracker-steps-line">
           {steps.map((step, idx) => {
             const isCompleted = idx < currentStepIdx;
@@ -174,19 +171,14 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
         </div>
       </div>
 
-      {/* 3-Tier Multi-Hospital Queue State */}
+      {/* Hospital list status (simple wording; internal queue state unchanged) */}
       <div className="card queue-tracking-card">
         <div className="queue-card-top">
           <div className="flex-row items-center gap-2">
             <Layers size={18} className="text-teal" />
-            <h3 className="section-title">3-Tier Hospital Queue Buffer Status</h3>
+            <h3 className="section-title">Hospitals we are trying</h3>
           </div>
-          <span className="badge badge-info">Active Tier: Priority {activeQueuePriority}</span>
         </div>
-
-        <p className="queue-explanation">
-          SUGASTHA maintains a live 3-tiered buffer. The selected primary hospital receives Priority 1. If unavailable, the next equipped backup hospital in the buffer receives the referral automatically:
-        </p>
 
         <div className="queue-nodes-stream">
           {consultation.queueState.queueNodes.map((node) => {
@@ -208,8 +200,7 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
                 }`}
               >
                 <div className="node-rank-badge">
-                  Tier {node.priorityOrder}
-                  {node.priorityOrder === 1 ? ' (Primary)' : ' (Backup)'}
+                  {node.priorityOrder === 1 ? 'Your hospital' : 'Another hospital'}
                 </div>
 
                 <div className="node-details">
@@ -224,19 +215,19 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
                     </span>
                   </div>
                   {node.rejectionReason && (
-                    <span className="rejection-hint">Reason: {node.rejectionReason}</span>
+                    <span className="rejection-hint">This hospital was full, so we moved on.</span>
                   )}
                 </div>
 
                 <div className="node-status-pill">
                   {isNodeAccepted ? (
-                    <span className="badge badge-green">ACCEPTED</span>
+                    <span className="badge badge-green">Yes, visit here</span>
                   ) : isNodeActive ? (
-                    <span className="badge badge-yellow">AWAITING RESPONSE</span>
+                    <span className="badge badge-yellow">Waiting for reply</span>
                   ) : isNodePassed ? (
-                    <span className="badge badge-red">TRANSFERRED TO BACKUP</span>
+                    <span className="badge badge-red">Was full</span>
                   ) : (
-                    <span className="badge badge-info">IN STANDBY QUEUE</span>
+                    <span className="badge badge-info">Ready if needed</span>
                   )}
                 </div>
               </div>
@@ -245,67 +236,74 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
         </div>
       </div>
 
-      {/* Backend / External Hospital API Testing Toolbar */}
+      {/* Primary action: finish visit after confirmation */}
+      {consultation.status === 'CONFIRMED' && (
+        <div className="card finish-action-card">
+          <button
+            type="button"
+            onClick={handleCompleteHealthcareJourney}
+            disabled={isProcessing}
+            className="btn btn-primary btn-sm btn-finish"
+          >
+            <FileCheck size={16} />
+            <span>Visit done — View Summary</span>
+            <ArrowRight size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* Developer-only hospital simulation tools (collapsed by default) */}
       <div className="card test-api-toolbar">
-        <div className="toolbar-header">
-          <div className="flex-row items-center gap-2">
-            <Sparkles size={16} className="text-amber" />
-            <span className="font-semibold text-sm">
-              Hospital Backend Interconnection Testing Suite
-            </span>
-          </div>
-          <span className="test-tool-badge">API READY / NO HOSPITAL UI</span>
-        </div>
-        <p className="toolbar-desc">
-          Because the hospital system is developed separately by another team, use these incoming webhook triggers to verify the user-side tracker reacts correctly to external hospital decisions:
-        </p>
+        <button
+          type="button"
+          className="dev-toggle-btn"
+          onClick={() => setShowDevTools(!showDevTools)}
+        >
+          <Sparkles size={14} className="text-amber" />
+          <span>{showDevTools ? 'Hide developer tools' : 'Developer tools (demo)'}</span>
+        </button>
 
-        <div className="toolbar-actions">
-          {consultation.status === 'PENDING' && (
-            <>
-              <button
-                type="button"
-                onClick={handleSimulateHospitalAccept}
-                disabled={isProcessing}
-                className="btn btn-primary btn-sm"
-              >
-                <CheckCircle2 size={15} />
-                <span>Simulate: Hospital Accepts Request (Confirm)</span>
-              </button>
+        {showDevTools && (
+          <>
+            <p className="toolbar-desc">
+              Simulates incoming hospital webhook events to test the user-side tracker (the hospital system is a separate build):
+            </p>
 
-              <button
-                type="button"
-                onClick={handleSimulateHospitalFailover}
-                disabled={isProcessing || consultation.queueState.activePriority >= 3}
-                className="btn btn-secondary btn-sm"
-              >
-                <RefreshCw size={14} />
-                <span>Simulate: Hospital Busy $\to$ Failover to Backup</span>
-              </button>
-            </>
-          )}
+            <div className="toolbar-actions">
+              {consultation.status === 'PENDING' && (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleSimulateHospitalAccept}
+                    disabled={isProcessing}
+                    className="btn btn-primary btn-sm"
+                  >
+                    <CheckCircle2 size={15} />
+                    <span>Simulate: Hospital Accepts Request (Confirm)</span>
+                  </button>
 
-          {consultation.status === 'CONFIRMED' && (
-            <button
-              type="button"
-              onClick={handleCompleteHealthcareJourney}
-              disabled={isProcessing}
-              className="btn btn-primary btn-sm btn-finish"
-            >
-              <FileCheck size={16} />
-              <span>Complete Consultation Journey & Sync to ABHA Record</span>
-              <ArrowRight size={16} />
-            </button>
-          )}
-        </div>
+                  <button
+                    type="button"
+                    onClick={handleSimulateHospitalFailover}
+                    disabled={isProcessing || consultation.queueState.activePriority >= 3}
+                    className="btn btn-secondary btn-sm"
+                  >
+                    <RefreshCw size={14} />
+                    <span>Simulate: Hospital Busy → Failover to Backup</span>
+                  </button>
+                </>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {/* QR Code Pass Modal */}
       <Modal
         isOpen={showQrModal}
         onClose={() => setShowQrModal(false)}
-        title="Consultation Pass & QR Verification"
-        subtitle="Present this slip at hospital desk or digital check-in kiosk"
+        title="Your Hospital Pass"
+        subtitle="Show this at the hospital desk"
         maxWidth="460px"
       >
         <QrCodeDisplay consultation={consultation} size={200} />
@@ -518,6 +516,17 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
           font-size: 0.72rem;
           color: #f87171;
         }
+        .finish-action-card {
+          display: flex;
+          justify-content: center;
+          padding: 1.25rem;
+        }
+        .finish-action-card .btn-finish {
+          width: 100%;
+          max-width: 440px;
+          height: 52px;
+          font-size: 1rem;
+        }
         .test-api-toolbar {
           background: rgba(245, 158, 11, 0.06);
           border: 1px dashed rgba(245, 158, 11, 0.35);
@@ -526,18 +535,22 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
           gap: 0.85rem;
           padding: 1.25rem;
         }
+        .dev-toggle-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: var(--text-muted);
+          width: fit-content;
+        }
+        .dev-toggle-btn:hover {
+          color: var(--text-secondary);
+        }
         .toolbar-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-        }
-        .test-tool-badge {
-          font-size: 0.68rem;
-          font-weight: 700;
-          color: #fb923c;
-          background: rgba(249, 115, 22, 0.15);
-          padding: 2px 6px;
-          border-radius: var(--radius-xs);
         }
         .toolbar-desc {
           font-size: 0.8rem;

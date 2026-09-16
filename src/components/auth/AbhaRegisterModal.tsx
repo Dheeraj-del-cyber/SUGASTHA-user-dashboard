@@ -68,8 +68,8 @@ export const AbhaRegisterModal: React.FC<AbhaRegisterModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Create Citizen ABHA ID"
-      subtitle="Register under Ayushman Bharat Digital Mission using Aadhaar KYC"
+      title="Create your ABHA number"
+      subtitle="It is free. Your details stay private."
       maxWidth="500px"
     >
       <div className="register-container">
@@ -77,9 +77,9 @@ export const AbhaRegisterModal: React.FC<AbhaRegisterModalProps> = ({
         <div className="steps-progress">
           <div className={`step-dot ${step >= 1 ? 'active' : ''}`}>1. Aadhaar</div>
           <div className="step-line"></div>
-          <div className={`step-dot ${step >= 2 ? 'active' : ''}`}>2. OTP & Details</div>
+          <div className={`step-dot ${step >= 2 ? 'active' : ''}`}>2. Enter code & details</div>
           <div className="step-line"></div>
-          <div className={`step-dot ${step >= 3 ? 'active' : ''}`}>3. Card Issued</div>
+          <div className={`step-dot ${step >= 3 ? 'active' : ''}`}>3. Done</div>
         </div>
 
         {/* Step 1: Aadhaar Details */}
@@ -88,12 +88,12 @@ export const AbhaRegisterModal: React.FC<AbhaRegisterModalProps> = ({
             <div className="info-box">
               <ShieldPlus size={18} className="text-teal" />
               <span>
-                Your 14-digit ABHA number will be securely generated and linked to your Ayushman health records.
+                We will create your 14-digit ABHA health number using your Aadhaar. It is free and safe.
               </span>
             </div>
 
             <div className="form-group">
-              <label className="form-label">12-Digit Aadhaar Number</label>
+              <label className="form-label">Enter your 12-digit Aadhaar number</label>
               <input
                 type="text"
                 className="form-input"
@@ -105,7 +105,7 @@ export const AbhaRegisterModal: React.FC<AbhaRegisterModalProps> = ({
             </div>
 
             <div className="form-group">
-              <label className="form-label">Aadhaar-Linked Mobile Number</label>
+              <label className="form-label">Enter your mobile number</label>
               <input
                 type="text"
                 className="form-input"
@@ -119,12 +119,12 @@ export const AbhaRegisterModal: React.FC<AbhaRegisterModalProps> = ({
             <div className="terms-row">
               <input type="checkbox" id="consent" defaultChecked required />
               <label htmlFor="consent" className="terms-label">
-                I hereby declare my voluntary consent to use my Aadhaar details for creating an Ayushman Bharat Health Account (ABHA).
+                I agree to use my Aadhaar details to create my ABHA health number.
               </label>
             </div>
 
             <button type="submit" className="btn btn-primary btn-lg w-full" disabled={loading}>
-              {loading ? 'Requesting UIDAI OTP...' : 'Send Aadhaar OTP'}
+              {loading ? 'Sending code...' : 'Send code to my phone'}
               <ArrowRight size={18} />
             </button>
           </form>
@@ -134,7 +134,7 @@ export const AbhaRegisterModal: React.FC<AbhaRegisterModalProps> = ({
         {step === 2 && (
           <form onSubmit={handleStep2VerifyOtpAndCreate} className="form-col animate-fade-in">
             <div className="form-group">
-              <label className="form-label">Enter 6-Digit Aadhaar OTP</label>
+              <label className="form-label">Enter the 6-digit code (OTP)</label>
               <input
                 type="text"
                 maxLength={6}
@@ -144,11 +144,11 @@ export const AbhaRegisterModal: React.FC<AbhaRegisterModalProps> = ({
                 placeholder="• • • • • •"
                 required
               />
-              <span className="text-xs text-teal">Aadhaar demo OTP pre-filled</span>
+              <span className="text-xs text-teal">Demo code is already filled</span>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Full Name (As per Aadhaar)</label>
+              <label className="form-label">Your full name</label>
               <input
                 type="text"
                 className="form-input"
@@ -185,7 +185,7 @@ export const AbhaRegisterModal: React.FC<AbhaRegisterModalProps> = ({
             </div>
 
             <div className="form-group">
-              <label className="form-label">Choose Preferred ABHA Address</label>
+              <label className="form-label">Choose your ABHA username</label>
               <div className="input-affix-group">
                 <input
                   type="text"
@@ -200,7 +200,7 @@ export const AbhaRegisterModal: React.FC<AbhaRegisterModalProps> = ({
             </div>
 
             <button type="submit" className="btn btn-primary btn-lg w-full" disabled={loading}>
-              {loading ? 'Creating Citizen ABHA ID...' : 'Verify & Generate ABHA Card'}
+              {loading ? 'Creating your ABHA number...' : 'Verify & Continue'}
               <UserCheck size={18} />
             </button>
           </form>
@@ -212,9 +212,9 @@ export const AbhaRegisterModal: React.FC<AbhaRegisterModalProps> = ({
             <div className="success-icon-badge">
               <CheckCircle2 size={44} className="text-emerald" />
             </div>
-            <h4 className="success-title">ABHA ID Created Successfully!</h4>
+            <h4 className="success-title">Your ABHA number is ready!</h4>
             <p className="success-desc">
-              Your official Ayushman Bharat Health Account has been activated and linked to the National Health System.
+              Your free health account is active. You can now use SUGASTHA.
             </p>
 
             <div className="card new-card-preview">
@@ -233,7 +233,7 @@ export const AbhaRegisterModal: React.FC<AbhaRegisterModalProps> = ({
             </div>
 
             <button onClick={handleFinish} className="btn btn-primary btn-lg w-full">
-              Proceed to SUGASTHA Dashboard
+              Start
               <ArrowRight size={18} />
             </button>
           </div>
@@ -242,7 +242,7 @@ export const AbhaRegisterModal: React.FC<AbhaRegisterModalProps> = ({
         {step < 3 && (
           <div className="back-row">
             <button type="button" className="btn-back" onClick={onBackToLogin}>
-              Back to Sign In
+              Back to login
             </button>
           </div>
         )}

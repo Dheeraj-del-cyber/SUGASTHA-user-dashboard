@@ -22,10 +22,6 @@ export const ActiveConsultationCard: React.FC<ActiveConsultationCardProps> = ({
   const [showQrModal, setShowQrModal] = useState(false);
 
   const isConfirmed = consultation.status === 'CONFIRMED';
-  const activeNode =
-    consultation.queueState.queueNodes.find((n) => n.status === 'PENDING_RESPONSE') ||
-    consultation.queueState.queueNodes.find((n) => n.status === 'ACCEPTED') ||
-    consultation.queueState.queueNodes[0];
 
   return (
     <div className={`card active-consultation-banner ${isConfirmed ? 'banner-confirmed' : 'banner-pending'}`}>
@@ -33,20 +29,20 @@ export const ActiveConsultationCard: React.FC<ActiveConsultationCardProps> = ({
         <div className="banner-title-group">
           <div className="flex-row items-center gap-2">
             <span className="live-ping"></span>
-            <span className="status-kicker">ACTIVE CONSULTATION IN PROGRESS</span>
+            <span className="status-kicker">MY VISIT STATUS</span>
           </div>
-          <h3 className="consultation-id-title font-mono">{consultation.id}</h3>
+          <h3 className="consultation-id-title">{consultation.selectedHospital.name}</h3>
         </div>
 
         <div className="banner-right-badges">
-          {/* 5-Digit Token Display */}
+          {/* Check-in PIN */}
           <div className="token-capsule">
-            <span className="cap-label">Token:</span>
+            <span className="cap-label">PIN:</span>
             <strong className="cap-num">#{consultation.consultationNumber}</strong>
           </div>
 
           <span className={`badge ${isConfirmed ? 'badge-green' : 'badge-yellow'}`}>
-            {isConfirmed ? 'CONFIRMED' : 'PENDING'}
+            {isConfirmed ? 'Visit confirmed' : 'Waiting for hospital'}
           </span>
         </div>
       </div>
@@ -59,7 +55,7 @@ export const ActiveConsultationCard: React.FC<ActiveConsultationCardProps> = ({
             <strong className="text-white">{consultation.selectedHospital.name}</strong>
           </div>
           <span className="text-sub">
-            {consultation.selectedHospital.address} • {consultation.selectedHospital.distanceKm} km
+            {consultation.selectedHospital.distanceKm} km away • {consultation.appointmentSlot}
           </span>
         </div>
 
@@ -74,10 +70,10 @@ export const ActiveConsultationCard: React.FC<ActiveConsultationCardProps> = ({
         <div className="detail-col">
           <div className="flex-row items-center gap-2">
             <ShieldCheck size={16} className="text-teal" />
-            <span className="text-muted">Queue Status:</span>
+            <span className="text-muted">When to go:</span>
           </div>
           <span className="text-sub text-teal">
-            Tier {activeNode.priorityOrder} ({activeNode.hospitalName.split(' ')[0]})
+            {consultation.appointmentSlot}
           </span>
         </div>
       </div>
@@ -86,11 +82,11 @@ export const ActiveConsultationCard: React.FC<ActiveConsultationCardProps> = ({
       <div className="banner-footer-actions">
         <button onClick={() => setShowQrModal(true)} className="btn btn-secondary btn-sm">
           <QrCode size={15} className="text-teal" />
-          <span>Show QR Verification Pass</span>
+          <span>View Hospital Pass</span>
         </button>
 
         <button onClick={onOpenTracker} className="btn btn-primary btn-sm">
-          <span>Open Full Tracking Interface</span>
+          <span>Track Visit</span>
           <ArrowRight size={15} />
         </button>
       </div>
@@ -99,8 +95,8 @@ export const ActiveConsultationCard: React.FC<ActiveConsultationCardProps> = ({
       <Modal
         isOpen={showQrModal}
         onClose={() => setShowQrModal(false)}
-        title="Consultation Pass & QR Verification"
-        subtitle="Verification Token for Hospital Check-in"
+        title="Your Hospital Pass"
+        subtitle="Show this at the hospital desk"
         maxWidth="440px"
       >
         <QrCodeDisplay consultation={consultation} size={200} />

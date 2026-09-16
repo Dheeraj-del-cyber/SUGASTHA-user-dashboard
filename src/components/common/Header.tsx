@@ -28,9 +28,9 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="brand-text">
             <div className="brand-title-row">
               <span className="brand-name">SUGASTHA</span>
-              <span className="brand-badge-gov">ABDM COMPLIANT</span>
+              <span className="brand-badge-gov">GOVERNMENT HEALTH SERVICE</span>
             </div>
-            <span className="brand-tagline">Citizen Healthcare & AI Triage Platform</span>
+            <span className="brand-tagline">Your health, made simple</span>
           </div>
         </div>
 
@@ -40,10 +40,10 @@ export const Header: React.FC<HeaderProps> = ({
           <a
             href="tel:108"
             className="sos-chip"
-            title="Emergency Ambulance Hotline: 108"
+            title="Call 108 for an emergency ambulance"
           >
             <PhoneCall size={14} className="sos-icon" />
-            <span className="sos-text">SOS 108</span>
+            <span className="sos-text">Emergency 108</span>
           </a>
 
           {/* Active Consultation Pill if present */}
@@ -55,10 +55,10 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               <span className="status-ping"></span>
-              <span className="token-label">Token:</span>
+              <span className="token-label">Visit PIN:</span>
               <strong className="token-num">#{activeConsultation.consultationNumber}</strong>
               <span className="token-status">
-                {activeConsultation.status === 'CONFIRMED' ? 'Confirmed' : 'Pending'}
+                {activeConsultation.status === 'CONFIRMED' ? 'Confirmed' : 'Waiting'}
               </span>
             </button>
           )}
@@ -76,7 +76,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={onLogout}
                 className="btn-icon-logout"
-                title="Log out of ABHA session"
+                title="Log out"
               >
                 <LogOut size={16} />
               </button>
@@ -84,7 +84,7 @@ export const Header: React.FC<HeaderProps> = ({
           ) : (
             <button onClick={onOpenLogin} className="btn btn-primary btn-sm">
               <User size={16} />
-              <span>ABHA Login</span>
+              <span>Log in</span>
             </button>
           )}
         </div>

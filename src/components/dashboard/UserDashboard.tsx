@@ -61,16 +61,16 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           <div className="hero-content">
             <div className="hero-tag">
               <Sparkles size={14} className="text-amber" />
-              <span>AI CLINICAL TRIAGE & HOSPITAL BUFFER SYSTEM</span>
+              <span>YOUR HEALTH PARTNER</span>
             </div>
             <h1 className="hero-title">How are you feeling today, {profile.fullName.split(' ')[0]}?</h1>
             <p className="hero-desc">
-              Enter your current symptoms for instantaneous clinical triage. SUGASTHA automatically correlates your vitals with your linked ABHA health records ({conditions.map((c) => c.condition).slice(0, 2).join(', ')}) to assess urgency and dispatch consultation requests across our 3-tier hospital queue.
+              Tell us what is troubling you. We will check your symptoms and help you get the right care.
             </p>
             <div className="hero-btn-row">
               <button onClick={onStartNewConsultation} className="btn btn-primary btn-lg start-triage-hero-btn">
                 <Stethoscope size={20} />
-                <span>Start New AI Triage & Consultation</span>
+                <span>Check My Symptoms</span>
                 <ArrowRight size={18} />
               </button>
               <a href="tel:108" className="btn btn-secondary btn-lg emergency-tel-btn">
@@ -91,27 +91,27 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         <div className="card metrics-card">
           <div className="metrics-header">
             <Activity size={18} className="text-teal" />
-            <h3 className="card-title">ABHA Health Profile Snapshot</h3>
+            <h3 className="card-title">Your Health at a Glance</h3>
           </div>
           <div className="metrics-grid">
             <div className="metric-box">
               <span className="metric-num text-teal">{records.length}</span>
-              <span className="metric-label">Fetched Records</span>
+              <span className="metric-label">Health Records</span>
             </div>
             <div className="metric-box">
               <span className="metric-num text-amber">{conditions.length}</span>
-              <span className="metric-label">Chronic Conditions</span>
+              <span className="metric-label">Long-Term Conditions</span>
             </div>
             <div className="metric-box">
               <span className="metric-num text-red">{allergies.length}</span>
-              <span className="metric-label">Known Allergies</span>
+              <span className="metric-label">Allergies</span>
             </div>
           </div>
 
           {/* Quick List of Chronic Vulnerabilities */}
           {conditions.length > 0 && (
             <div className="conditions-summary-box">
-              <span className="box-label">Active Monitored Conditions:</span>
+              <span className="box-label">Your health conditions:</span>
               <div className="conditions-tags">
                 {conditions.map((c) => (
                   <span key={c.id} className="badge badge-yellow">
@@ -135,8 +135,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
               <Stethoscope size={22} />
             </div>
             <div className="action-info">
-              <h4>Start New Consultation</h4>
-              <p>Enter current symptoms & receive instant Green/Yellow/Red triage.</p>
+              <h4>Check Your Symptoms</h4>
+              <p>Tell us what is wrong. We will suggest the right care.</p>
             </div>
             <ArrowRight size={18} className="text-muted action-arrow" />
           </div>
@@ -149,8 +149,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
               <FileText size={22} />
             </div>
             <div className="action-info">
-              <h4>ABHA Health Records</h4>
-              <p>View past prescriptions, diagnostic reports, and medical history.</p>
+              <h4>Your Health Records</h4>
+              <p>See your past prescriptions, reports, and history.</p>
             </div>
             <ArrowRight size={18} className="text-muted action-arrow" />
           </div>
@@ -163,8 +163,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
               <History size={22} />
             </div>
             <div className="action-info">
-              <h4>Consultation & Pass History</h4>
-              <p>Access your past 5-digit verification tokens and QR check-in slips.</p>
+              <h4>Hospital Passes</h4>
+              <p>Your past check-in PINs and QR passes.</p>
             </div>
             <ArrowRight size={18} className="text-muted action-arrow" />
           </div>
@@ -178,8 +178,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
                 <Clock size={22} />
               </div>
               <div className="action-info">
-                <h4>Active Queue Tracker</h4>
-                <p>Track request state, hospital queue buffer, and confirmation.</p>
+                <h4>My Visit Status</h4>
+                <p>See what is happening with your visit.</p>
               </div>
               <ArrowRight size={18} className="text-muted action-arrow" />
             </div>
@@ -190,7 +190,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         <div className="card recent-record-card">
           <div className="recent-record-header">
             <HeartPulse size={18} className="text-teal" />
-            <h4 className="card-title">Latest ABDM Record Linked</h4>
+            <h4 className="card-title">Latest Record</h4>
             <button onClick={onOpenRecords} className="btn-link-sm">
               View All ({records.length})
             </button>
@@ -204,7 +204,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
               <p className="snippet-details">{records[0].details}</p>
             </div>
           ) : (
-            <p className="text-muted text-sm">No recent records available.</p>
+            <p className="text-muted text-sm">No records yet.</p>
           )}
         </div>
       </div>

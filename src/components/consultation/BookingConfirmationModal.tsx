@@ -44,33 +44,33 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Confirm Consultation & Initialize Backup Queue"
-      subtitle="Review your primary hospital selection and automated multi-tier queue buffer"
+      title="Confirm Your Visit"
+      subtitle="Please check the details before booking"
       maxWidth="580px"
     >
       <div className="booking-confirm-body">
         {/* Patient Demographics Banner */}
         <div className="patient-banner">
           <div className="patient-info">
-            <span className="label">Patient Name:</span>
+            <span className="label">Your name:</span>
             <strong>{profile.fullName}</strong>
           </div>
           <div className="patient-info">
-            <span className="label">ABHA ID:</span>
+            <span className="label">ABHA number:</span>
             <strong className="text-teal font-mono">{profile.abhaNumber}</strong>
           </div>
           <div className="patient-info">
-            <span className="label">Triage Priority:</span>
+            <span className="label">Priority:</span>
             <span className={`badge ${triage.level === 'RED' ? 'badge-red' : 'badge-yellow'}`}>
-              {triage.level} Priority
+              {triage.level === 'RED' ? 'Urgent' : 'Soon'}
             </span>
           </div>
         </div>
 
-        {/* Selected Primary Hospital (Priority 1) */}
+        {/* Selected Hospital */}
         <div className="primary-booking-box">
           <div className="box-header">
-            <span className="priority-pill priority-1">Priority 1 (Selected Primary)</span>
+            <span className="priority-pill priority-1">Your selected hospital</span>
             <span className="slot-badge">
               <Clock size={12} /> {doctor.availableSlotToday}
             </span>
@@ -93,35 +93,32 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
                 <strong>{doctor.name}</strong>
                 <span className="spec-tag">{doctor.specialization}</span>
               </div>
-              <p className="doc-sub">{doctor.qualifications} • {doctor.experienceYears} Years Experience</p>
+              <p className="doc-sub">{doctor.experienceYears} years experience</p>
             </div>
           </div>
         </div>
 
-        {/* 3-Tier Queue / Backup Buffer Explanation */}
+        {/* Backup Hospitals (simple explanation) */}
         <div className="queue-buffer-section">
           <div className="queue-section-header">
             <Layers size={16} className="text-teal" />
-            <h4 className="queue-title">Automated 3-Tier Backup Queue Dispatch</h4>
+            <h4 className="queue-title">Backup hospitals</h4>
           </div>
 
           <p className="queue-desc">
-            To eliminate appointment bottlenecks, SUGASTHA registers backup consultation requests with the next 2 nearest equipped hospitals simultaneously. If <strong>{hospital.name.split(' ')[0]}</strong> does not confirm within the designated triage window, the request instantly cascades to Backup Hospital 1:
+            If this hospital is full, we will automatically try these nearby hospitals for you:
           </p>
 
           <div className="queue-tiers-list">
             {queueNodes.map((node) => (
               <div key={node.priorityOrder} className={`tier-node-card tier-${node.priorityOrder}`}>
                 <div className="tier-rank">
-                  {node.priorityOrder === 1 ? '1st Choice' : `Backup #${node.priorityOrder - 1}`}
+                  {node.priorityOrder === 1 ? 'Your choice' : 'Another nearby hospital'}
                 </div>
                 <div className="tier-content">
                   <strong>{node.hospitalName}</strong>
-                  <span className="tier-doc">Dr: {node.doctorName} ({node.doctorSpecialization})</span>
+                  <span className="tier-doc">Dr. {node.doctorName}</span>
                 </div>
-                <span className="tier-status">
-                  {node.priorityOrder === 1 ? 'Primary Target' : 'Fallback Standby'}
-                </span>
               </div>
             ))}
           </div>
@@ -139,11 +136,11 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
             className="btn btn-primary btn-lg book-btn"
           >
             {isBooking ? (
-              <span>Generating Consultation ID & QR...</span>
+              <span>Booking your visit...</span>
             ) : (
               <>
                 <ShieldCheck size={18} />
-                <span>Book Consultation & Generate Token</span>
+                <span>Book Visit</span>
                 <ArrowRight size={18} />
               </>
             )}

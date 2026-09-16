@@ -37,10 +37,10 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
         <div className="card alert-summary-card">
           <div className="alert-card-header">
             <HeartPulse size={18} className="text-teal" />
-            <h4 className="alert-card-title">ABHA Chronic Conditions</h4>
+            <h4 className="alert-card-title">Your health conditions</h4>
           </div>
           {conditions.length === 0 ? (
-            <p className="empty-text">No chronic conditions registered.</p>
+            <p className="empty-text">No health conditions.</p>
           ) : (
             <div className="conditions-list">
               {conditions.map((cond) => (
@@ -64,10 +64,10 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
         <div className="card alert-summary-card">
           <div className="alert-card-header">
             <AlertTriangle size={18} className="text-amber" />
-            <h4 className="alert-card-title">ABHA Verified Drug Allergies</h4>
+            <h4 className="alert-card-title">Your allergies</h4>
           </div>
           {allergies.length === 0 ? (
-            <p className="empty-text">No known drug allergies reported.</p>
+            <p className="empty-text">No known allergies.</p>
           ) : (
             <div className="allergies-list">
               {allergies.map((alg) => (
@@ -89,14 +89,14 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
       {/* Historical Records Timeline Header */}
       <div className="records-header-bar">
         <div>
-          <h3 className="section-title">ABHA-Linked Medical Records</h3>
+          <h3 className="section-title">Your Health Records</h3>
           <p className="section-subtitle">
-            Historical diagnostic evaluations, lab tests, and hospital encounters automatically fetched via ABDM gateway.
+            Your past prescriptions, reports, and visits — saved in one place.
           </p>
         </div>
         <button onClick={onStartTriage} className="btn btn-primary btn-sm">
           <Activity size={16} />
-          <span>Assess Symptoms with this History</span>
+          <span>Check Symptoms</span>
         </button>
       </div>
 
@@ -118,7 +118,7 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
         {filteredRecords.length === 0 ? (
           <div className="card empty-records-card">
             <FileText size={32} className="text-muted" />
-            <p>No historical records matching the selected category.</p>
+            <p>No records in this category.</p>
           </div>
         ) : (
           filteredRecords.map((record) => (

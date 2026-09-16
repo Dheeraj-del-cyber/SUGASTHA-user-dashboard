@@ -41,6 +41,17 @@ const BODY_REGIONS = [
   'Whole Body / General',
 ];
 
+// Patient-friendly display names for body regions (values stay unchanged for triage data)
+const BODY_REGION_LABELS: Record<string, string> = {
+  'Chest / Thorax': 'Chest',
+  'Head, Neck & Brain': 'Head, neck or head pain',
+  'Abdomen & Gastrointestinal': 'Stomach or digestion',
+  'Respiratory & Throat': 'Breathing or throat',
+  'Musculoskeletal & Limbs': 'Bones, joints, arms or legs',
+  'Dermatological / Skin': 'Skin',
+  'Whole Body / General': 'Whole body / general',
+};
+
 export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
   profile,
   onSubmit,
@@ -91,7 +102,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedSymptoms.length === 0) {
-      alert('Please select or describe at least one symptom.');
+      alert('Please tap at least one symptom first.');
       return;
     }
     onSubmit({
@@ -112,9 +123,9 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
           <Stethoscope size={24} className="text-teal" />
         </div>
         <div>
-          <h2 className="form-title">Enter Current Symptoms</h2>
+          <h2 className="form-title">Tell us what is wrong</h2>
           <p className="form-subtitle">
-            Provide your present clinical complaints. SUGASTHA's AI triage engine will automatically cross-correlate them with your linked ABHA records ({profile.fullName}).
+            Pick your problems below. We will check them with your health records and suggest the right care.
           </p>
         </div>
       </div>
@@ -123,16 +134,16 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
       <div className="cross-ref-banner">
         <ShieldCheck size={18} className="text-teal flex-shrink-0" />
         <div>
-          <span className="banner-title">ABHA Medical History Active:</span>
+          <span className="banner-title">We remember your health history:</span>
           <span className="banner-text">
-            {' '}Your chronic conditions, drug allergies, and past diagnostics are automatically loaded into the triage evaluation matrix.
+            {' '}Your past conditions and allergies are checked automatically. You do not need to type them again.
           </span>
         </div>
       </div>
 
       {/* Symptom Selection Chips */}
       <div className="section-block">
-        <label className="section-label">1. Primary Symptoms (Tap to Select / Deselect)</label>
+        <label className="section-label">1. Tap your symptoms</label>
         <div className="chips-wrap">
           {COMMON_SYMPTOMS.map((sym) => {
             const isSelected = selectedSymptoms.includes(sym);
@@ -155,7 +166,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
           <input
             type="text"
             className="form-input"
-            placeholder="Type other symptoms (e.g. Palpitations, Swelling)..."
+            placeholder="Not listed? Type it here..."
             value={customSymptom}
             onChange={(e) => setCustomSymptom(e.target.value)}
           />
@@ -168,7 +179,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
         {/* Active Selected List */}
         {selectedSymptoms.length > 0 && (
           <div className="selected-summary">
-            <span className="summary-label">Currently selected:</span>
+            <span className="summary-label">You selected:</span>
             <div className="selected-tags-row">
               {selectedSymptoms.map((sym) => (
                 <span key={sym} className="active-tag">
@@ -191,7 +202,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
       <div className="grid-2-col">
         <div className="section-block">
           <label className="section-label">
-            <MapPin size={14} className="text-teal" /> 2. Primary Body Region
+            <MapPin size={14} className="text-teal" /> 2. Where is the problem?
           </label>
           <select
             className="form-input"
@@ -200,7 +211,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
           >
             {BODY_REGIONS.map((region) => (
               <option key={region} value={region}>
-                {region}
+                {BODY_REGION_LABELS[region] || region}
               </option>
             ))}
           </select>
@@ -208,7 +219,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
 
         <div className="section-block">
           <label className="section-label">
-            <Clock size={14} className="text-teal" /> 3. Duration of Symptoms
+            <Clock size={14} className="text-teal" /> 3. Since when?
           </label>
           <div className="duration-picker">
             {[1, 2, 4, 7, 14].map((d) => (
@@ -218,7 +229,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
                 onClick={() => setDurationDays(d)}
                 className={`duration-btn ${durationDays === d ? 'active' : ''}`}
               >
-                {d === 1 ? 'Today' : `${d}d`}
+                {d === 1 ? 'Today' : `${d} days`}
               </button>
             ))}
           </div>
@@ -229,19 +240,19 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
       <div className="section-block">
         <div className="pain-label-row">
           <label className="section-label">
-            <Flame size={15} className="text-amber" /> 4. Subjective Pain Severity:
+            <Flame size={15} className="text-amber" /> 4. How much pain?
           </label>
           <span className={`pain-score-pill score-${painScale}`}>
             {painScale} / 10 -{' '}
             {painScale === 0
-              ? 'No Pain'
+              ? 'No pain'
               : painScale <= 3
-              ? 'Mild Discomfort'
+              ? 'Mild'
               : painScale <= 6
-              ? 'Moderate Pain'
+              ? 'Moderate'
               : painScale <= 8
-              ? 'Severe Pain'
-              : 'Emergency / Worst Possible'}
+              ? 'Severe'
+              : 'Worst possible'}
           </span>
         </div>
         <input
@@ -258,7 +269,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
           <span>3 (Mild)</span>
           <span>5 (Moderate)</span>
           <span>8 (Severe)</span>
-          <span>10 (Emergency)</span>
+          <span>10 (Worst)</span>
         </div>
       </div>
 
@@ -266,7 +277,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
       <div className="section-block red-flags-box">
         <label className="red-flags-title">
           <AlertCircle size={16} className="text-red" />
-          <span>Immediate Warning Markers (Check all that apply):</span>
+          <span>Check any warning signs you have:</span>
         </label>
         <div className="red-flags-grid">
           <label className="checkbox-item">
@@ -275,7 +286,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
               checked={redFlags.chestPressure}
               onChange={(e) => setRedFlags({ ...redFlags, chestPressure: e.target.checked })}
             />
-            <span>Chest pressure, heaviness, or pain radiating to jaw/arm</span>
+            <span>Pain or pressure in chest, or pain spreading to jaw or arm</span>
           </label>
           <label className="checkbox-item">
             <input
@@ -283,7 +294,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
               checked={redFlags.difficultyBreathing}
               onChange={(e) => setRedFlags({ ...redFlags, difficultyBreathing: e.target.checked })}
             />
-            <span>Severe shortness of breath or inability to speak full sentences</span>
+            <span>Trouble breathing, or cannot speak a full sentence</span>
           </label>
           <label className="checkbox-item">
             <input
@@ -291,7 +302,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
               checked={redFlags.lossOfConsciousness}
               onChange={(e) => setRedFlags({ ...redFlags, lossOfConsciousness: e.target.checked })}
             />
-            <span>Syncope, fainting, or sudden altered consciousness</span>
+            <span>Fainted, blacked out, or suddenly confused</span>
           </label>
           <label className="checkbox-item">
             <input
@@ -299,20 +310,20 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
               checked={redFlags.feverWithChills}
               onChange={(e) => setRedFlags({ ...redFlags, feverWithChills: e.target.checked })}
             />
-            <span>High persistent fever exceeding 102°F with severe chills</span>
+            <span>Very high fever with strong chills</span>
           </label>
         </div>
       </div>
 
       {/* Additional Clinical Notes */}
       <div className="section-block">
-        <label className="section-label">5. Additional Symptoms & Context</label>
+        <label className="section-label">5. Anything else to tell us? (Optional)</label>
         <textarea
           rows={3}
           className="form-input"
           value={additionalNotes}
           onChange={(e) => setAdditionalNotes(e.target.value)}
-          placeholder="Describe how symptoms started, triggers, or changes over time..."
+          placeholder="Write in your own words if you want..."
         ></textarea>
       </div>
 
@@ -320,7 +331,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
       <div className="auto-triage-notice">
         <Sparkles size={18} className="text-teal flex-shrink-0" />
         <p>
-          <strong>Automated Clinical Classification:</strong> SUGASTHA's clinical engine will automatically classify your priority as <strong>Green</strong>, <strong>Yellow</strong>, or <strong>Red</strong>. You are never asked to select your own triage tier.
+          <strong>We decide the urgency for you.</strong> You do not need to choose. After you submit, we will tell you how soon to see a doctor.
         </p>
       </div>
 
@@ -333,12 +344,12 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
         {isAnalyzing ? (
           <>
             <span className="spinner-border"></span>
-            <span>Running AI Clinical Cross-Analysis...</span>
+            <span>Checking your symptoms...</span>
           </>
         ) : (
           <>
             <Sparkles size={18} />
-            <span>Generate AI Triage & Clinical Recommendation</span>
+            <span>Check My Symptoms</span>
           </>
         )}
       </button>
