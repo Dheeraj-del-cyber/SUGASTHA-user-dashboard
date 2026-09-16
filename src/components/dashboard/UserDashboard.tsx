@@ -34,6 +34,7 @@ const FEATURE_SLIDES = [
     description: 'Describe how you feel and get a guided care path in under a minute.',
     action: 'AI symptom check',
     icon: Sparkles,
+    image: '/images/side.png',
     theme: 'feature-slide-blue',
   },
   {
@@ -172,7 +173,11 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
                   </span>
                 </div>
                 <div className="feature-slide-icon" aria-hidden="true">
-                  <SlideIcon size={34} />
+                  {slide.image ? (
+                    <img src={slide.image} alt="" className="feature-slide-image" />
+                  ) : (
+                    <SlideIcon size={34} />
+                  )}
                 </div>
               </article>
             );
@@ -428,6 +433,13 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           box-shadow: 0 12px 24px rgba(23, 32, 42, 0.07);
         }
 
+        .feature-slide-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: inherit;
+        }
+
         .feature-carousel-controls {
           display: flex;
           align-items: center;
@@ -472,6 +484,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           gap: 1.15rem;
           padding: 2rem;
           background: var(--white);
+          border: 1px solid rgba(23, 32, 42, 0.32);
           border-radius: var(--radius-lg);
           box-shadow: var(--shadow-md);
         }
