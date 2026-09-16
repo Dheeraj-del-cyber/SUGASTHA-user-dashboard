@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Video, Building2, FileText, Sparkles, Check, ShieldCheck, Clock3, Route, ArrowRight } from 'lucide-react';
 import {
   AbhaProfile,
@@ -75,6 +75,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
   const [isGenerated, setIsGenerated] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
   const [isFeaturePaused, setIsFeaturePaused] = useState(false);
+  const featureTouchStart = useRef<number | null>(null);
 
   useEffect(() => {
     if (isFeaturePaused) return;
@@ -83,6 +84,25 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
     }, 3800);
     return () => window.clearInterval(featureTimer);
   }, [isFeaturePaused]);
+
+  const handleFeatureTouchStart = (event: React.TouchEvent<HTMLElement>) => {
+    featureTouchStart.current = event.touches[0]?.clientX ?? null;
+  };
+
+  const handleFeatureTouchEnd = (event: React.TouchEvent<HTMLElement>) => {
+    const startX = featureTouchStart.current;
+    const endX = event.changedTouches[0]?.clientX;
+    featureTouchStart.current = null;
+    if (startX === null || endX === undefined) return;
+
+    const distance = endX - startX;
+    if (Math.abs(distance) < 45) return;
+    setActiveFeature((current) => (
+      distance < 0
+        ? (current + 1) % FEATURE_SLIDES.length
+        : (current - 1 + FEATURE_SLIDES.length) % FEATURE_SLIDES.length
+    ));
+  };
 
   const handleAddSymptom = (symptom: string) => {
     if (!symptomInput.trim()) {
@@ -131,6 +151,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         onMouseLeave={() => setIsFeaturePaused(false)}
         onFocus={() => setIsFeaturePaused(true)}
         onBlur={() => setIsFeaturePaused(false)}
+        onTouchStart={handleFeatureTouchStart}
+        onTouchEnd={handleFeatureTouchEnd}
       >
         <div
           className="feature-slide-track"
@@ -322,7 +344,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 
         .feature-slide-track {
           display: flex;
-          transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+          will-change: transform;
+          transition: transform 760ms cubic-bezier(0.22, 0.8, 0.2, 1);
           touch-action: pan-y;
         }
 
@@ -411,6 +434,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           justify-content: space-between;
           padding: 0 1.75rem 0.9rem;
           background: inherit;
+          user-select: none;
+          overscroll-behavior-x: contain;
         }
 
         .feature-slide-dots {
