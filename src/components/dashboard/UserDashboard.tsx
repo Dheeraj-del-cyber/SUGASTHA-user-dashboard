@@ -770,12 +770,12 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 
         @media (max-width: 640px) {
           .feature-slide {
-            min-height: 172px;
-            padding: 1.25rem 1rem 1rem;
+            min-height: 148px;
+            padding: 1rem 1rem 0.8rem;
           }
 
           .feature-slide h2 {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
           }
 
           .feature-slide p {
