@@ -85,7 +85,7 @@ export const App: React.FC = () => {
     const savedHistory = consultationService.getConsultationHistory();
     setConsultationHistory(savedHistory);
 
-    const loadingTimer = window.setTimeout(() => setIsInitializing(false), 700);
+    const loadingTimer = window.setTimeout(() => setIsInitializing(false), 3000);
     return () => window.clearTimeout(loadingTimer);
   }, []);
 
@@ -281,7 +281,6 @@ export const App: React.FC = () => {
         <div className="loading-brand-lockup">
           <img src="/images/logo.png" alt="SUGASTHA logo" className="loading-logo" />
           <div className="loading-brand-name">SUGASTHA</div>
-          <p className="loading-tagline">Citizen Healthcare &amp; AI Triage Portal</p>
           <div className="loading-progress" aria-hidden="true">
             <span />
           </div>
