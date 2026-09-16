@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Activity, User, LogOut, PhoneCall, Bell, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, User, LogOut, PhoneCall, Bell, CheckCircle2 } from 'lucide-react';
 import { AbhaProfile, ConsultationRequest } from '../../types';
 
 interface HeaderProps {
@@ -45,14 +45,12 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Brand Logo & Title */}
         <div className="brand-group" onClick={() => window.location.reload()}>
           <div className="brand-icon-wrapper">
-            <Activity className="brand-icon" size={24} />
+            <img src="/images/logo.png" alt="SUGASTHA logo" className="brand-logo-image" />
           </div>
           <div className="brand-text">
             <div className="brand-title-row">
-              <span className="brand-name">SWASTHYASETU</span>
-              <span className="brand-badge-gov">GOVERNMENT HEALTH PORTAL</span>
+              <span className="brand-name">SUGASTHA</span>
             </div>
-            <span className="brand-tagline">National Unified Digital Health Framework</span>
           </div>
         </div>
 
@@ -191,12 +189,17 @@ export const Header: React.FC<HeaderProps> = ({
           width: 42px;
           height: 42px;
           border-radius: var(--radius-sm);
-          background: var(--brand-gradient);
+          background: var(--white);
           display: flex;
           align-items: center;
           justify-content: center;
-          color: var(--white);
-          box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+          overflow: hidden;
+          box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+        }
+        .brand-logo-image {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
         }
         .brand-text {
           display: flex;

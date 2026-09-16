@@ -34,6 +34,7 @@ import {
 
 export const App: React.FC = () => {
   // ABHA Session State
+  const [isInitializing, setIsInitializing] = useState(true);
   const [profile, setProfile] = useState<AbhaProfile | null>(null);
   const [records, setRecords] = useState<HealthRecord[]>([]);
   const [conditions, setConditions] = useState<ChronicCondition[]>([]);
@@ -83,6 +84,9 @@ export const App: React.FC = () => {
 
     const savedHistory = consultationService.getConsultationHistory();
     setConsultationHistory(savedHistory);
+
+    const loadingTimer = window.setTimeout(() => setIsInitializing(false), 700);
+    return () => window.clearTimeout(loadingTimer);
   }, []);
 
   // Handle Login Success
@@ -270,6 +274,22 @@ export const App: React.FC = () => {
     } else if (tab === 'records' || tab === 'profile') setActiveSubView('RECORDS');
     else if (tab === 'doctors') setActiveSubView('SYMPTOMS');
   };
+
+  if (isInitializing) {
+    return (
+      <main className="sugastha-loading-screen" aria-live="polite" aria-label="Loading SUGASTHA">
+        <div className="loading-brand-lockup">
+          <img src="/images/logo.png" alt="SUGASTHA logo" className="loading-logo" />
+          <div className="loading-brand-name">SUGASTHA</div>
+          <p className="loading-tagline">Citizen Healthcare &amp; AI Triage Portal</p>
+          <div className="loading-progress" aria-hidden="true">
+            <span />
+          </div>
+          <p className="loading-status">Preparing your health dashboard</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <div className="sugastha-app-root">

@@ -222,7 +222,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         </div>
         <h1 className="welcome-title">Welcome back, {profile.fullName.split(' ')[0]}!</h1>
         <p className="welcome-subtext">
-          How can SWASTHYASETU support your health today? Access doctor bookings, teleconsultation, health records & emergency services.
+          How can SUGASTHA support your health today? Access doctor bookings, teleconsultation, health records & emergency services.
         </p>
       </div>
 

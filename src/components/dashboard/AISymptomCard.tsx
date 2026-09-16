@@ -19,12 +19,12 @@ export const AISymptomCard: React.FC<AISymptomCardProps> = ({ onCheckSymptoms })
 
         <h3 className="ai-title">Not sure which doctor to consult?</h3>
         <p className="ai-desc">
-          Describe your symptoms in your preferred language. SWASTHYASETU clinical AI will analyze your inputs and guide you to the appropriate specialist or emergency care.
+          Describe your symptoms in your preferred language. SUGASTHA clinical AI will analyze your inputs and guide you to the appropriate specialist or emergency care.
         </p>
 
         <div className="ai-disclaimer-box">
           <ShieldAlert size={14} className="disclaimer-icon" />
-          <span>SWASTHYASETU AI triage is an assistive tool and does not replace qualified clinical diagnosis by a medical professional.</span>
+          <span>SUGASTHA AI triage is an assistive tool and does not replace qualified clinical diagnosis by a medical professional.</span>
         </div>
 
         <div className="ai-action-row">
