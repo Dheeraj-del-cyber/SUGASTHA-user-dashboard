@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, User, LogOut, PhoneCall, Bell, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, User, LogOut, Bell, CheckCircle2 } from 'lucide-react';
 import { AbhaProfile, ConsultationRequest } from '../../types';
 
 interface HeaderProps {
@@ -69,16 +69,6 @@ export const Header: React.FC<HeaderProps> = ({
               <strong className="token-num">#{activeConsultation.consultationNumber}</strong>
             </button>
           )}
-
-          {/* Emergency SOS Call Pill */}
-          <a
-            href="tel:108"
-            className="sos-chip"
-            title="Call 108 Emergency Ambulance"
-          >
-            <PhoneCall size={14} />
-            <span>108 Emergency</span>
-          </a>
 
           {/* Notifications Dropdown */}
           <div className="notification-wrapper">
@@ -236,22 +226,6 @@ export const Header: React.FC<HeaderProps> = ({
           align-items: center;
           gap: 0.65rem;
           flex-shrink: 0;
-        }
-        .sos-chip {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          background: var(--pastel-soft-pink);
-          border: 1px solid #FCA5A5;
-          color: #DC2626;
-          padding: 0.35rem 0.75rem;
-          border-radius: var(--radius-full);
-          font-weight: 700;
-          font-size: 0.75rem;
-          transition: all var(--transition-fast);
-        }
-        .sos-chip:hover {
-          background: #FEE2E2;
         }
         .active-token-chip {
           display: flex;
@@ -490,13 +464,6 @@ export const Header: React.FC<HeaderProps> = ({
             display: none;
           }
           .abha-number-text {
-            display: none;
-          }
-          .sos-chip {
-            padding: 0.3rem 0.5rem;
-            font-size: 0.7rem;
-          }
-          .sos-chip span {
             display: none;
           }
           .user-profile-chip {

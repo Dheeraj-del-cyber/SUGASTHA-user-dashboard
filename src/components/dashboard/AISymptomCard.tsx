@@ -19,7 +19,7 @@ export const AISymptomCard: React.FC<AISymptomCardProps> = ({ onCheckSymptoms })
 
         <h3 className="ai-title">Not sure which doctor to consult?</h3>
         <p className="ai-desc">
-          Describe your symptoms in your preferred language. SUGASTHA clinical AI will analyze your inputs and guide you to the appropriate specialist or emergency care.
+          Describe your symptoms in your preferred language. SUGASTHA clinical AI will analyze your inputs and guide you to the appropriate specialist.
         </p>
 
         <div className="ai-disclaimer-box">

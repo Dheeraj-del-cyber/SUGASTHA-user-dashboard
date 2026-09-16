@@ -6,7 +6,6 @@ import {
   Building2,
   Video,
   Sparkles,
-  PhoneCall,
   FileText,
   Pill,
   HeartPulse,
@@ -43,7 +42,6 @@ import { SpecialityCard, SpecialityItem } from './SpecialityCard';
 import { FacilityCard } from './FacilityCard';
 import { ConsultOnlineCard, TeleconsultOption } from './ConsultOnlineCard';
 import { AISymptomCard } from './AISymptomCard';
-import { EmergencyCard } from './EmergencyCard';
 import { ActiveConsultationCard } from '../consultation/ActiveConsultationCard';
 
 interface UserDashboardProps {
@@ -200,8 +198,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
     }
   };
 
-  const nearestHospital = MOCK_HOSPITALS[0];
-
   return (
     <div className="home-dashboard-layout animate-fade-in">
       {/* 0. ACTIVE CONSULTATION HERO BAR (If present) */}
@@ -264,13 +260,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           icon={<Pill size={22} />}
           bgPastel="var(--pastel-cream-yellow)"
           onClick={onOpenRecords}
-        />
-        <QuickActionCard
-          title="Emergency"
-          icon={<PhoneCall size={22} />}
-          bgPastel="var(--pastel-soft-pink)"
-          badge="108"
-          onClick={() => (window.location.href = 'tel:108')}
         />
       </HorizontalCardSection>
 
@@ -370,14 +359,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
       {/* 7. AI SYMPTOM ASSISTANT */}
       <div className="section-block">
         <AISymptomCard onCheckSymptoms={onStartNewConsultation} />
-      </div>
-
-      {/* 8. EMERGENCY HELP */}
-      <div className="section-block">
-        <EmergencyCard
-          onCallAmbulance={() => (window.location.href = 'tel:108')}
-          nearestHospital={nearestHospital}
-        />
       </div>
 
       {/* APPOINTMENT MODAL (View / Reschedule / Cancel) */}
