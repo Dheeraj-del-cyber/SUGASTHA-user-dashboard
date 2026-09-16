@@ -438,6 +438,40 @@ export const Header: React.FC<HeaderProps> = ({
           color: #DC2626;
           background: #FEE2E2;
         }
+        @media (min-width: 769px) and (max-width: 1100px) {
+          .brand-tagline,
+          .brand-badge-gov,
+          .abha-number-text {
+            display: none;
+          }
+          .header-actions {
+            gap: 0.45rem;
+          }
+          .user-profile-chip {
+            padding: 3px 6px;
+          }
+        }
+        @media (min-width: 1200px) {
+          .swasthya-header {
+            padding: 0.65rem 0;
+          }
+          .header-container {
+            gap: 1.5rem;
+          }
+          .brand-group {
+            gap: 0.9rem;
+          }
+          .brand-icon-wrapper {
+            width: 46px;
+            height: 46px;
+          }
+          .brand-name {
+            font-size: 1.45rem;
+          }
+          .header-actions {
+            gap: 0.75rem;
+          }
+        }
         @media (max-width: 768px) {
           .brand-group {
             min-width: 0;

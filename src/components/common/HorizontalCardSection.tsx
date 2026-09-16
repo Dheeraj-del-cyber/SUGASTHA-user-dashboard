@@ -239,6 +239,31 @@ export const HorizontalCardSection: React.FC<HorizontalCardSectionProps> = ({
           height: 100%;
           display: flex;
         }
+        @media (min-width: 769px) {
+          .horizontal-section-wrapper {
+            gap: 1rem;
+            margin-bottom: 1.75rem;
+          }
+          .section-header-row {
+            padding: 0 0.5rem;
+          }
+          .section-main-title {
+            font-size: 1.3rem;
+          }
+          .horizontal-scroll-track {
+            gap: 1.15rem;
+            padding-bottom: 1rem;
+          }
+        }
+        @media (min-width: 1200px) {
+          .horizontal-section-wrapper {
+            gap: 1.1rem;
+            margin-bottom: 2rem;
+          }
+          .section-main-title {
+            font-size: 1.35rem;
+          }
+        }
         @media (max-width: 640px) {
           .scroll-arrow-buttons {
             display: none;

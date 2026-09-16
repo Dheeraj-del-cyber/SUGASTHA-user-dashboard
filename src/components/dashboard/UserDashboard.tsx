@@ -656,6 +656,20 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
             font-size: 0.92rem;
           }
         }
+        @media (min-width: 1100px) {
+          .home-dashboard-layout {
+            gap: 1.75rem;
+          }
+          .welcome-banner-card {
+            padding: 1.75rem 2rem;
+          }
+          .welcome-title {
+            font-size: 1.95rem;
+          }
+          .welcome-subtext {
+            max-width: 780px;
+          }
+        }
         @media (max-width: 480px) {
           .welcome-badge-tag {
             font-size: 0.62rem;

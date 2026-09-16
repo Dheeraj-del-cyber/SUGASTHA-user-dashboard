@@ -568,6 +568,15 @@ export const App: React.FC = () => {
             gap: 1.25rem;
           }
         }
+        @media (min-width: 1100px) {
+          .main-content-wrapper {
+            padding-top: 1.5rem;
+            gap: 1.5rem;
+          }
+          .view-switcher-bar {
+            padding-bottom: 0.9rem;
+          }
+        }
         @media (max-width: 768px) {
           .view-switcher-bar {
             display: none;
