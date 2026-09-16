@@ -1,5 +1,5 @@
-import React from 'react';
-import { ShieldCheck, Activity, User, LogOut, PhoneCall } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShieldCheck, Activity, User, LogOut, PhoneCall, Bell, CheckCircle2 } from 'lucide-react';
 import { AbhaProfile, ConsultationRequest } from '../../types';
 
 interface HeaderProps {
@@ -8,6 +8,7 @@ interface HeaderProps {
   onOpenLogin: () => void;
   onLogout: () => void;
   onViewActiveConsultation: () => void;
+  onOpenProfile?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,37 +17,48 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenLogin,
   onLogout,
   onViewActiveConsultation,
+  onOpenProfile,
 }) => {
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(2);
+
+  const notifications = [
+    {
+      id: 'notif-1',
+      title: 'ABHA Health Card Active',
+      time: '10 mins ago',
+      desc: 'Your health records are synced with ABDM registry.',
+      type: 'ABHA',
+    },
+    {
+      id: 'notif-2',
+      title: 'Queue Priority Updated',
+      time: '1 hour ago',
+      desc: 'AIIMS Emergency desk has 3 patients ahead in queue.',
+      type: 'QUEUE',
+    },
+  ];
+
   return (
-    <header className="sugastha-header">
+    <header className="swasthya-header">
       <div className="container header-container">
-        {/* Brand Logo */}
-        <div className="brand-group">
+        {/* Brand Logo & Title */}
+        <div className="brand-group" onClick={() => window.location.reload()}>
           <div className="brand-icon-wrapper">
             <Activity className="brand-icon" size={24} />
           </div>
           <div className="brand-text">
             <div className="brand-title-row">
-              <span className="brand-name">SUGASTHA</span>
-              <span className="brand-badge-gov">GOVERNMENT HEALTH SERVICE</span>
+              <span className="brand-name">SWASTHYASETU</span>
+              <span className="brand-badge-gov">GOVERNMENT HEALTH PORTAL</span>
             </div>
-            <span className="brand-tagline">Your health, made simple</span>
+            <span className="brand-tagline">National Unified Digital Health Framework</span>
           </div>
         </div>
 
-        {/* Action Controls */}
+        {/* Action Controls & Patient Status */}
         <div className="header-actions">
-          {/* Emergency SOS Button */}
-          <a
-            href="tel:108"
-            className="sos-chip"
-            title="Call 108 for an emergency ambulance"
-          >
-            <PhoneCall size={14} className="sos-icon" />
-            <span className="sos-text">Emergency 108</span>
-          </a>
-
-          {/* Active Consultation Pill if present */}
+          {/* Active Visit PIN Pill */}
           {activeConsultation && (
             <button
               onClick={onViewActiveConsultation}
@@ -57,26 +69,82 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="status-ping"></span>
               <span className="token-label">Visit PIN:</span>
               <strong className="token-num">#{activeConsultation.consultationNumber}</strong>
-              <span className="token-status">
-                {activeConsultation.status === 'CONFIRMED' ? 'Confirmed' : 'Waiting'}
-              </span>
             </button>
           )}
 
-          {/* User ABHA Profile / Login Button */}
-          {profile ? (
-            <div className="user-profile-badge">
-              <div className="abha-id-tag">
-                <ShieldCheck size={16} className="text-teal" />
-                <div className="abha-details">
-                  <span className="user-name">{profile.fullName.split(' ')[0]}</span>
-                  <span className="abha-addr">{profile.abhaAddress}</span>
+          {/* Emergency SOS Call Pill */}
+          <a
+            href="tel:108"
+            className="sos-chip"
+            title="Call 108 Emergency Ambulance"
+          >
+            <PhoneCall size={14} />
+            <span>108 Emergency</span>
+          </a>
+
+          {/* Notifications Dropdown */}
+          <div className="notification-wrapper">
+            <button
+              onClick={() => {
+                setIsNotificationsOpen(!isNotificationsOpen);
+                setUnreadCount(0);
+              }}
+              className="btn-icon-head"
+              title="Notifications"
+            >
+              <Bell size={18} />
+              {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
+            </button>
+
+            {isNotificationsOpen && (
+              <div className="notifications-popover">
+                <div className="popover-header">
+                  <h4>Notifications</h4>
+                  <span className="popover-count">2 New</span>
+                </div>
+                <div className="popover-body">
+                  {notifications.map((n) => (
+                    <div key={n.id} className="notif-item">
+                      <CheckCircle2 size={16} className="notif-icon text-green" />
+                      <div className="notif-content">
+                        <span className="notif-title">{n.title}</span>
+                        <p className="notif-desc">{n.desc}</p>
+                        <span className="notif-time">{n.time}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
+            )}
+          </div>
+
+          {/* Profile & ABHA Connected Status */}
+          {profile ? (
+            <div className="user-profile-chip">
+              <div
+                className="profile-info-trigger"
+                onClick={onOpenProfile}
+                title="View ABHA Profile"
+              >
+                <div className="avatar-mini">
+                  {profile.fullName.substring(0, 1)}
+                </div>
+                <div className="profile-text-group">
+                  <div className="name-status-row">
+                    <span className="user-name-text">{profile.fullName.split(' ')[0]}</span>
+                    <span className="abha-status-badge">
+                      <ShieldCheck size={12} className="text-green" />
+                      <span>ABHA Connected</span>
+                    </span>
+                  </div>
+                  <span className="abha-number-text">{profile.abhaNumber}</span>
+                </div>
+              </div>
+
               <button
                 onClick={onLogout}
-                className="btn-icon-logout"
-                title="Log out"
+                className="btn-icon-head logout-btn"
+                title="Log Out"
               >
                 <LogOut size={16} />
               </button>
@@ -84,24 +152,25 @@ export const Header: React.FC<HeaderProps> = ({
           ) : (
             <button onClick={onOpenLogin} className="btn btn-primary btn-sm">
               <User size={16} />
-              <span>Log in</span>
+              <span>Log in ABHA</span>
             </button>
           )}
         </div>
       </div>
 
       <style>{`
-        .sugastha-header {
+        .swasthya-header {
           position: sticky;
           top: 0;
           z-index: 100;
-          background: rgba(11, 17, 32, 0.88);
+          background: rgba(255, 255, 255, 0.92);
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
-          border-bottom: 1px solid var(--border-subtle);
+          border-bottom: 1px solid var(--border-light);
           height: var(--header-height);
           display: flex;
           align-items: center;
+          box-shadow: 0 2px 12px rgba(23, 32, 42, 0.03);
         }
         .header-container {
           display: flex;
@@ -112,7 +181,7 @@ export const Header: React.FC<HeaderProps> = ({
         .brand-group {
           display: flex;
           align-items: center;
-          gap: 0.85rem;
+          gap: 0.75rem;
           cursor: pointer;
         }
         .brand-icon-wrapper {
@@ -123,8 +192,8 @@ export const Header: React.FC<HeaderProps> = ({
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #ffffff;
-          box-shadow: 0 4px 12px var(--brand-primary-glow);
+          color: var(--white);
+          box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
         }
         .brand-text {
           display: flex;
@@ -140,142 +209,241 @@ export const Header: React.FC<HeaderProps> = ({
           font-weight: 800;
           font-size: 1.35rem;
           letter-spacing: -0.02em;
-          background: linear-gradient(135deg, #38bdf8 0%, #ffffff 70%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+          color: var(--brand-primary);
         }
         .brand-badge-gov {
-          background: rgba(249, 115, 22, 0.16);
-          border: 1px solid rgba(249, 115, 22, 0.35);
-          color: #fb923c;
-          font-size: 0.62rem;
+          background: var(--pastel-cream-yellow);
+          border: 1px solid #FDE68A;
+          color: #B45309;
+          font-size: 0.6rem;
           font-weight: 700;
           padding: 2px 6px;
           border-radius: var(--radius-xs);
           letter-spacing: 0.04em;
         }
         .brand-tagline {
-          font-size: 0.75rem;
+          font-size: 0.73rem;
           color: var(--text-muted);
-          font-weight: 400;
         }
         .header-actions {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
+          gap: 0.65rem;
         }
         .sos-chip {
           display: flex;
           align-items: center;
-          gap: 0.35rem;
-          background: rgba(239, 68, 68, 0.15);
-          border: 1px solid rgba(239, 68, 68, 0.4);
-          color: #f87171;
-          padding: 0.4rem 0.75rem;
+          gap: 4px;
+          background: var(--pastel-soft-pink);
+          border: 1px solid #FCA5A5;
+          color: #DC2626;
+          padding: 0.35rem 0.75rem;
           border-radius: var(--radius-full);
           font-weight: 700;
           font-size: 0.75rem;
-          letter-spacing: 0.02em;
           transition: all var(--transition-fast);
         }
         .sos-chip:hover {
-          background: #ef4444;
-          color: #ffffff;
+          background: #FEE2E2;
         }
         .active-token-chip {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
-          padding: 0.35rem 0.85rem;
+          gap: 6px;
+          padding: 0.35rem 0.75rem;
           border-radius: var(--radius-full);
-          font-size: 0.8rem;
-          background: var(--bg-surface-2);
-          border: 1px solid var(--border-subtle);
-          color: var(--text-primary);
+          font-size: 0.78rem;
+          background: var(--pastel-light-blue);
+          border: 1px solid var(--pastel-sky-blue);
+          color: var(--dark-navy-text);
           cursor: pointer;
-          transition: all var(--transition-fast);
-        }
-        .active-token-chip:hover {
-          transform: translateY(-1px);
-        }
-        .token-pending {
-          border-color: rgba(245, 158, 11, 0.4);
-          background: rgba(245, 158, 11, 0.1);
-        }
-        .token-confirmed {
-          border-color: rgba(16, 185, 129, 0.4);
-          background: rgba(16, 185, 129, 0.1);
         }
         .status-ping {
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background: #10b981;
-          box-shadow: 0 0 8px #10b981;
+          background: #2E8B57;
+          box-shadow: 0 0 6px #2E8B57;
           animation: pulseGlow 1.5s infinite;
         }
-        .token-pending .status-ping {
-          background: #f59e0b;
-          box-shadow: 0 0 8px #f59e0b;
-        }
         .token-num {
-          color: var(--brand-accent);
-          font-family: var(--font-display);
-        }
-        .token-status {
-          font-size: 0.7rem;
-          text-transform: uppercase;
-          opacity: 0.8;
-        }
-        .user-profile-badge {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          background: var(--bg-surface-2);
-          border: 1px solid var(--border-subtle);
-          padding: 0.3rem 0.65rem;
-          border-radius: var(--radius-sm);
-        }
-        .abha-id-tag {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-        .text-teal {
           color: var(--brand-primary);
         }
-        .abha-details {
-          display: flex;
-          flex-direction: column;
-          line-height: 1.2;
+        .notification-wrapper {
+          position: relative;
         }
-        .user-name {
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: var(--text-primary);
-        }
-        .abha-addr {
-          font-size: 0.7rem;
-          color: var(--text-muted);
-        }
-        .btn-icon-logout {
-          color: var(--text-muted);
-          padding: 4px;
-          border-radius: 4px;
+        .btn-icon-head {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: var(--bg-app);
+          border: 1px solid var(--border-light);
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: color var(--transition-fast);
+          color: var(--dark-navy-text);
+          position: relative;
+          transition: all var(--transition-fast);
         }
-        .btn-icon-logout:hover {
-          color: #ef4444;
+        .btn-icon-head:hover {
+          background: var(--pastel-light-blue);
+          color: var(--brand-primary);
         }
-        @media (max-width: 640px) {
+        .notif-badge {
+          position: absolute;
+          top: -2px;
+          right: -2px;
+          background: #DC2626;
+          color: var(--white);
+          font-size: 0.6rem;
+          font-weight: 800;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .notifications-popover {
+          position: absolute;
+          top: 44px;
+          right: 0;
+          width: 300px;
+          background: var(--white);
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-md);
+          box-shadow: var(--shadow-lg);
+          padding: 0.85rem;
+          z-index: 120;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+        .popover-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 1px solid var(--border-light);
+          padding-bottom: 0.5rem;
+        }
+        .popover-header h4 {
+          font-size: 0.9rem;
+        }
+        .popover-count {
+          font-size: 0.7rem;
+          font-weight: 700;
+          color: var(--brand-primary);
+          background: var(--pastel-light-blue);
+          padding: 2px 6px;
+          border-radius: var(--radius-full);
+        }
+        .popover-body {
+          display: flex;
+          flex-direction: column;
+          gap: 0.6rem;
+        }
+        .notif-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+          font-size: 0.78rem;
+          padding: 6px;
+          border-radius: var(--radius-xs);
+          background: var(--bg-surface-2);
+        }
+        .notif-icon {
+          color: #2E8B57;
+          margin-top: 2px;
+          flex-shrink: 0;
+        }
+        .notif-title {
+          font-weight: 700;
+          color: var(--dark-navy-text);
+          display: block;
+        }
+        .notif-desc {
+          font-size: 0.72rem;
+          color: var(--text-muted);
+        }
+        .notif-time {
+          font-size: 0.65rem;
+          color: var(--text-subtle);
+        }
+        .user-profile-chip {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: var(--pastel-light-blue);
+          border: 1px solid var(--pastel-sky-blue);
+          padding: 4px 8px;
+          border-radius: var(--radius-full);
+        }
+        .profile-info-trigger {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          cursor: pointer;
+        }
+        .avatar-mini {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: var(--brand-primary);
+          color: var(--white);
+          font-family: var(--font-display);
+          font-weight: 800;
+          font-size: 0.9rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .profile-text-group {
+          display: flex;
+          flex-direction: column;
+          line-height: 1.1;
+        }
+        .name-status-row {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+        .user-name-text {
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: var(--dark-navy-text);
+        }
+        .abha-status-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 2px;
+          font-size: 0.65rem;
+          font-weight: 700;
+          color: #2E8B57;
+          background: #E8F5E9;
+          padding: 1px 5px;
+          border-radius: var(--radius-full);
+        }
+        .text-green {
+          color: #2E8B57;
+        }
+        .abha-number-text {
+          font-size: 0.68rem;
+          color: var(--text-muted);
+        }
+        .logout-btn:hover {
+          color: #DC2626;
+          background: #FEE2E2;
+        }
+        @media (max-width: 768px) {
           .brand-tagline, .brand-badge-gov {
             display: none;
           }
-          .abha-addr {
+          .abha-number-text {
             display: none;
+          }
+          .sos-chip {
+            padding: 0.3rem 0.5rem;
+            font-size: 0.7rem;
           }
         }
       `}</style>

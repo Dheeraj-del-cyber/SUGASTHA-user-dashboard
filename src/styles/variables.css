@@ -1,72 +1,76 @@
 :root {
-  /* Core Colors */
-  --bg-app: #080c16;
-  --bg-surface-1: #0f172a;
-  --bg-surface-2: #162036;
-  --bg-surface-3: #1e294b;
-  --bg-glass: rgba(17, 26, 47, 0.75);
-  --bg-glass-card: rgba(22, 32, 54, 0.85);
+  /* Pastel Color Palette (Main Visual Reference) */
+  --pastel-light-blue: #DDF4FF;
+  --pastel-sky-blue: #BFE9F8;
+  --pastel-cream-yellow: #FFF3C7;
+  --pastel-soft-yellow: #FFF8DD;
+  --pastel-soft-pink: #FCE1E8;
+  --pastel-green-accent: #2E8B57;
+  --pastel-green-bg: #E8F5E9;
+  --dark-navy-text: #17202A;
+  --white: #FFFFFF;
 
-  /* Borders & Dividers */
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-focus: rgba(14, 165, 233, 0.5);
-  --border-highlight: rgba(14, 165, 233, 0.25);
+  /* App Layout Base */
+  --bg-app: #F4F8FA;
+  --bg-surface-1: #FFFFFF;
+  --bg-surface-2: #F8FAFC;
+  --bg-surface-3: #EDF4F8;
+  --bg-glass-card: #FFFFFF;
 
-  /* Primary Brand (SUGASTHA Clinical Teal / Cyan) */
-  --brand-primary: #0ea5e9;
-  --brand-primary-hover: #0284c7;
-  --brand-primary-glow: rgba(14, 165, 233, 0.25);
-  --brand-secondary: #06b6d4;
-  --brand-accent: #38bdf8;
-  --brand-gradient: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 50%, #3b82f6 100%);
-  --brand-gradient-hover: linear-gradient(135deg, #0284c7 0%, #0891b2 50%, #2563eb 100%);
+  /* Brand Colors */
+  --brand-primary: #0284C7;
+  --brand-primary-hover: #0369A1;
+  --brand-accent: #0EA5E9;
+  --brand-gradient: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%);
+  --brand-gradient-pastel: linear-gradient(135deg, #DDF4FF 0%, #BFE9F8 100%);
 
   /* ABDM Brand Colors */
-  --abdm-orange: #f97316;
-  --abdm-green: #10b981;
-  --abdm-blue: #2563eb;
-  --abdm-gradient: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  --abdm-orange: #E65100;
+  --abdm-green: #2E8B57;
+  --abdm-blue: #0284C7;
+  --abdm-gradient: linear-gradient(135deg, #FFF3C7 0%, #FFE082 100%);
 
   /* Triage Colors */
-  --triage-green: #10b981;
-  --triage-green-bg: rgba(16, 185, 129, 0.12);
-  --triage-green-border: rgba(16, 185, 129, 0.35);
-  --triage-green-glow: rgba(16, 185, 129, 0.25);
+  --triage-green: #2E8B57;
+  --triage-green-bg: #E8F5E9;
+  --triage-green-border: #A5D6A7;
 
-  --triage-yellow: #f59e0b;
-  --triage-yellow-bg: rgba(245, 158, 11, 0.12);
-  --triage-yellow-border: rgba(245, 158, 11, 0.35);
-  --triage-yellow-glow: rgba(245, 158, 11, 0.25);
+  --triage-yellow: #D97706;
+  --triage-yellow-bg: #FFF3C7;
+  --triage-yellow-border: #FDE68A;
 
-  --triage-red: #ef4444;
-  --triage-red-bg: rgba(239, 68, 68, 0.14);
-  --triage-red-border: rgba(239, 68, 68, 0.45);
-  --triage-red-glow: rgba(239, 68, 68, 0.35);
+  --triage-red: #DC2626;
+  --triage-red-bg: #FCE1E8;
+  --triage-red-border: #FCA5A5;
 
   /* Typography Colors */
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --text-inverse: #020617;
+  --text-primary: #17202A;
+  --text-secondary: #4A5568;
+  --text-muted: #718096;
+  --text-inverse: #FFFFFF;
 
   /* Typography Fonts */
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Outfit', var(--font-sans);
 
-  /* Radii */
-  --radius-xs: 6px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
-  --radius-full: 9999px;
+  /* Borders & Shadows */
+  --border-light: #E2E8F0;
+  --border-subtle: rgba(23, 32, 42, 0.08);
+  --border-focus: #0EA5E9;
+  --border-highlight: rgba(14, 165, 233, 0.3);
 
-  /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 30px var(--brand-primary-glow);
-  --shadow-glow-red: 0 0 35px var(--triage-red-glow);
+  --shadow-sm: 0 2px 8px rgba(23, 32, 42, 0.04);
+  --shadow-md: 0 8px 24px rgba(23, 32, 42, 0.06);
+  --shadow-lg: 0 16px 36px rgba(23, 32, 42, 0.1);
+  --shadow-soft: 0 4px 16px rgba(2, 132, 199, 0.06);
+
+  /* Radii - Soft Large Rounded Corners */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
 
   /* Layout Measurements */
   --header-height: 72px;

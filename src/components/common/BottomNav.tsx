@@ -1,12 +1,12 @@
 import React from 'react';
-import { LayoutDashboard, Stethoscope, Clock, FileText } from 'lucide-react';
+import { Home, Calendar, Users, FileText, User } from 'lucide-react';
 
-export type ActiveTab = 'dashboard' | 'triage' | 'tracking' | 'records';
+export type ActiveTab = 'dashboard' | 'appointments' | 'doctors' | 'records' | 'profile' | 'triage' | 'tracking';
 
 interface BottomNavProps {
   activeTab: ActiveTab;
   onSelectTab: (tab: ActiveTab) => void;
-  hasActiveConsultation: boolean;
+  hasActiveConsultation?: boolean;
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({
@@ -20,27 +20,27 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         onClick={() => onSelectTab('dashboard')}
         className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
       >
-        <LayoutDashboard size={20} />
+        <Home size={20} />
         <span>Home</span>
       </button>
 
       <button
-        onClick={() => onSelectTab('triage')}
-        className={`nav-item ${activeTab === 'triage' ? 'active' : ''}`}
+        onClick={() => onSelectTab('appointments')}
+        className={`nav-item ${activeTab === 'appointments' || activeTab === 'tracking' ? 'active' : ''}`}
       >
-        <Stethoscope size={20} />
-        <span>Check Symptoms</span>
+        <div className="nav-icon-container">
+          <Calendar size={20} />
+          {hasActiveConsultation && <span className="nav-ping"></span>}
+        </div>
+        <span>Appointments</span>
       </button>
 
       <button
-        onClick={() => onSelectTab('tracking')}
-        className={`nav-item ${activeTab === 'tracking' ? 'active' : ''}`}
+        onClick={() => onSelectTab('doctors')}
+        className={`nav-item ${activeTab === 'doctors' || activeTab === 'triage' ? 'active' : ''}`}
       >
-        <div className="nav-icon-container">
-          <Clock size={20} />
-          {hasActiveConsultation && <span className="nav-ping"></span>}
-        </div>
-        <span>My Visit</span>
+        <Users size={20} />
+        <span>Doctors</span>
       </button>
 
       <button
@@ -51,6 +51,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         <span>Records</span>
       </button>
 
+      <button
+        onClick={() => onSelectTab('profile')}
+        className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
+      >
+        <User size={20} />
+        <span>Profile</span>
+      </button>
+
       <style>{`
         .bottom-nav-bar {
           position: fixed;
@@ -58,35 +66,39 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           left: 0;
           right: 0;
           height: var(--bottom-nav-height);
-          background: rgba(15, 23, 42, 0.94);
+          background: rgba(255, 255, 255, 0.95);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
-          border-top: 1px solid var(--border-subtle);
+          border-top: 1px solid var(--border-light);
           display: flex;
           align-items: center;
           justify-content: space-around;
           z-index: 90;
-          padding: 0 0.5rem;
+          padding: 0 0.25rem;
+          box-shadow: 0 -4px 16px rgba(23, 32, 42, 0.05);
         }
         .nav-item {
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 4px;
+          gap: 3px;
           color: var(--text-muted);
-          font-size: 0.72rem;
-          font-weight: 500;
-          padding: 6px 12px;
+          font-size: 0.7rem;
+          font-weight: 600;
+          padding: 6px 8px;
           border-radius: var(--radius-sm);
           transition: all var(--transition-fast);
           flex: 1;
         }
         .nav-item.active {
-          color: var(--brand-accent);
+          color: var(--brand-primary);
+        }
+        .nav-item.active svg {
+          transform: translateY(-1px);
         }
         .nav-item:hover {
-          color: var(--text-primary);
+          color: var(--dark-navy-text);
         }
         .nav-icon-container {
           position: relative;
@@ -98,8 +110,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background: #10b981;
-          box-shadow: 0 0 6px #10b981;
+          background: #2E8B57;
+          box-shadow: 0 0 6px #2E8B57;
         }
         @media (min-width: 769px) {
           .bottom-nav-bar {

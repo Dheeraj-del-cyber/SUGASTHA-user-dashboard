@@ -158,14 +158,37 @@ export const App: React.FC = () => {
 
   // Confirm and Book Hospital Consultation (3-Tier Queue Buffering)
   const handleConfirmHospitalBooking = () => {
-    if (!profile || !currentSymptoms || !triageResult || !pendingHospital || !pendingDoctor) return;
+    if (!profile || !pendingHospital || !pendingDoctor) return;
+
+    // Fallback symptoms & triage if user selected doctor directly from home page
+    const symptomsToUse: SymptomInput = currentSymptoms || {
+      primarySymptoms: ['General Health Consultation'],
+      durationDays: 1,
+      painScale: 2,
+      bodyRegion: 'General',
+      additionalNotes: 'Direct Doctor Appointment Booking from Home Dashboard',
+      hasRedFlags: {},
+    };
+
+    const triageToUse: TriageResult = triageResult || {
+      level: 'GREEN',
+      title: 'Routine General Consultation',
+      category: 'OPD Checkup',
+      summary: 'Direct appointment requested for general specialist evaluation.',
+      urgencyWindow: 'Routine / 24-48 hours',
+      recommendedRoute: 'HOSPITAL_VISIT',
+      clinicalFactors: [],
+      suggestedSpecialties: [pendingDoctor.specialization],
+      vitalsRiskScore: 10,
+      warningFlags: [],
+    };
 
     setIsBookingInProgress(true);
     setTimeout(() => {
       const newConsultation = consultationService.createConsultation(
         profile,
-        currentSymptoms,
-        triageResult,
+        symptomsToUse,
+        triageToUse,
         pendingHospital,
         pendingDoctor
       );
@@ -179,14 +202,36 @@ export const App: React.FC = () => {
 
   // Book Teleconsultation (eSanjeevani route)
   const handleBookTeleconsultation = () => {
-    if (!profile || !currentSymptoms || !triageResult) return;
+    if (!profile) return;
+
+    const symptomsToUse = currentSymptoms || {
+      primarySymptoms: ['General Health Consultation'],
+      durationDays: 1,
+      painScale: 1,
+      bodyRegion: 'General',
+      additionalNotes: 'Online Teleconsultation',
+      hasRedFlags: {},
+    };
+
+    const triageToUse = triageResult || {
+      level: 'GREEN',
+      title: 'Routine Teleconsultation',
+      category: 'eSanjeevani Online',
+      summary: 'Routine online video consultation request.',
+      urgencyWindow: 'Routine / 24-48 hours',
+      recommendedRoute: 'TELECONSULTATION',
+      clinicalFactors: [],
+      suggestedSpecialties: ['General Medicine'],
+      vitalsRiskScore: 10,
+      warningFlags: [],
+    };
 
     setIsBookingInProgress(true);
     setTimeout(() => {
       const newConsultation = consultationService.createTeleconsultation(
         profile,
-        currentSymptoms,
-        triageResult
+        symptomsToUse,
+        triageToUse
       );
       setActiveConsultation(newConsultation);
       setIsBookingInProgress(false);
@@ -219,10 +264,11 @@ export const App: React.FC = () => {
     setActiveTab(tab);
     if (tab === 'dashboard') setActiveSubView('DASHBOARD');
     else if (tab === 'triage') setActiveSubView('SYMPTOMS');
-    else if (tab === 'tracking') {
+    else if (tab === 'appointments' || tab === 'tracking') {
       if (activeConsultation) setActiveSubView('TRACKER');
       else setActiveSubView('HISTORY');
-    } else if (tab === 'records') setActiveSubView('RECORDS');
+    } else if (tab === 'records' || tab === 'profile') setActiveSubView('RECORDS');
+    else if (tab === 'doctors') setActiveSubView('SYMPTOMS');
   };
 
   return (
@@ -236,6 +282,10 @@ export const App: React.FC = () => {
         onViewActiveConsultation={() => {
           setActiveTab('tracking');
           setActiveSubView('TRACKER');
+        }}
+        onOpenProfile={() => {
+          setActiveTab('records');
+          setActiveSubView('RECORDS');
         }}
       />
 
@@ -263,7 +313,7 @@ export const App: React.FC = () => {
                 : ''
             }`}
           >
-            Check Symptoms
+            Check Symptoms (AI Triage)
           </button>
           {activeConsultation && (
             <button
@@ -320,6 +370,7 @@ export const App: React.FC = () => {
               setActiveTab('tracking');
               setActiveSubView('HISTORY');
             }}
+            onSelectHospitalAndDoctor={handleSelectHospitalAndDoctor}
           />
         )}
 
@@ -377,6 +428,7 @@ export const App: React.FC = () => {
         {/* View 6: ABHA Health Records */}
         {activeSubView === 'RECORDS' && (
           <HealthRecordsView
+            profile={profile}
             records={records}
             conditions={conditions}
             allergies={allergies}
@@ -429,13 +481,26 @@ export const App: React.FC = () => {
         }}
       />
 
-      {pendingHospital && pendingDoctor && triageResult && profile && (
+      {pendingHospital && pendingDoctor && profile && (
         <BookingConfirmationModal
           isOpen={isBookingModalOpen}
           onClose={() => setIsBookingModalOpen(false)}
           hospital={pendingHospital}
           doctor={pendingDoctor}
-          triage={triageResult}
+          triage={
+            triageResult || {
+              level: 'GREEN',
+              title: 'General Consultation',
+              category: 'OPD Checkup',
+              summary: 'Direct doctor consultation request.',
+              urgencyWindow: 'Routine / 24-48 hours',
+              recommendedRoute: 'HOSPITAL_VISIT',
+              clinicalFactors: [],
+              suggestedSpecialties: [pendingDoctor.specialization],
+              vitalsRiskScore: 10,
+              warningFlags: [],
+            }
+          }
           profile={profile}
           onConfirmBooking={handleConfirmHospitalBooking}
           isBooking={isBookingInProgress}
@@ -460,16 +525,16 @@ export const App: React.FC = () => {
         }
         .main-content-wrapper {
           flex: 1;
-          padding-top: 1.5rem;
+          padding-top: 1.25rem;
           padding-bottom: 3rem;
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
+          gap: 1.25rem;
         }
         .view-switcher-bar {
           display: flex;
           gap: 0.5rem;
-          border-bottom: 1px solid var(--border-subtle);
+          border-bottom: 1px solid var(--border-light);
           padding-bottom: 0.75rem;
           overflow-x: auto;
         }
@@ -478,18 +543,18 @@ export const App: React.FC = () => {
           font-size: 0.85rem;
           font-weight: 600;
           color: var(--text-muted);
-          border-radius: var(--radius-sm);
+          border-radius: var(--radius-full);
           transition: all var(--transition-fast);
           white-space: nowrap;
         }
         .view-tab:hover {
-          color: var(--text-primary);
-          background: rgba(255, 255, 255, 0.05);
+          color: var(--dark-navy-text);
+          background: var(--pastel-light-blue);
         }
         .view-tab.active {
-          color: var(--brand-accent);
-          background: rgba(14, 165, 233, 0.12);
-          border: 1px solid rgba(14, 165, 233, 0.3);
+          color: var(--brand-primary);
+          background: var(--pastel-light-blue);
+          border: 1px solid var(--pastel-sky-blue);
         }
         .recommendation-stage-wrap {
           display: flex;
