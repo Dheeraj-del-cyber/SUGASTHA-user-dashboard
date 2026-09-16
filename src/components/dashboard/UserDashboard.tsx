@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Video, Building2, Sparkles, Check, ShieldCheck, Clock3, Route, ArrowRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Video, Building2, FileText, Sparkles, Check, ShieldCheck, Clock3, Route, ArrowRight } from 'lucide-react';
 import {
   AbhaProfile,
   HealthRecord,
@@ -27,6 +27,41 @@ interface UserDashboardProps {
 
 const COMMON_SYMPTOMS = ['Fever', 'Cough', 'Headache'];
 
+const FEATURE_SLIDES = [
+  {
+    eyebrow: 'START HERE',
+    title: 'Understand your symptoms',
+    description: 'Describe how you feel and get a guided care path in under a minute.',
+    action: 'AI symptom check',
+    icon: Sparkles,
+    theme: 'feature-slide-blue',
+  },
+  {
+    eyebrow: 'CARE WHEN YOU NEED IT',
+    title: 'Talk to a doctor online',
+    description: 'Connect to a teleconsultation without leaving your home.',
+    action: 'Teleconsultation',
+    icon: Video,
+    theme: 'feature-slide-mint',
+  },
+  {
+    eyebrow: 'YOUR HEALTH, TOGETHER',
+    title: 'Keep records in one place',
+    description: 'Access your ABHA-linked health history whenever you need it.',
+    action: 'Health records',
+    icon: FileText,
+    theme: 'feature-slide-yellow',
+  },
+  {
+    eyebrow: 'FIND THE RIGHT CARE',
+    title: 'Discover doctors and hospitals',
+    description: 'Compare nearby facilities and find specialists for your needs.',
+    action: 'Care network',
+    icon: Building2,
+    theme: 'feature-slide-lilac',
+  },
+];
+
 export const UserDashboard: React.FC<UserDashboardProps> = ({
   records = [],
   conditions = [],
@@ -38,6 +73,16 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 }) => {
   const [symptomInput, setSymptomInput] = useState('');
   const [isGenerated, setIsGenerated] = useState(false);
+  const [activeFeature, setActiveFeature] = useState(0);
+  const [isFeaturePaused, setIsFeaturePaused] = useState(false);
+
+  useEffect(() => {
+    if (isFeaturePaused) return;
+    const featureTimer = window.setInterval(() => {
+      setActiveFeature((current) => (current + 1) % FEATURE_SLIDES.length);
+    }, 3800);
+    return () => window.clearInterval(featureTimer);
+  }, [isFeaturePaused]);
 
   const handleAddSymptom = (symptom: string) => {
     if (!symptomInput.trim()) {
@@ -78,6 +123,55 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           />
         </div>
       )}
+
+      <section
+        className="feature-carousel"
+        aria-label="What you can do with SUGASTHA"
+        onMouseEnter={() => setIsFeaturePaused(true)}
+        onMouseLeave={() => setIsFeaturePaused(false)}
+        onFocus={() => setIsFeaturePaused(true)}
+        onBlur={() => setIsFeaturePaused(false)}
+      >
+        <div
+          className="feature-slide-track"
+          style={{ transform: `translateX(-${activeFeature * 100}%)` }}
+        >
+          {FEATURE_SLIDES.map((slide) => {
+            const SlideIcon = slide.icon;
+            return (
+              <article key={slide.title} className={`feature-slide ${slide.theme}`}>
+                <div className="feature-slide-copy">
+                  <span className="feature-slide-eyebrow">{slide.eyebrow}</span>
+                  <h2>{slide.title}</h2>
+                  <p>{slide.description}</p>
+                  <span className="feature-slide-action">
+                    {slide.action}
+                    <ArrowRight size={15} />
+                  </span>
+                </div>
+                <div className="feature-slide-icon" aria-hidden="true">
+                  <SlideIcon size={34} />
+                </div>
+              </article>
+            );
+          })}
+        </div>
+        <div className="feature-carousel-controls">
+          <div className="feature-slide-dots">
+            {FEATURE_SLIDES.map((slide, index) => (
+              <button
+                key={slide.title}
+                type="button"
+                className={`feature-dot ${activeFeature === index ? 'active' : ''}`}
+                onClick={() => setActiveFeature(index)}
+                aria-label={`Show slide ${index + 1}: ${slide.title}`}
+                aria-current={activeFeature === index ? 'true' : undefined}
+              />
+            ))}
+          </div>
+          <span className="feature-slide-count">{String(activeFeature + 1).padStart(2, '0')} / 04</span>
+        </div>
+      </section>
 
       {/* Main Minimal Home Card */}
       <div className="card symptom-home-card">
@@ -139,7 +233,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 
           {/* Generate Button */}
           <button type="submit" className="btn btn-primary btn-lg generate-btn">
-            <Sparkles size={18} />
             <span>Generate</span>
           </button>
         </form>
@@ -217,6 +310,135 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 
         .active-visit-hero-banner {
           width: 100%;
+        }
+
+        .feature-carousel {
+          width: 100%;
+          overflow: hidden;
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-md);
+          background: var(--white);
+        }
+
+        .feature-slide-track {
+          display: flex;
+          transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+          touch-action: pan-y;
+        }
+
+        .feature-slide {
+          min-width: 100%;
+          min-height: 190px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1.5rem;
+          padding: 1.6rem 1.75rem 1.35rem;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .feature-slide::after {
+          content: '';
+          position: absolute;
+          width: 180px;
+          height: 180px;
+          right: 8%;
+          bottom: -95px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.42);
+        }
+
+        .feature-slide-blue { background: linear-gradient(135deg, #dff5ff 0%, #bfe9f8 100%); }
+        .feature-slide-mint { background: linear-gradient(135deg, #e5f7ee 0%, #c6ead7 100%); }
+        .feature-slide-yellow { background: linear-gradient(135deg, #fff8dc 0%, #ffe9a8 100%); }
+        .feature-slide-lilac { background: linear-gradient(135deg, #f1ecff 0%, #ddd4ff 100%); }
+
+        .feature-slide-copy {
+          position: relative;
+          z-index: 1;
+          max-width: 510px;
+        }
+
+        .feature-slide-eyebrow {
+          color: var(--brand-primary);
+          font-size: 0.68rem;
+          font-weight: 800;
+          letter-spacing: 0.1em;
+        }
+
+        .feature-slide h2 {
+          margin-top: 0.35rem;
+          font-size: clamp(1.35rem, 3vw, 1.9rem);
+          line-height: 1.1;
+        }
+
+        .feature-slide p {
+          max-width: 430px;
+          margin-top: 0.45rem;
+          color: var(--text-secondary);
+          font-size: 0.86rem;
+        }
+
+        .feature-slide-action {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          margin-top: 0.85rem;
+          color: var(--brand-primary);
+          font-size: 0.78rem;
+          font-weight: 800;
+        }
+
+        .feature-slide-icon {
+          position: relative;
+          z-index: 1;
+          display: grid;
+          place-items: center;
+          width: 76px;
+          height: 76px;
+          flex-shrink: 0;
+          border: 1px solid rgba(255, 255, 255, 0.72);
+          border-radius: 24px;
+          color: var(--brand-primary);
+          background: rgba(255, 255, 255, 0.62);
+          box-shadow: 0 12px 24px rgba(23, 32, 42, 0.07);
+        }
+
+        .feature-carousel-controls {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 1.75rem 0.9rem;
+          background: inherit;
+        }
+
+        .feature-slide-dots {
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+        }
+
+        .feature-dot {
+          width: 7px;
+          height: 7px;
+          padding: 0;
+          border-radius: 50%;
+          background: rgba(2, 132, 199, 0.25);
+          transition: all var(--transition-normal);
+        }
+
+        .feature-dot.active {
+          width: 22px;
+          border-radius: var(--radius-full);
+          background: var(--brand-primary);
+        }
+
+        .feature-slide-count {
+          color: var(--text-muted);
+          font-family: var(--font-display);
+          font-size: 0.68rem;
+          font-weight: 700;
         }
 
         .symptom-home-card {
@@ -522,6 +744,30 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         }
 
         @media (max-width: 640px) {
+          .feature-slide {
+            min-height: 172px;
+            padding: 1.25rem 1rem 1rem;
+          }
+
+          .feature-slide h2 {
+            font-size: 1.3rem;
+          }
+
+          .feature-slide p {
+            max-width: 245px;
+            font-size: 0.78rem;
+          }
+
+          .feature-slide-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 18px;
+          }
+
+          .feature-carousel-controls {
+            padding: 0 1rem 0.75rem;
+          }
+
           .symptom-home-card {
             padding: 1.25rem;
             gap: 1.25rem;

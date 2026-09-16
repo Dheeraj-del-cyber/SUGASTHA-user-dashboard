@@ -357,17 +357,6 @@ export const App: React.FC = () => {
           >
             Check Symptoms (AI Triage)
           </button>
-          {activeConsultation && (
-            <button
-              onClick={() => {
-                setActiveTab('tracking');
-                setActiveSubView('TRACKER');
-              }}
-              className={`view-tab ${activeSubView === 'TRACKER' ? 'active' : ''}`}
-            >
-              My Visit Status
-            </button>
-          )}
           <button
             onClick={() => {
               setActiveTab('records');
