@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Video, Building2, Sparkles, Check } from 'lucide-react';
+import { Video, Building2, Sparkles, Check, ShieldCheck, Clock3, Route, ArrowRight } from 'lucide-react';
 import {
   AbhaProfile,
   HealthRecord,
@@ -28,6 +28,9 @@ interface UserDashboardProps {
 const COMMON_SYMPTOMS = ['Fever', 'Cough', 'Headache'];
 
 export const UserDashboard: React.FC<UserDashboardProps> = ({
+  records = [],
+  conditions = [],
+  allergies = [],
   activeConsultation,
   onOpenTracker,
   onStartNewConsultation,
@@ -78,12 +81,34 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 
       {/* Main Minimal Home Card */}
       <div className="card symptom-home-card">
-        {/* Heading */}
-        <h2 className="symptom-heading">Enter your current symptoms</h2>
+        <div className="symptom-intro-row">
+          <div className="symptom-intro-icon">
+            <Sparkles size={20} />
+          </div>
+          <div className="symptom-intro-copy">
+            <span className="eyebrow-label">AI HEALTH CHECK</span>
+            <span className="intro-time"><Clock3 size={13} /> Takes about 1 minute</span>
+          </div>
+        </div>
+
+        <div className="symptom-heading-group">
+          <h2 className="symptom-heading">How are you feeling today?</h2>
+          <p className="symptom-description">Tell us what you are experiencing and we will help you find the right next step.</p>
+        </div>
+
+        <div className="health-context-strip">
+          <ShieldCheck size={18} />
+          <div>
+            <strong>Your health context is ready</strong>
+            <span>{records.length} records · {conditions.length} conditions · {allergies.length} allergies checked</span>
+          </div>
+        </div>
 
         {/* Input Form */}
         <form onSubmit={handleGenerate} className="symptom-input-group">
+          <label htmlFor="symptom-input" className="input-label">Describe your symptoms</label>
           <input
+            id="symptom-input"
             type="text"
             className="form-input symptom-input-field"
             placeholder="Type your symptoms here (e.g. Fever, Cough)"
@@ -151,13 +176,41 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         )}
       </div>
 
+      {!isGenerated && (
+        <section className="next-steps-panel" aria-label="What happens next">
+          <div className="next-steps-heading">
+            <div>
+              <span className="eyebrow-label">YOUR CARE PATH</span>
+              <h3>What happens next?</h3>
+            </div>
+            <Route size={22} />
+          </div>
+          <div className="next-steps-list">
+            <div className="next-step-item">
+              <span className="step-number">01</span>
+              <div><strong>Share symptoms</strong><span>Use your own words</span></div>
+              <ArrowRight size={16} />
+            </div>
+            <div className="next-step-item">
+              <span className="step-number">02</span>
+              <div><strong>Get guidance</strong><span>Review your care options</span></div>
+              <ArrowRight size={16} />
+            </div>
+            <div className="next-step-item">
+              <span className="step-number">03</span>
+              <div><strong>Choose what suits you</strong><span>Online or hospital care</span></div>
+            </div>
+          </div>
+        </section>
+      )}
+
       <style>{`
         .home-dashboard-layout {
           display: flex;
           flex-direction: column;
           gap: 1.25rem;
           width: 100%;
-          max-width: 720px;
+          max-width: 760px;
           margin: 0 auto;
           padding-top: 1rem;
         }
@@ -169,11 +222,57 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         .symptom-home-card {
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
+          gap: 1.15rem;
           padding: 2rem;
           background: var(--white);
           border-radius: var(--radius-lg);
           box-shadow: var(--shadow-md);
+        }
+
+        .symptom-intro-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+        }
+
+        .symptom-intro-icon {
+          width: 40px;
+          height: 40px;
+          display: grid;
+          place-items: center;
+          border-radius: 13px;
+          color: var(--brand-primary);
+          background: var(--pastel-light-blue);
+          border: 1px solid var(--pastel-sky-blue);
+        }
+
+        .symptom-intro-copy {
+          display: flex;
+          align-items: center;
+          gap: 0.65rem;
+          margin-left: auto;
+        }
+
+        .eyebrow-label {
+          color: var(--brand-primary);
+          font-size: 0.68rem;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+        }
+
+        .intro-time {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.3rem;
+          color: var(--text-muted);
+          font-size: 0.72rem;
+        }
+
+        .symptom-heading-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.35rem;
         }
 
         .symptom-heading {
@@ -183,10 +282,50 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           text-align: center;
         }
 
+        .symptom-description {
+          max-width: 510px;
+          margin: 0 auto;
+          color: var(--text-secondary);
+          font-size: 0.88rem;
+          text-align: center;
+        }
+
+        .health-context-strip {
+          display: flex;
+          align-items: center;
+          gap: 0.65rem;
+          padding: 0.7rem 0.8rem;
+          border: 1px solid var(--triage-green-border);
+          border-radius: var(--radius-sm);
+          background: var(--triage-green-bg);
+          color: var(--triage-green);
+        }
+
+        .health-context-strip div {
+          display: flex;
+          flex-direction: column;
+          gap: 0.1rem;
+        }
+
+        .health-context-strip strong {
+          font-size: 0.78rem;
+        }
+
+        .health-context-strip span {
+          color: var(--text-secondary);
+          font-size: 0.72rem;
+        }
+
         .symptom-input-group {
           display: flex;
           flex-direction: column;
           gap: 1.25rem;
+        }
+
+        .input-label {
+          color: var(--text-primary);
+          font-size: 0.82rem;
+          font-weight: 700;
         }
 
         .symptom-input-field {
@@ -320,14 +459,99 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           line-height: 1.3;
         }
 
+        .next-steps-panel {
+          padding: 1.25rem 1.35rem;
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-lg);
+          background: rgba(255, 255, 255, 0.78);
+          box-shadow: var(--shadow-sm);
+        }
+
+        .next-steps-heading {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          color: var(--brand-primary);
+        }
+
+        .next-steps-heading h3 {
+          margin-top: 0.15rem;
+          font-size: 1.05rem;
+        }
+
+        .next-steps-list {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0.75rem;
+          margin-top: 1rem;
+        }
+
+        .next-step-item {
+          display: flex;
+          align-items: center;
+          gap: 0.55rem;
+          min-width: 0;
+          padding: 0.7rem;
+          border-radius: var(--radius-sm);
+          background: var(--bg-surface-2);
+          color: var(--text-muted);
+        }
+
+        .next-step-item > div {
+          display: flex;
+          flex-direction: column;
+          min-width: 0;
+          flex: 1;
+        }
+
+        .next-step-item strong {
+          color: var(--text-primary);
+          font-size: 0.76rem;
+        }
+
+        .next-step-item span:not(.step-number) {
+          font-size: 0.68rem;
+          line-height: 1.2;
+        }
+
+        .step-number {
+          color: var(--brand-primary);
+          font-family: var(--font-display);
+          font-size: 0.7rem;
+          font-weight: 800;
+        }
+
         @media (max-width: 640px) {
           .symptom-home-card {
             padding: 1.25rem;
             gap: 1.25rem;
           }
 
+          .symptom-intro-copy {
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.2rem;
+          }
+
           .symptom-heading {
             font-size: 1.35rem;
+          }
+
+          .symptom-description {
+            font-size: 0.8rem;
+          }
+
+          .next-steps-panel {
+            padding: 1rem;
+          }
+
+          .next-steps-list {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+          }
+
+          .next-step-item {
+            padding: 0.65rem;
           }
 
           .options-container {
