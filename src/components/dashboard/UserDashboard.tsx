@@ -481,8 +481,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         .home-dashboard-layout {
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
-          padding-bottom: 2rem;
+          gap: 1rem;
+          padding-bottom: 1rem;
           width: 100%;
         }
         .active-visit-hero-banner {
@@ -492,7 +492,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           background: linear-gradient(135deg, #DDF4FF 0%, #BFE9F8 50%, #FFFFFF 100%);
           border: 1px solid #93C5FD;
           border-radius: var(--radius-lg);
-          padding: 1.5rem 1.75rem;
+          padding: 1.15rem 1rem;
           box-shadow: var(--shadow-sm);
           display: flex;
           flex-direction: column;
@@ -515,13 +515,13 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           color: #D97706;
         }
         .welcome-title {
-          font-size: 1.75rem;
+          font-size: 1.45rem;
           font-weight: 800;
           color: var(--dark-navy-text);
           line-height: 1.2;
         }
         .welcome-subtext {
-          font-size: 0.92rem;
+          font-size: 0.85rem;
           color: var(--text-secondary);
           max-width: 720px;
         }
@@ -640,6 +640,40 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           gap: 0.5rem;
           border-top: 1px solid var(--border-light);
           padding-top: 0.75rem;
+        }
+        @media (min-width: 769px) {
+          .home-dashboard-layout {
+            gap: 1.5rem;
+            padding-bottom: 2rem;
+          }
+          .welcome-banner-card {
+            padding: 1.5rem 1.75rem;
+          }
+          .welcome-title {
+            font-size: 1.75rem;
+          }
+          .welcome-subtext {
+            font-size: 0.92rem;
+          }
+        }
+        @media (max-width: 480px) {
+          .welcome-badge-tag {
+            font-size: 0.62rem;
+          }
+          .welcome-title {
+            font-size: 1.35rem;
+          }
+          .modal-card {
+            padding: 1rem;
+            border-radius: var(--radius-md);
+          }
+          .modal-footer {
+            flex-direction: column-reverse;
+            align-items: stretch;
+          }
+          .modal-footer .btn {
+            width: 100%;
+          }
         }
       `}</style>
     </div>

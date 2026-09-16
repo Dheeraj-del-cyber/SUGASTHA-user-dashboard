@@ -32,6 +32,10 @@ body {
   overflow-x: hidden;
 }
 
+#root {
+  min-height: 100vh;
+}
+
 /* Custom Scrollbar - Hidden for Horizontal Cards & Subtle Elsewhere */
 ::-webkit-scrollbar {
   width: 6px;
@@ -113,7 +117,8 @@ input:focus, textarea:focus, select:focus {
 .container {
   max-width: var(--max-content-width);
   margin: 0 auto;
-  padding: 0 1.25rem;
+  width: 100%;
+  padding: 0 1rem;
 }
 
 /* White Card Base with Large Corner Radius */
@@ -224,11 +229,18 @@ input:focus, textarea:focus, select:focus {
 /* Mobile Nav Padding */
 @media (max-width: 768px) {
   body {
-    padding-bottom: calc(var(--bottom-nav-height) + 1.5rem);
+    padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 1rem);
   }
   h1 { font-size: 1.6rem; }
   h2 { font-size: 1.35rem; }
   .container {
-    padding: 0 1rem;
+    padding: 0 0.875rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
   }
 }

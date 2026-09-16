@@ -167,7 +167,9 @@ export const Header: React.FC<HeaderProps> = ({
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
           border-bottom: 1px solid var(--border-light);
-          height: var(--header-height);
+          min-height: var(--header-height);
+          height: auto;
+          padding: 0.5rem 0;
           display: flex;
           align-items: center;
           box-shadow: 0 2px 12px rgba(23, 32, 42, 0.03);
@@ -177,6 +179,7 @@ export const Header: React.FC<HeaderProps> = ({
           align-items: center;
           justify-content: space-between;
           width: 100%;
+          gap: 0.75rem;
         }
         .brand-group {
           display: flex;
@@ -229,6 +232,7 @@ export const Header: React.FC<HeaderProps> = ({
           display: flex;
           align-items: center;
           gap: 0.65rem;
+          flex-shrink: 0;
         }
         .sos-chip {
           display: flex;
@@ -435,6 +439,16 @@ export const Header: React.FC<HeaderProps> = ({
           background: #FEE2E2;
         }
         @media (max-width: 768px) {
+          .brand-group {
+            min-width: 0;
+          }
+          .brand-icon-wrapper {
+            width: 36px;
+            height: 36px;
+          }
+          .brand-name {
+            font-size: 1.05rem;
+          }
           .brand-tagline, .brand-badge-gov {
             display: none;
           }
@@ -444,6 +458,28 @@ export const Header: React.FC<HeaderProps> = ({
           .sos-chip {
             padding: 0.3rem 0.5rem;
             font-size: 0.7rem;
+          }
+          .sos-chip span {
+            display: none;
+          }
+          .user-profile-chip {
+            padding: 3px;
+            background: transparent;
+            border: 0;
+          }
+          .profile-text-group,
+          .logout-btn {
+            display: none;
+          }
+          .notification-wrapper {
+            order: -1;
+          }
+          .notifications-popover {
+            position: fixed;
+            top: calc(var(--header-height) + 0.5rem);
+            left: 0.875rem;
+            right: 0.875rem;
+            width: auto;
           }
         }
       `}</style>

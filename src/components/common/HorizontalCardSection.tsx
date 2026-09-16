@@ -140,11 +140,13 @@ export const HorizontalCardSection: React.FC<HorizontalCardSectionProps> = ({
           justify-content: space-between;
           padding: 0 0.25rem;
           gap: 0.75rem;
+          min-width: 0;
         }
         .section-title-group {
           display: flex;
           align-items: center;
           gap: 0.75rem;
+          min-width: 0;
         }
         .section-icon-badge {
           width: 38px;
@@ -160,6 +162,7 @@ export const HorizontalCardSection: React.FC<HorizontalCardSectionProps> = ({
           display: flex;
           align-items: center;
           gap: 0.5rem;
+          flex-wrap: wrap;
         }
         .section-main-title {
           font-size: 1.25rem;
@@ -177,6 +180,7 @@ export const HorizontalCardSection: React.FC<HorizontalCardSectionProps> = ({
         .section-sub-title {
           font-size: 0.82rem;
           color: var(--text-muted);
+          line-height: 1.35;
         }
         .section-header-controls {
           display: flex;
@@ -228,7 +232,7 @@ export const HorizontalCardSection: React.FC<HorizontalCardSectionProps> = ({
           scroll-behavior: smooth;
           scroll-snap-type: x mandatory;
           -webkit-overflow-scrolling: touch;
-          padding: 4px 4px 12px 4px;
+          padding: 4px 0.25rem 12px 0.25rem;
         }
         .horizontal-scroll-item {
           scroll-snap-align: start;
@@ -241,6 +245,30 @@ export const HorizontalCardSection: React.FC<HorizontalCardSectionProps> = ({
           }
           .section-main-title {
             font-size: 1.1rem;
+          }
+          .horizontal-section-wrapper {
+            gap: 0.7rem;
+            margin-bottom: 0.75rem;
+          }
+          .section-header-row {
+            align-items: flex-start;
+          }
+          .section-title-group {
+            gap: 0.55rem;
+          }
+          .section-icon-badge {
+            width: 34px;
+            height: 34px;
+          }
+          .section-sub-title {
+            font-size: 0.75rem;
+          }
+          .horizontal-scroll-track {
+            gap: 0.75rem;
+            overscroll-behavior-inline: contain;
+          }
+          .horizontal-scroll-item {
+            max-width: calc(100vw - 2.25rem);
           }
         }
       `}</style>

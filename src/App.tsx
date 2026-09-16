@@ -525,11 +525,11 @@ export const App: React.FC = () => {
         }
         .main-content-wrapper {
           flex: 1;
-          padding-top: 1.25rem;
-          padding-bottom: 3rem;
+          padding-top: 0.875rem;
+          padding-bottom: 2rem;
           display: flex;
           flex-direction: column;
-          gap: 1.25rem;
+          gap: 1rem;
         }
         .view-switcher-bar {
           display: flex;
@@ -560,6 +560,13 @@ export const App: React.FC = () => {
           display: flex;
           flex-direction: column;
           gap: 1.5rem;
+        }
+        @media (min-width: 769px) {
+          .main-content-wrapper {
+            padding-top: 1.25rem;
+            padding-bottom: 3rem;
+            gap: 1.25rem;
+          }
         }
         @media (max-width: 768px) {
           .view-switcher-bar {
