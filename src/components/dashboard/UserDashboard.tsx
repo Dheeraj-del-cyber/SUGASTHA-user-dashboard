@@ -1,22 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Stethoscope,
-  Calendar,
-  Users,
-  Building2,
-  Video,
-  Sparkles,
-  FileText,
-  Pill,
-  HeartPulse,
-  Brain,
-  Bone,
-  Eye,
-  Smile,
-  Baby,
-  Activity,
-  X,
-} from 'lucide-react';
+import { Video, Building2, Sparkles, Check } from 'lucide-react';
 import {
   AbhaProfile,
   HealthRecord,
@@ -26,22 +9,6 @@ import {
   Hospital,
   Doctor,
 } from '../../types';
-
-import { MOCK_HOSPITALS } from '../../data/mockHospitals';
-import {
-  MOCK_UPCOMING_APPOINTMENTS,
-  MOCK_TELECONSULT_OPTIONS,
-  MOCK_RECOMMENDED_DOCTORS,
-} from '../../data/mockDashboardData';
-
-import { HorizontalCardSection } from '../common/HorizontalCardSection';
-import { QuickActionCard } from './QuickActionCard';
-import { AppointmentCard, AppointmentData } from './AppointmentCard';
-import { DoctorCard } from './DoctorCard';
-import { SpecialityCard, SpecialityItem } from './SpecialityCard';
-import { FacilityCard } from './FacilityCard';
-import { ConsultOnlineCard, TeleconsultOption } from './ConsultOnlineCard';
-import { AISymptomCard } from './AISymptomCard';
 import { ActiveConsultationCard } from '../consultation/ActiveConsultationCard';
 
 interface UserDashboardProps {
@@ -55,144 +22,43 @@ interface UserDashboardProps {
   onOpenRecords: () => void;
   onOpenHistory?: () => void;
   onSelectHospitalAndDoctor?: (hosp: Hospital, doc: Doctor) => void;
+  onSelectOption?: (symptomText: string, route: 'TELECONSULTATION' | 'HOSPITAL_VISIT') => void;
 }
 
+const COMMON_SYMPTOMS = ['Fever', 'Cough', 'Headache'];
+
 export const UserDashboard: React.FC<UserDashboardProps> = ({
-  profile,
-  records = [],
   activeConsultation,
-  onStartNewConsultation,
   onOpenTracker,
-  onOpenRecords,
-  onSelectHospitalAndDoctor,
+  onStartNewConsultation,
+  onSelectOption,
 }) => {
-  // Local state for appointments list (to support reschedule/cancel interactive actions)
-  const [appointments, setAppointments] = useState<AppointmentData[]>(MOCK_UPCOMING_APPOINTMENTS);
-  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentData | null>(null);
-  const [appointmentModalMode, setAppointmentModalMode] = useState<'VIEW' | 'RESCHEDULE' | 'CANCEL' | null>(null);
-  const [rescheduleDate, setRescheduleDate] = useState('');
-  const [rescheduleTime, setRescheduleTime] = useState('');
+  const [symptomInput, setSymptomInput] = useState('');
+  const [isGenerated, setIsGenerated] = useState(false);
 
-  // Specialities data
-  const specialities: SpecialityItem[] = [
-    {
-      id: 'gen-med',
-      name: 'General Medicine',
-      icon: <Stethoscope size={22} />,
-      doctorCount: 42,
-      description: 'Fever, cough, general infections, health checkups',
-    },
-    {
-      id: 'cardio',
-      name: 'Cardiology',
-      icon: <HeartPulse size={22} />,
-      doctorCount: 18,
-      description: 'Chest pain, high blood pressure, heart diseases',
-    },
-    {
-      id: 'neuro',
-      name: 'Neurology',
-      icon: <Brain size={22} />,
-      doctorCount: 12,
-      description: 'Headache, dizziness, stroke, nerve care',
-    },
-    {
-      id: 'ortho',
-      name: 'Orthopedics',
-      icon: <Bone size={22} />,
-      doctorCount: 24,
-      description: 'Joint pain, fractures, bone health, spine',
-    },
-    {
-      id: 'gynae',
-      name: 'Gynecology',
-      icon: <Activity size={22} />,
-      doctorCount: 29,
-      description: 'Women health, pregnancy, hormonal care',
-    },
-    {
-      id: 'ophthal',
-      name: 'Ophthalmology',
-      icon: <Eye size={22} />,
-      doctorCount: 15,
-      description: 'Eye checkup, vision, cataract, glaucoma',
-    },
-    {
-      id: 'dentistry',
-      name: 'Dentistry',
-      icon: <Smile size={22} />,
-      doctorCount: 31,
-      description: 'Toothache, dental surgery, cleaning, braces',
-    },
-    {
-      id: 'peds',
-      name: 'Pediatrics',
-      icon: <Baby size={22} />,
-      doctorCount: 27,
-      description: 'Child healthcare, vaccinations, growth',
-    },
-  ];
-
-  // Appointment Action Handlers
-  const handleViewAppointment = (app: AppointmentData) => {
-    setSelectedAppointment(app);
-    setAppointmentModalMode('VIEW');
-  };
-
-  const handleOpenReschedule = (app: AppointmentData) => {
-    setSelectedAppointment(app);
-    setRescheduleDate(app.date);
-    setRescheduleTime(app.time);
-    setAppointmentModalMode('RESCHEDULE');
-  };
-
-  const handleOpenCancel = (app: AppointmentData) => {
-    setSelectedAppointment(app);
-    setAppointmentModalMode('CANCEL');
-  };
-
-  const handleConfirmReschedule = () => {
-    if (!selectedAppointment) return;
-    setAppointments((prev) =>
-      prev.map((a) =>
-        a.id === selectedAppointment.id
-          ? { ...a, date: rescheduleDate || a.date, time: rescheduleTime || a.time }
-          : a
-      )
-    );
-    setAppointmentModalMode(null);
-    setSelectedAppointment(null);
-  };
-
-  const handleConfirmCancel = () => {
-    if (!selectedAppointment) return;
-    setAppointments((prev) =>
-      prev.map((a) => (a.id === selectedAppointment.id ? { ...a, status: 'CANCELLED' } : a))
-    );
-    setAppointmentModalMode(null);
-    setSelectedAppointment(null);
-  };
-
-  const handleJoinVideoCall = (app: AppointmentData) => {
-    if (app.meetUrl) {
-      window.open(app.meetUrl, '_blank');
+  const handleAddSymptom = (symptom: string) => {
+    if (!symptomInput.trim()) {
+      setSymptomInput(symptom);
     } else {
-      alert(`Joining video consultation with ${app.doctorName}...`);
+      const currentList = symptomInput.split(',').map((s) => s.trim());
+      if (currentList.includes(symptom)) {
+        const updated = currentList.filter((s) => s !== symptom).join(', ');
+        setSymptomInput(updated);
+      } else {
+        setSymptomInput(`${symptomInput.trim()}, ${symptom}`);
+      }
     }
   };
 
-  const handleSpecialityClick = (_spec: SpecialityItem) => {
-    onStartNewConsultation();
+  const handleGenerate = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setIsGenerated(true);
   };
 
-  const handleTeleconsultSelect = (_opt: TeleconsultOption) => {
-    onStartNewConsultation();
-  };
-
-  const handleBookDoctorClick = (doc: Doctor) => {
-    const parentHosp = MOCK_HOSPITALS.find((h) => h.doctors.some((d) => d.id === doc.id)) || MOCK_HOSPITALS[0];
-    if (onSelectHospitalAndDoctor) {
-      onSelectHospitalAndDoctor(parentHosp, doc);
+  const handleOptionClick = (route: 'TELECONSULTATION' | 'HOSPITAL_VISIT') => {
+    const textToUse = symptomInput.trim() || 'General Consultation';
+    if (onSelectOption) {
+      onSelectOption(textToUse, route);
     } else {
       onStartNewConsultation();
     }
@@ -200,7 +66,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 
   return (
     <div className="home-dashboard-layout animate-fade-in">
-      {/* 0. ACTIVE CONSULTATION HERO BAR (If present) */}
+      {/* Active Consultation Hero Bar if present */}
       {activeConsultation && (
         <div className="active-visit-hero-banner">
           <ActiveConsultationCard
@@ -210,464 +76,275 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         </div>
       )}
 
-      {/* WELCOME BANNER */}
-      <div className="welcome-banner-card">
-        <div className="welcome-badge-tag">
-          <Sparkles size={14} className="sparkle-gold" />
-          <span>NAMASTE • ABDM VERIFIED HEALTH SERVICE</span>
-        </div>
-        <h1 className="welcome-title">Welcome back, {profile.fullName.split(' ')[0]}!</h1>
-        <p className="welcome-subtext">
-          How can SUGASTHA support your health today? Access doctor bookings, teleconsultation, health records & emergency services.
-        </p>
-      </div>
+      {/* Main Minimal Home Card */}
+      <div className="card symptom-home-card">
+        {/* Heading */}
+        <h2 className="symptom-heading">Enter your current symptoms</h2>
 
-      {/* 1. QUICK ACTIONS (Horizontal Scroll) */}
-      <HorizontalCardSection
-        title="Quick Actions"
-        subtitle="Access key healthcare services instantly"
-        icon={<Sparkles size={20} />}
-        pastelBg="var(--pastel-light-blue)"
-        itemMinWidth="150px"
-      >
-        <QuickActionCard
-          title="Book Doctor"
-          icon={<Users size={22} />}
-          bgPastel="var(--pastel-sky-blue)"
-          onClick={onStartNewConsultation}
-        />
-        <QuickActionCard
-          title="Teleconsult"
-          icon={<Video size={22} />}
-          bgPastel="var(--pastel-light-blue)"
-          onClick={onStartNewConsultation}
-        />
-        <QuickActionCard
-          title="Find Hospital"
-          icon={<Building2 size={22} />}
-          bgPastel="var(--pastel-cream-yellow)"
-          onClick={onStartNewConsultation}
-        />
-        <QuickActionCard
-          title="Health Records"
-          icon={<FileText size={22} />}
-          bgPastel="var(--pastel-sky-blue)"
-          badge={records.length > 0 ? `${records.length}` : undefined}
-          onClick={onOpenRecords}
-        />
-        <QuickActionCard
-          title="Medicines"
-          icon={<Pill size={22} />}
-          bgPastel="var(--pastel-cream-yellow)"
-          onClick={onOpenRecords}
-        />
-      </HorizontalCardSection>
-
-      {/* 2. UPCOMING APPOINTMENTS (Horizontal Scroll) */}
-      <HorizontalCardSection
-        title="Upcoming Appointments"
-        subtitle="Your scheduled consultations and hospital visits"
-        icon={<Calendar size={20} />}
-        badgeText={`${appointments.filter((a) => a.status !== 'CANCELLED').length} Active`}
-        pastelBg="var(--pastel-soft-pink)"
-        itemMinWidth="300px"
-      >
-        {appointments.map((app) => (
-          <AppointmentCard
-            key={app.id}
-            appointment={app}
-            onView={handleViewAppointment}
-            onReschedule={handleOpenReschedule}
-            onCancel={handleOpenCancel}
-            onJoinVideo={handleJoinVideoCall}
+        {/* Input Form */}
+        <form onSubmit={handleGenerate} className="symptom-input-group">
+          <input
+            type="text"
+            className="form-input symptom-input-field"
+            placeholder="Type your symptoms here (e.g. Fever, Cough)"
+            value={symptomInput}
+            onChange={(e) => setSymptomInput(e.target.value)}
           />
-        ))}
-      </HorizontalCardSection>
 
-      {/* 3. RECOMMENDED DOCTORS (Horizontal Scroll) */}
-      <HorizontalCardSection
-        title="Recommended Doctors"
-        subtitle="Top-rated specialists available for immediate booking"
-        icon={<Users size={20} />}
-        pastelBg="var(--pastel-sky-blue)"
-        itemMinWidth="280px"
-      >
-        {MOCK_RECOMMENDED_DOCTORS.map((doc) => (
-          <DoctorCard
-            key={doc.id}
-            doctor={doc}
-            hospitalName="AIIMS / Safdarjung Network"
-            onBook={handleBookDoctorClick}
-          />
-        ))}
-      </HorizontalCardSection>
+          {/* Common Suggestions */}
+          <div className="symptom-suggestions-row">
+            {COMMON_SYMPTOMS.map((sym) => {
+              const isSelected = symptomInput
+                .split(',')
+                .map((s) => s.trim().toLowerCase())
+                .includes(sym.toLowerCase());
+              return (
+                <button
+                  type="button"
+                  key={sym}
+                  onClick={() => handleAddSymptom(sym)}
+                  className={`symptom-suggestion-chip ${isSelected ? 'selected' : ''}`}
+                >
+                  {isSelected && <Check size={14} className="chip-icon" />}
+                  <span>{sym}</span>
+                </button>
+              );
+            })}
+          </div>
 
-      {/* 4. FIND BY SPECIALITY (Horizontal Scroll) */}
-      <HorizontalCardSection
-        title="Find by Speciality"
-        subtitle="Select a medical discipline to view specialists"
-        icon={<Stethoscope size={20} />}
-        pastelBg="var(--pastel-cream-yellow)"
-        itemMinWidth="260px"
-      >
-        {specialities.map((spec) => (
-          <SpecialityCard
-            key={spec.id}
-            speciality={spec}
-            onClick={handleSpecialityClick}
-          />
-        ))}
-      </HorizontalCardSection>
+          {/* Generate Button */}
+          <button type="submit" className="btn btn-primary btn-lg generate-btn">
+            <Sparkles size={18} />
+            <span>Generate</span>
+          </button>
+        </form>
 
-      {/* 5. NEARBY HEALTHCARE FACILITIES (Horizontal Scroll) */}
-      <HorizontalCardSection
-        title="Nearby Healthcare Facilities"
-        subtitle="Government tertiary, district hospitals & accredited centers"
-        icon={<Building2 size={20} />}
-        pastelBg="var(--pastel-light-blue)"
-        itemMinWidth="310px"
-      >
-        {MOCK_HOSPITALS.map((hosp) => (
-          <FacilityCard
-            key={hosp.id}
-            hospital={hosp}
-            onViewDetails={(h) => {
-              if (h.doctors.length > 0) handleBookDoctorClick(h.doctors[0]);
-              else onStartNewConsultation();
-            }}
-          />
-        ))}
-      </HorizontalCardSection>
-
-      {/* 6. CONSULT ONLINE (Horizontal Scroll) */}
-      <HorizontalCardSection
-        title="Consult Online"
-        subtitle="Instant teleconsultations with certified practitioners"
-        icon={<Video size={20} />}
-        pastelBg="var(--pastel-sky-blue)"
-        itemMinWidth="260px"
-      >
-        {MOCK_TELECONSULT_OPTIONS.map((opt) => (
-          <ConsultOnlineCard
-            key={opt.id}
-            option={opt}
-            onSelect={handleTeleconsultSelect}
-          />
-        ))}
-      </HorizontalCardSection>
-
-      {/* 7. AI SYMPTOM ASSISTANT */}
-      <div className="section-block">
-        <AISymptomCard onCheckSymptoms={onStartNewConsultation} />
-      </div>
-
-      {/* APPOINTMENT MODAL (View / Reschedule / Cancel) */}
-      {selectedAppointment && appointmentModalMode && (
-        <div className="modal-backdrop">
-          <div className="modal-card animate-fade-in">
-            <div className="modal-header">
-              <h3 className="modal-title">
-                {appointmentModalMode === 'VIEW' && 'Appointment Details'}
-                {appointmentModalMode === 'RESCHEDULE' && 'Reschedule Appointment'}
-                {appointmentModalMode === 'CANCEL' && 'Cancel Appointment'}
-              </h3>
-              <button
-                onClick={() => {
-                  setAppointmentModalMode(null);
-                  setSelectedAppointment(null);
-                }}
-                className="modal-close-btn"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="modal-body">
-              <div className="app-detail-box">
-                <h4 className="doc-name">{selectedAppointment.doctorName}</h4>
-                <p className="doc-spec">{selectedAppointment.speciality}</p>
-                <p className="fac-name">{selectedAppointment.facilityName}</p>
-                <div className="detail-row">
-                  <span>Date & Time:</span>
-                  <strong>{selectedAppointment.date} at {selectedAppointment.time}</strong>
-                </div>
-                {selectedAppointment.tokenNumber && (
-                  <div className="detail-row">
-                    <span>Visit PIN:</span>
-                    <strong className="pin-highlight">#{selectedAppointment.tokenNumber}</strong>
-                  </div>
-                )}
+        {/* Two Options Below - Revealed after Generate */}
+        {isGenerated && (
+          <div className="options-container animate-fade-in">
+            <div
+              className="option-card option-esanjeevani card-interactive"
+              onClick={() => handleOptionClick('TELECONSULTATION')}
+            >
+              <div className="option-icon-wrapper esanjeevani-icon">
+                <Video size={32} />
               </div>
-
-              {appointmentModalMode === 'RESCHEDULE' && (
-                <div className="reschedule-inputs">
-                  <label>Select New Date</label>
-                  <input
-                    type="text"
-                    value={rescheduleDate}
-                    onChange={(e) => setRescheduleDate(e.target.value)}
-                    placeholder="e.g. 20 Sep 2026"
-                  />
-                  <label>Select Preferred Time</label>
-                  <input
-                    type="text"
-                    value={rescheduleTime}
-                    onChange={(e) => setRescheduleTime(e.target.value)}
-                    placeholder="e.g. 03:00 PM"
-                  />
-                </div>
-              )}
-
-              {appointmentModalMode === 'CANCEL' && (
-                <p className="cancel-warning-text">
-                  Are you sure you want to cancel this appointment with {selectedAppointment.doctorName}? This slot will be released back to the hospital queue.
-                </p>
-              )}
+              <div className="option-content">
+                <h3 className="option-title">eSanjeevani</h3>
+                <p className="option-description">For remote/online consultation</p>
+              </div>
             </div>
 
-            <div className="modal-footer">
-              <button
-                onClick={() => {
-                  setAppointmentModalMode(null);
-                  setSelectedAppointment(null);
-                }}
-                className="btn btn-secondary btn-sm"
-              >
-                Close
-              </button>
-
-              {appointmentModalMode === 'RESCHEDULE' && (
-                <button
-                  onClick={handleConfirmReschedule}
-                  className="btn btn-primary btn-sm"
-                >
-                  Confirm Reschedule
-                </button>
-              )}
-
-              {appointmentModalMode === 'CANCEL' && (
-                <button
-                  onClick={handleConfirmCancel}
-                  className="btn btn-danger btn-sm"
-                >
-                  Confirm Cancel
-                </button>
-              )}
+            <div
+              className="option-card option-hospital card-interactive"
+              onClick={() => handleOptionClick('HOSPITAL_VISIT')}
+            >
+              <div className="option-icon-wrapper hospital-icon">
+                <Building2 size={32} />
+              </div>
+              <div className="option-content">
+                <h3 className="option-title">Hospital Dashboard</h3>
+                <p className="option-description">For in-person hospital/doctor access</p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <style>{`
         .home-dashboard-layout {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
-          padding-bottom: 1rem;
+          gap: 1.25rem;
           width: 100%;
+          max-width: 720px;
+          margin: 0 auto;
+          padding-top: 1rem;
         }
+
         .active-visit-hero-banner {
           width: 100%;
         }
-        .welcome-banner-card {
-          background: linear-gradient(135deg, #DDF4FF 0%, #BFE9F8 50%, #FFFFFF 100%);
-          border: 1px solid #93C5FD;
-          border-radius: var(--radius-lg);
-          padding: 1.15rem 1rem;
-          box-shadow: var(--shadow-sm);
+
+        .symptom-home-card {
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
-        }
-        .welcome-badge-tag {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 0.7rem;
-          font-weight: 800;
-          color: var(--brand-primary);
+          gap: 1.5rem;
+          padding: 2rem;
           background: var(--white);
-          padding: 4px 10px;
-          border-radius: var(--radius-full);
-          width: fit-content;
-          border: 1px solid #BFDBFE;
-        }
-        .sparkle-gold {
-          color: #D97706;
-        }
-        .welcome-title {
-          font-size: 1.45rem;
-          font-weight: 800;
-          color: var(--dark-navy-text);
-          line-height: 1.2;
-        }
-        .welcome-subtext {
-          font-size: 0.85rem;
-          color: var(--text-secondary);
-          max-width: 720px;
-        }
-        .section-block {
-          width: 100%;
-          margin-bottom: 1rem;
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-md);
         }
 
-        /* Modal Styles */
-        .modal-backdrop {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(23, 32, 42, 0.4);
-          backdrop-filter: blur(4px);
-          z-index: 200;
+        .symptom-heading {
+          font-size: 1.6rem;
+          font-weight: 800;
+          color: var(--dark-navy-text);
+          text-align: center;
+        }
+
+        .symptom-input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+        }
+
+        .symptom-input-field {
+          width: 100%;
+          padding: 1rem 1.25rem;
+          font-size: 1.05rem;
+          border-radius: var(--radius-md);
+          border: 1.5px solid var(--border-light);
+          background: var(--bg-surface-2);
+          transition: all var(--transition-fast);
+        }
+
+        .symptom-input-field:focus {
+          background: var(--white);
+          border-color: var(--border-focus);
+          box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+        }
+
+        .symptom-suggestions-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.6rem;
+          align-items: center;
+        }
+
+        .symptom-suggestion-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.5rem 1rem;
+          border-radius: var(--radius-full);
+          font-size: 0.9rem;
+          font-weight: 600;
+          background: var(--pastel-light-blue);
+          color: var(--brand-primary);
+          border: 1px solid var(--pastel-sky-blue);
+          transition: all var(--transition-fast);
+          cursor: pointer;
+        }
+
+        .symptom-suggestion-chip:hover {
+          background: var(--pastel-sky-blue);
+          transform: translateY(-1px);
+        }
+
+        .symptom-suggestion-chip.selected {
+          background: var(--brand-primary);
+          color: var(--white);
+          border-color: var(--brand-primary);
+        }
+
+        .chip-icon {
+          color: var(--white);
+        }
+
+        .generate-btn {
+          width: 100%;
+          padding: 0.9rem;
+          font-size: 1.05rem;
+          font-weight: 700;
+          margin-top: 0.5rem;
+        }
+
+        .options-container {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1.25rem;
+          margin-top: 0.5rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid var(--border-light);
+        }
+
+        .option-card {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 1.75rem 1.25rem;
+          border-radius: var(--radius-lg);
+          border: 1.5px solid var(--border-light);
+          background: var(--bg-surface-2);
+          cursor: pointer;
+          transition: all var(--transition-normal);
+          gap: 1rem;
+        }
+
+        .option-card:hover {
+          border-color: var(--brand-primary);
+          background: var(--white);
+          transform: translateY(-3px);
+          box-shadow: var(--shadow-md);
+        }
+
+        .option-icon-wrapper {
+          width: 64px;
+          height: 64px;
+          border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 1rem;
+          flex-shrink: 0;
         }
-        .modal-card {
-          background: var(--white);
-          border-radius: var(--radius-lg);
-          border: 1px solid var(--border-light);
-          box-shadow: var(--shadow-lg);
-          width: 100%;
-          max-width: 480px;
-          padding: 1.5rem;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-        .modal-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-bottom: 1px solid var(--border-light);
-          padding-bottom: 0.75rem;
-        }
-        .modal-title {
-          font-size: 1.15rem;
-          font-weight: 700;
-          color: var(--dark-navy-text);
-        }
-        .modal-close-btn {
-          color: var(--text-muted);
-          padding: 4px;
-          border-radius: 50%;
-        }
-        .modal-close-btn:hover {
-          background: var(--bg-app);
-          color: var(--dark-navy-text);
-        }
-        .modal-body {
-          display: flex;
-          flex-direction: column;
-          gap: 0.85rem;
-        }
-        .app-detail-box {
+
+        .esanjeevani-icon {
           background: var(--pastel-light-blue);
-          padding: 1rem;
-          border-radius: var(--radius-md);
+          color: var(--brand-primary);
+          border: 1px solid var(--pastel-sky-blue);
+        }
+
+        .hospital-icon {
+          background: var(--pastel-cream-yellow);
+          color: var(--abdm-orange);
+          border: 1px solid #FDE68A;
+        }
+
+        .option-content {
           display: flex;
           flex-direction: column;
           gap: 0.35rem;
         }
-        .doc-name {
-          font-size: 1.05rem;
+
+        .option-title {
+          font-size: 1.25rem;
           font-weight: 700;
           color: var(--dark-navy-text);
         }
-        .doc-spec {
-          font-size: 0.82rem;
-          font-weight: 600;
-          color: var(--brand-primary);
-        }
-        .fac-name {
-          font-size: 0.78rem;
-          color: var(--text-muted);
-        }
-        .detail-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          font-size: 0.82rem;
-          margin-top: 0.35rem;
-        }
-        .pin-highlight {
-          color: var(--brand-primary);
-          font-family: var(--font-display);
-        }
-        .reschedule-inputs {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          font-size: 0.85rem;
-        }
-        .reschedule-inputs label {
-          font-weight: 600;
-          color: var(--dark-navy-text);
-        }
-        .cancel-warning-text {
+
+        .option-description {
           font-size: 0.88rem;
-          color: #DC2626;
-          background: var(--pastel-soft-pink);
-          padding: 0.75rem;
-          border-radius: var(--radius-sm);
+          color: var(--text-secondary);
+          line-height: 1.3;
         }
-        .modal-footer {
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          gap: 0.5rem;
-          border-top: 1px solid var(--border-light);
-          padding-top: 0.75rem;
-        }
-        @media (min-width: 769px) {
-          .home-dashboard-layout {
-            gap: 1.5rem;
-            padding-bottom: 2rem;
+
+        @media (max-width: 640px) {
+          .symptom-home-card {
+            padding: 1.25rem;
+            gap: 1.25rem;
           }
-          .welcome-banner-card {
-            padding: 1.5rem 1.75rem;
-          }
-          .welcome-title {
-            font-size: 1.75rem;
-          }
-          .welcome-subtext {
-            font-size: 0.92rem;
-          }
-        }
-        @media (min-width: 1100px) {
-          .home-dashboard-layout {
-            gap: 1.75rem;
-          }
-          .welcome-banner-card {
-            padding: 1.75rem 2rem;
-          }
-          .welcome-title {
-            font-size: 1.95rem;
-          }
-          .welcome-subtext {
-            max-width: 780px;
-          }
-        }
-        @media (max-width: 480px) {
-          .welcome-badge-tag {
-            font-size: 0.62rem;
-          }
-          .welcome-title {
+
+          .symptom-heading {
             font-size: 1.35rem;
           }
-          .modal-card {
-            padding: 1rem;
-            border-radius: var(--radius-md);
+
+          .options-container {
+            grid-template-columns: 1fr;
+            gap: 1rem;
           }
-          .modal-footer {
-            flex-direction: column-reverse;
-            align-items: stretch;
+
+          .option-card {
+            flex-direction: row;
+            text-align: left;
+            padding: 1.25rem;
+            align-items: center;
           }
-          .modal-footer .btn {
-            width: 100%;
+
+          .option-icon-wrapper {
+            width: 52px;
+            height: 52px;
           }
         }
       `}</style>

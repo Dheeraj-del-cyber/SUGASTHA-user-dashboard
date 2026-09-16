@@ -148,6 +148,29 @@ export const App: React.FC = () => {
     }, 900);
   };
 
+  // Option selected from Home Dashboard (eSanjeevani or Hospital Dashboard)
+  const handleHomeOptionSelect = (symptomText: string, route: 'TELECONSULTATION' | 'HOSPITAL_VISIT') => {
+    const inputList = symptomText
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+
+    const symptoms: SymptomInput = {
+      primarySymptoms: inputList.length > 0 ? inputList : ['General Health Checkup'],
+      durationDays: 1,
+      painScale: 2,
+      bodyRegion: 'General',
+      additionalNotes: 'Entered via Home Page',
+      hasRedFlags: {},
+    };
+
+    setCurrentSymptoms(symptoms);
+    const result = triageEngine.evaluateTriage(symptoms, conditions, records, allergies);
+    result.recommendedRoute = route;
+    setTriageResult(result);
+    setActiveSubView('RECOMMENDATION');
+  };
+
   // Proceed from Triage Result to Recommendation
   const handleProceedToRecommendation = () => {
     setActiveSubView('RECOMMENDATION');
@@ -390,6 +413,7 @@ export const App: React.FC = () => {
               setActiveSubView('HISTORY');
             }}
             onSelectHospitalAndDoctor={handleSelectHospitalAndDoctor}
+            onSelectOption={handleHomeOptionSelect}
           />
         )}
 
