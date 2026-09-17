@@ -359,53 +359,15 @@ export const App: React.FC = () => {
           setActiveTab('dashboard');
           setActiveSubView('DASHBOARD');
         }}
+        activeTab={activeTab}
+        activeSubView={activeSubView}
+        onSelectTab={handleNavSelect}
+        recordsCount={records.length}
+        historyCount={consultationHistory.length}
       />
 
       {/* Main Content Area */}
       <main className="container main-content-wrapper">
-        {/* Navigation Breadcrumb Bar (Desktop / Tablet) */}
-        <div className="view-switcher-bar">
-          <button
-            onClick={() => {
-              setActiveTab('dashboard');
-              setActiveSubView('DASHBOARD');
-            }}
-            className={`view-tab ${activeSubView === 'DASHBOARD' ? 'active' : ''}`}
-          >
-            Home
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('triage');
-              setActiveSubView('SYMPTOMS');
-            }}
-            className={`view-tab ${
-              activeSubView === 'SYMPTOMS' || activeSubView === 'TRIAGE_RESULT' || activeSubView === 'RECOMMENDATION'
-                ? 'active'
-                : ''
-            }`}
-          >
-            Check Symptoms (AI Triage)
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('records');
-              setActiveSubView('RECORDS');
-            }}
-            className={`view-tab ${activeSubView === 'RECORDS' ? 'active' : ''}`}
-          >
-            My Health Records ({records.length})
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('tracking');
-              setActiveSubView('HISTORY');
-            }}
-            className={`view-tab ${activeSubView === 'HISTORY' ? 'active' : ''}`}
-          >
-            Hospital Passes ({consultationHistory.length})
-          </button>
-        </div>
 
         {/* View 1: Home Dashboard */}
         {activeSubView === 'DASHBOARD' && profile && (
@@ -615,14 +577,6 @@ export const App: React.FC = () => {
           .main-content-wrapper {
             padding-top: 1.5rem;
             gap: 1.5rem;
-          }
-          .view-switcher-bar {
-            padding-bottom: 0.9rem;
-          }
-        }
-        @media (max-width: 768px) {
-          .view-switcher-bar {
-            display: none;
           }
         }
       `}</style>

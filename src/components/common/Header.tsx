@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ShieldCheck, User, LogOut, Bell, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, User, LogOut, Bell, CheckCircle2, Home, FileText, Ticket } from 'lucide-react';
 import { AbhaProfile, ConsultationRequest } from '../../types';
+import { ActiveTab } from './BottomNav';
 
 interface HeaderProps {
   profile: AbhaProfile | null;
@@ -10,6 +11,11 @@ interface HeaderProps {
   onViewActiveConsultation: () => void;
   onOpenProfile?: () => void;
   onGoHome?: () => void;
+  activeTab?: ActiveTab;
+  activeSubView?: 'DASHBOARD' | 'SYMPTOMS' | 'TRIAGE_RESULT' | 'RECOMMENDATION' | 'TRACKER' | 'RECORDS' | 'HISTORY';
+  onSelectTab?: (tab: ActiveTab) => void;
+  recordsCount?: number;
+  historyCount?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -20,6 +26,11 @@ export const Header: React.FC<HeaderProps> = ({
   onViewActiveConsultation,
   onOpenProfile,
   onGoHome,
+  activeTab,
+  activeSubView,
+  onSelectTab,
+  recordsCount,
+  historyCount,
 }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(2);
@@ -45,7 +56,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="swasthya-header">
       <div className="container header-container">
         {/* Brand Logo & Title */}
-        <div className="brand-group" onClick={onGoHome ?? (() => undefined)}>
+        <div className="brand-group" onClick={onGoHome ?? (() => onSelectTab?.('dashboard'))}>
           <div className="brand-icon-wrapper">
             <img src="/images/logo.png" alt="SUGASTHA logo" className="brand-logo-image" />
           </div>
@@ -55,6 +66,52 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Desktop Navigation Links (Visible on Desktop / Tablet >= 769px) */}
+        <nav className="desktop-nav-menu" aria-label="Main Navigation">
+          <button
+            onClick={() => onSelectTab?.('dashboard')}
+            className={`desktop-nav-item ${
+              activeTab === 'dashboard' || activeSubView === 'DASHBOARD' ? 'active' : ''
+            }`}
+          >
+            <Home size={17} className="desktop-nav-icon" />
+            <span>Home</span>
+          </button>
+
+          <button
+            onClick={() => onSelectTab?.('records')}
+            className={`desktop-nav-item ${
+              activeTab === 'records' || activeSubView === 'RECORDS' ? 'active' : ''
+            }`}
+          >
+            <FileText size={17} className="desktop-nav-icon" />
+            <span>Records</span>
+            {typeof recordsCount === 'number' && recordsCount > 0 && (
+              <span className="desktop-nav-count">{recordsCount}</span>
+            )}
+          </button>
+
+          <button
+            onClick={() => onSelectTab?.('tracking')}
+            className={`desktop-nav-item ${
+              activeTab === 'tracking' ||
+              activeTab === 'appointments' ||
+              activeSubView === 'TRACKER' ||
+              activeSubView === 'HISTORY'
+                ? 'active'
+                : ''
+            }`}
+          >
+            <Ticket size={17} className="desktop-nav-icon" />
+            <span>Hospital Passes</span>
+            {activeConsultation ? (
+              <span className="desktop-nav-active-dot" title="Active Visit Token Live" />
+            ) : typeof historyCount === 'number' && historyCount > 0 ? (
+              <span className="desktop-nav-count">{historyCount}</span>
+            ) : null}
+          </button>
+        </nav>
 
         {/* Action Controls & Patient Status */}
         <div className="header-actions">
@@ -417,6 +474,98 @@ export const Header: React.FC<HeaderProps> = ({
           color: #DC2626;
           background: #FEE2E2;
         }
+
+        /* Desktop Navigation Links Styling */
+        .desktop-nav-menu {
+          display: none;
+        }
+
+        @media (min-width: 769px) {
+          .desktop-nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(241, 245, 249, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 4px 6px;
+            border-radius: var(--radius-full);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
+          }
+          .desktop-nav-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.45rem 0.9rem;
+            border-radius: var(--radius-full);
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            position: relative;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            white-space: nowrap;
+          }
+          .desktop-nav-icon {
+            color: var(--text-muted);
+            transition: color 0.2s ease, transform 0.2s ease;
+          }
+          .desktop-nav-item:hover {
+            color: var(--brand-primary);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 6px rgba(2, 132, 199, 0.08);
+          }
+          .desktop-nav-item:hover .desktop-nav-icon {
+            color: var(--brand-primary);
+            transform: translateY(-1px);
+          }
+          .desktop-nav-item.active {
+            color: var(--brand-primary);
+            background: var(--white);
+            font-weight: 700;
+            box-shadow: 0 2px 10px rgba(2, 132, 199, 0.16), 0 0 0 1px var(--pastel-sky-blue);
+          }
+          .desktop-nav-item.active .desktop-nav-icon {
+            color: var(--brand-primary);
+            stroke-width: 2.3;
+          }
+          .desktop-nav-count {
+            font-size: 0.68rem;
+            font-weight: 700;
+            background: var(--pastel-sky-blue);
+            color: var(--brand-primary-hover);
+            padding: 1px 6px;
+            border-radius: var(--radius-full);
+            line-height: 1;
+          }
+          .desktop-nav-item.active .desktop-nav-count {
+            background: var(--brand-primary);
+            color: var(--white);
+          }
+          .nav-badge-pulse {
+            font-size: 0.62rem;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+            background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%);
+            color: var(--white);
+            padding: 2px 6px;
+            border-radius: var(--radius-full);
+            line-height: 1;
+            box-shadow: 0 2px 6px rgba(14, 165, 233, 0.3);
+          }
+          .desktop-nav-active-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10B981;
+            box-shadow: 0 0 8px #10B981;
+            animation: pulseGlow 1.5s infinite;
+          }
+        }
+
         @media (min-width: 769px) and (max-width: 1100px) {
           .brand-tagline,
           .brand-badge-gov,
@@ -428,6 +577,11 @@ export const Header: React.FC<HeaderProps> = ({
           }
           .user-profile-chip {
             padding: 3px 6px;
+          }
+          .desktop-nav-item {
+            padding: 0.4rem 0.7rem;
+            font-size: 0.8rem;
+            gap: 0.35rem;
           }
         }
         @media (min-width: 1200px) {
@@ -449,6 +603,14 @@ export const Header: React.FC<HeaderProps> = ({
           }
           .header-actions {
             gap: 0.75rem;
+          }
+          .desktop-nav-menu {
+            gap: 0.45rem;
+            padding: 5px 8px;
+          }
+          .desktop-nav-item {
+            padding: 0.5rem 1.15rem;
+            font-size: 0.88rem;
           }
         }
         @media (max-width: 768px) {
