@@ -91,9 +91,6 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
                 Connecting You to
                 <span>Better Healthcare</span>
               </h1>
-              <p>
-                Digital-first care designed to connect patients, doctors, facilities and health records into one trusted experience.
-              </p>
             </div>
 
             <div className="desktop-illustration" aria-hidden="true">
@@ -201,7 +198,6 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
               Connecting You to
               <span>Better Healthcare</span>
             </h1>
-            <p>Digital-first care connecting patients, doctors, facilities and records in one secure experience.</p>
           </div>
 
           <div className={`mobile-auth-card ${shakeError ? 'shake' : ''}`}>

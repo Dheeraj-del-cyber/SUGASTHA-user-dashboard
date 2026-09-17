@@ -85,7 +85,8 @@ export const Modal: React.FC<ModalProps> = ({
           justify-content: space-between;
           padding: 1.25rem 1.5rem;
           border-bottom: 1px solid var(--border-subtle);
-          background: rgba(22, 32, 54, 0.6);
+          background: var(--pastel-light-blue);
+          border-bottom-color: #17202A;
         }
         .modal-title {
           font-size: 1.25rem;
@@ -105,7 +106,7 @@ export const Modal: React.FC<ModalProps> = ({
         }
         .modal-close-btn:hover {
           color: var(--text-primary);
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.65);
         }
         .modal-body {
           padding: 1.5rem;

@@ -4,7 +4,6 @@ import {
   Car,
   Clock,
   UserCheck,
-  Star,
   CheckCircle,
   ArrowRight,
   ShieldCheck,
@@ -154,13 +153,9 @@ export const HospitalList: React.FC<HospitalListProps> = ({
                       >
                         <div className="doc-chip-top">
                           <strong className="doc-name">{doc.name}</strong>
-                          <span className="doc-rating">
-                            <Star size={11} className="text-amber fill-amber" /> {doc.rating}
-                          </span>
                         </div>
                         <span className="doc-spec text-teal">{doc.specialization}</span>
                         <div className="doc-slot-row">
-                          <span className="doc-exp">{doc.experienceYears} yrs exp</span>
                           <span className="doc-slot">Next: {doc.availableSlotToday}</span>
                         </div>
                       </div>
@@ -435,16 +430,6 @@ export const HospitalList: React.FC<HospitalListProps> = ({
         .doc-name {
           font-size: 0.85rem;
           color: var(--dark-navy-text);
-        }
-        .doc-rating {
-          font-size: 0.72rem;
-          font-weight: 600;
-          display: flex;
-          align-items: center;
-          gap: 2px;
-        }
-        .fill-amber {
-          fill: #f59e0b;
         }
         .doc-spec {
           font-size: 0.75rem;

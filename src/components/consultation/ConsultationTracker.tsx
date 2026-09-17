@@ -8,13 +8,11 @@ import {
   ArrowRight,
   Sparkles,
   RefreshCw,
-  QrCode,
   FileCheck,
 } from 'lucide-react';
 import { ConsultationRequest, HealthcareJourneySummary } from '../../types';
 import { consultationService } from '../../services/consultationService';
 import { QrCodeDisplay } from './QrCodeDisplay';
-import { Modal } from '../common/Modal';
 
 interface ConsultationTrackerProps {
   consultation: ConsultationRequest;
@@ -28,7 +26,6 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
   onConsultationUpdated,
   onJourneyCompleted,
 }) => {
-  const [showQrModal, setShowQrModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showDevTools, setShowDevTools] = useState(false);
 
@@ -98,7 +95,7 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
 
   return (
     <div className="tracker-wrapper animate-fade-in">
-      {/* Top Banner with PIN and QR trigger */}
+      {/* Visit details and hospital pass */}
       <div className="card tracker-top-card">
         <div className="tracker-id-row">
           <div className="id-col">
@@ -106,15 +103,25 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
             <h2 className="consult-id">{consultation.selectedHospital.name}</h2>
           </div>
 
-          <div className="token-highlight-chip">
-            <span className="token-chip-label">CHECK-IN PIN:</span>
-            <strong className="token-chip-num">#{consultation.consultationNumber}</strong>
-          </div>
+        </div>
 
-          <button onClick={() => setShowQrModal(true)} className="btn btn-secondary btn-sm">
-            <QrCode size={16} className="text-teal" />
-            <span>View Hospital Pass</span>
-          </button>
+        <div className="visit-details-row">
+          <div>
+            <span>Hospital</span>
+            <strong>{consultation.selectedHospital.name}</strong>
+          </div>
+          <div>
+            <span>Doctor</span>
+            <strong>{consultation.selectedDoctor.name}</strong>
+          </div>
+          <div>
+            <span>Time</span>
+            <strong>{consultation.appointmentSlot}</strong>
+          </div>
+        </div>
+
+        <div className="tracker-visit-grid">
+          <QrCodeDisplay consultation={consultation} size={180} />
         </div>
 
         {/* Status Callout Banner */}
@@ -298,17 +305,6 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
         )}
       </div>
 
-      {/* QR Code Pass Modal */}
-      <Modal
-        isOpen={showQrModal}
-        onClose={() => setShowQrModal(false)}
-        title="Your Hospital Pass"
-        subtitle="Show this at the hospital desk"
-        maxWidth="460px"
-      >
-        <QrCodeDisplay consultation={consultation} size={200} />
-      </Modal>
-
       <style>{`
         .tracker-wrapper {
           display: flex;
@@ -318,7 +314,8 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
         .tracker-top-card {
           display: flex;
           flex-direction: column;
-          gap: 1.25rem;
+          gap: 0.7rem;
+          align-items: stretch;
         }
         .tracker-id-row {
           display: flex;
@@ -326,6 +323,40 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
           justify-content: space-between;
           flex-wrap: wrap;
           gap: 1rem;
+        }
+        .tracker-visit-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          align-items: center;
+          gap: 1rem;
+        }
+        .visit-details-row {
+          display: grid;
+          grid-template-columns: 1.5fr 1fr 1fr;
+          gap: 0.5rem;
+          padding: 0.5rem 0.65rem;
+          background: var(--pastel-light-blue);
+          border: 1px solid #17202A;
+          border-radius: var(--radius-sm);
+        }
+        .visit-details-row div {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          min-width: 0;
+        }
+        .visit-details-row span {
+          color: var(--text-muted);
+          font-size: 0.65rem;
+          text-transform: uppercase;
+          font-weight: 700;
+        }
+        .visit-details-row strong {
+          color: #000000;
+          font-size: 0.72rem;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
         .id-col {
           display: flex;
@@ -340,32 +371,13 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
         }
         .consult-id {
           font-size: 1.35rem;
-          color: #ffffff;
-        }
-        .token-highlight-chip {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          background: rgba(14, 165, 233, 0.12);
-          border: 1px solid rgba(14, 165, 233, 0.35);
-          padding: 0.45rem 1rem;
-          border-radius: var(--radius-full);
-        }
-        .token-chip-label {
-          font-size: 0.72rem;
-          color: var(--text-muted);
-          font-weight: 700;
-        }
-        .token-chip-num {
-          font-family: var(--font-display);
-          font-size: 1.3rem;
-          color: var(--brand-accent);
+          color: var(--dark-navy-text);
         }
         .status-callout {
           display: flex;
           align-items: flex-start;
-          gap: 1rem;
-          padding: 1.1rem 1.25rem;
+          gap: 0.55rem;
+          padding: 0.65rem 0.75rem;
           border-radius: var(--radius-sm);
         }
         .callout-pending {
@@ -377,13 +389,46 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
           border: 1px solid rgba(16, 185, 129, 0.35);
         }
         .callout-text h4 {
-          font-size: 1.05rem;
-          color: #ffffff;
+          font-size: 0.85rem;
+          color: #000000;
         }
         .callout-text p {
-          font-size: 0.85rem;
-          color: var(--text-secondary);
-          margin-top: 2px;
+          font-size: 0.72rem;
+          color: #000000;
+          margin-top: 1px;
+        }
+        @media (max-width: 768px) {
+          .tracker-visit-grid {
+            grid-template-columns: 1fr;
+          }
+          .visit-details-row {
+            grid-template-columns: 1fr;
+            gap: 0.35rem;
+            padding: 0.45rem 0.55rem;
+          }
+          .visit-details-row div {
+            gap: 1px;
+          }
+          .visit-details-row span {
+            font-size: 0.58rem;
+          }
+          .visit-details-row strong {
+            font-size: 0.68rem;
+          }
+          .status-callout {
+            gap: 0.4rem;
+            padding: 0.55rem 0.6rem;
+          }
+          .status-callout svg {
+            width: 18px;
+            height: 18px;
+          }
+          .callout-text h4 {
+            font-size: 0.78rem;
+          }
+          .callout-text p {
+            font-size: 0.68rem;
+          }
         }
         .timeline-card {
           display: flex;
@@ -566,11 +611,11 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
         }
         @media (max-width: 768px) {
           .tracker-steps-line {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-          }
-          .step-connector {
-            display: none;
+            grid-template-columns: repeat(4, minmax(105px, 1fr));
+            gap: 0.35rem;
+            overflow-x: auto;
+            padding-bottom: 0.35rem;
+            scrollbar-width: thin;
           }
           .queue-node-box {
             grid-template-columns: 1fr;

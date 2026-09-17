@@ -252,7 +252,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 
         <div className="symptom-heading-group">
           <h2 className="symptom-heading">How are you feeling today?</h2>
-          <p className="symptom-description">Tell us what you are experiencing and we will help you find the right next step.</p>
         </div>
 
         <div className="health-context-strip">
@@ -370,17 +369,17 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           <div className="next-steps-list">
             <div className="next-step-item">
               <span className="step-number">01</span>
-              <div><strong>Share symptoms</strong><span>Use your own words</span></div>
+              <div><strong>Share symptoms</strong></div>
               <ArrowRight size={16} />
             </div>
             <div className="next-step-item">
               <span className="step-number">02</span>
-              <div><strong>Get guidance</strong><span>Review your care options</span></div>
+              <div><strong>Get guidance</strong></div>
               <ArrowRight size={16} />
             </div>
             <div className="next-step-item">
               <span className="step-number">03</span>
-              <div><strong>Choose what suits you</strong><span>Online or hospital care</span></div>
+              <div><strong>Choose what suits you</strong></div>
             </div>
           </div>
         </section>

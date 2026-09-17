@@ -347,10 +347,6 @@ export const App: React.FC = () => {
         activeConsultation={activeConsultation}
         onOpenLogin={handleLogout}
         onLogout={handleLogout}
-        onViewActiveConsultation={() => {
-          setActiveTab('tracking');
-          setActiveSubView('TRACKER');
-        }}
         onOpenProfile={() => {
           setActiveTab('records');
           setActiveSubView('RECORDS');

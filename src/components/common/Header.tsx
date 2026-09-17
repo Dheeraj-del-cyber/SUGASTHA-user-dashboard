@@ -8,7 +8,6 @@ interface HeaderProps {
   activeConsultation: ConsultationRequest | null;
   onOpenLogin: () => void;
   onLogout: () => void;
-  onViewActiveConsultation: () => void;
   onOpenProfile?: () => void;
   onGoHome?: () => void;
   activeTab?: ActiveTab;
@@ -23,7 +22,6 @@ export const Header: React.FC<HeaderProps> = ({
   activeConsultation,
   onOpenLogin,
   onLogout,
-  onViewActiveConsultation,
   onOpenProfile,
   onGoHome,
   activeTab,
@@ -115,20 +113,6 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Action Controls & Patient Status */}
         <div className="header-actions">
-          {/* Active Visit PIN Pill */}
-          {activeConsultation && (
-            <button
-              onClick={onViewActiveConsultation}
-              className={`active-token-chip ${
-                activeConsultation.status === 'CONFIRMED' ? 'token-confirmed' : 'token-pending'
-              }`}
-            >
-              <span className="status-ping"></span>
-              <span className="token-label">Visit PIN:</span>
-              <strong className="token-num">#{activeConsultation.consultationNumber}</strong>
-            </button>
-          )}
-
           {/* Notifications Dropdown */}
           <div className="notification-wrapper">
             <button

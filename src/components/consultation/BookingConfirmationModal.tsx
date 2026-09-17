@@ -29,7 +29,6 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
   hospital,
   doctor,
   triage,
-  profile,
   onConfirmBooking,
   isBooking,
 }) => {
@@ -45,32 +44,14 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
       isOpen={isOpen}
       onClose={onClose}
       title="Confirm Your Visit"
-      subtitle="Please check the details before booking"
-      maxWidth="580px"
+      subtitle="Check details"
+      maxWidth="540px"
     >
       <div className="booking-confirm-body">
-        {/* Patient Demographics Banner */}
-        <div className="patient-banner">
-          <div className="patient-info">
-            <span className="label">Your name:</span>
-            <strong>{profile.fullName}</strong>
-          </div>
-          <div className="patient-info">
-            <span className="label">ABHA number:</span>
-            <strong className="text-teal font-mono">{profile.abhaNumber}</strong>
-          </div>
-          <div className="patient-info">
-            <span className="label">Priority:</span>
-            <span className={`badge ${triage.level === 'RED' ? 'badge-red' : 'badge-yellow'}`}>
-              {triage.level === 'RED' ? 'Urgent' : 'Soon'}
-            </span>
-          </div>
-        </div>
-
         {/* Selected Hospital */}
         <div className="primary-booking-box">
           <div className="box-header">
-            <span className="priority-pill priority-1">Your selected hospital</span>
+            <span className="priority-pill priority-1">Hospital</span>
             <span className="slot-badge">
               <Clock size={12} /> {doctor.availableSlotToday}
             </span>
@@ -91,9 +72,7 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
             <div>
               <div className="doc-name-spec">
                 <strong>{doctor.name}</strong>
-                <span className="spec-tag">{doctor.specialization}</span>
               </div>
-              <p className="doc-sub">{doctor.experienceYears} years experience</p>
             </div>
           </div>
         </div>
@@ -105,15 +84,13 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
             <h4 className="queue-title">Backup hospitals</h4>
           </div>
 
-          <p className="queue-desc">
-            If this hospital is full, we will automatically try these nearby hospitals for you:
-          </p>
+          <p className="queue-desc">Backup hospitals if needed</p>
 
           <div className="queue-tiers-list">
             {queueNodes.map((node) => (
               <div key={node.priorityOrder} className={`tier-node-card tier-${node.priorityOrder}`}>
                 <div className="tier-rank">
-                  {node.priorityOrder === 1 ? 'Your choice' : 'Another nearby hospital'}
+                  {node.priorityOrder === 1 ? 'Selected' : `Backup ${node.priorityOrder - 1}`}
                 </div>
                 <div className="tier-content">
                   <strong>{node.hospitalName}</strong>
@@ -152,40 +129,16 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
         .booking-confirm-body {
           display: flex;
           flex-direction: column;
-          gap: 1.25rem;
-        }
-        .patient-banner {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 0.75rem;
-          background: var(--bg-surface-2);
-          border: 1px solid var(--border-subtle);
-          padding: 0.75rem 1rem;
-          border-radius: var(--radius-sm);
-        }
-        .patient-info {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-          font-size: 0.8rem;
-        }
-        .patient-info .label {
-          font-size: 0.68rem;
-          color: var(--text-muted);
-          text-transform: uppercase;
-        }
-        .font-mono {
-          font-family: monospace;
-          letter-spacing: 0.04em;
+          gap: 0.8rem;
         }
         .primary-booking-box {
-          background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(15, 23, 42, 0.9) 100%);
-          border: 1px solid rgba(14, 165, 233, 0.4);
-          border-radius: var(--radius-md);
-          padding: 1.25rem;
+          background: var(--pastel-light-blue);
+          border: 1px solid #17202A;
+          border-radius: var(--radius-sm);
+          padding: 0.8rem;
           display: flex;
           flex-direction: column;
-          gap: 0.85rem;
+          gap: 0.55rem;
         }
         .box-header {
           display: flex;
@@ -202,7 +155,7 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
         .priority-1 {
           background: rgba(14, 165, 233, 0.2);
           border: 1px solid rgba(14, 165, 233, 0.4);
-          color: #38bdf8;
+          color: var(--brand-primary);
         }
         .slot-badge {
           display: flex;
@@ -218,17 +171,18 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
           gap: 0.75rem;
         }
         .entity-name {
-          font-size: 1.15rem;
-          color: #ffffff;
+          font-size: 1rem;
+          color: var(--dark-navy-text);
         }
         .entity-sub {
-          font-size: 0.8rem;
+          font-size: 0.72rem;
           color: var(--text-secondary);
         }
         .doc-row {
-          background: rgba(0, 0, 0, 0.25);
-          padding: 0.65rem 0.85rem;
-          border-radius: var(--radius-sm);
+          background: var(--white);
+          border: 1px solid var(--border-light);
+          padding: 0.45rem 0.65rem;
+          border-radius: var(--radius-xs);
         }
         .doc-name-spec {
           display: flex;
@@ -236,27 +190,16 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
           gap: 0.5rem;
           flex-wrap: wrap;
           font-size: 0.92rem;
-          color: #ffffff;
-        }
-        .spec-tag {
-          font-size: 0.72rem;
-          color: var(--brand-accent);
-          background: rgba(14, 165, 233, 0.12);
-          padding: 1px 6px;
-          border-radius: var(--radius-xs);
-        }
-        .doc-sub {
-          font-size: 0.75rem;
-          color: var(--text-muted);
+          color: var(--dark-navy-text);
         }
         .queue-buffer-section {
           background: var(--bg-surface-2);
-          border: 1px solid var(--border-subtle);
-          border-radius: var(--radius-md);
-          padding: 1.1rem;
+          border: 1px solid #17202A;
+          border-radius: var(--radius-sm);
+          padding: 0.7rem;
           display: flex;
           flex-direction: column;
-          gap: 0.75rem;
+          gap: 0.45rem;
         }
         .queue-section-header {
           display: flex;
@@ -264,29 +207,29 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
           gap: 0.5rem;
         }
         .queue-title {
-          font-size: 0.95rem;
-          color: #ffffff;
+          font-size: 0.85rem;
+          color: var(--dark-navy-text);
         }
         .queue-desc {
-          font-size: 0.8rem;
+          font-size: 0.72rem;
           color: var(--text-secondary);
-          line-height: 1.45;
+          line-height: 1.2;
         }
         .queue-tiers-list {
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
+          gap: 0.35rem;
         }
         .tier-node-card {
           display: grid;
           grid-template-columns: auto 1fr auto;
           align-items: center;
           gap: 0.75rem;
-          background: rgba(0, 0, 0, 0.25);
-          border: 1px solid var(--border-subtle);
-          padding: 0.5rem 0.85rem;
-          border-radius: var(--radius-sm);
-          font-size: 0.8rem;
+          background: var(--white);
+          border: 1px solid var(--border-light);
+          padding: 0.35rem 0.55rem;
+          border-radius: var(--radius-xs);
+          font-size: 0.72rem;
         }
         .tier-1 {
           border-left: 3px solid #0ea5e9;
@@ -320,17 +263,23 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
           justify-content: space-between;
           align-items: center;
           gap: 1rem;
-          padding-top: 0.5rem;
+          padding-top: 0.1rem;
         }
         .book-btn {
           flex: 1;
+          padding: 0.65rem 1rem;
         }
         @media (max-width: 640px) {
-          .patient-banner {
-            grid-template-columns: 1fr;
-          }
           .tier-node-card {
-            grid-template-columns: 1fr;
+            grid-template-columns: auto 1fr;
+            gap: 0.45rem;
+          }
+          .booking-confirm-body {
+            gap: 0.65rem;
+          }
+          .primary-booking-box,
+          .queue-buffer-section {
+            padding: 0.65rem;
           }
         }
       `}</style>
