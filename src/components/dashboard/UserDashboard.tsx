@@ -222,7 +222,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
       <div className="card symptom-home-card">
         <div className="symptom-intro-row">
           <div className="symptom-intro-icon">
-            <Sparkles size={20} />
+            <img src="/images/side.png" alt="AI health check" className="symptom-intro-image" />
           </div>
           <div className="symptom-intro-copy">
             <span className="eyebrow-label">AI HEALTH CHECK</span>
@@ -563,6 +563,13 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           color: var(--brand-primary);
           background: var(--pastel-light-blue);
           border: 1px solid var(--pastel-sky-blue);
+        }
+
+        .symptom-intro-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: inherit;
         }
 
         .symptom-intro-copy {
