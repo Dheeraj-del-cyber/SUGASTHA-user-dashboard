@@ -471,9 +471,16 @@ export const Header: React.FC<HeaderProps> = ({
             background: transparent;
             border: 0;
           }
-          .profile-text-group,
-          .logout-btn {
+          .profile-text-group {
             display: none;
+          }
+          .logout-btn {
+            display: flex;
+            width: 34px;
+            height: 34px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--border-light);
+            box-shadow: 0 2px 8px rgba(17, 24, 39, 0.06);
           }
           .notification-wrapper {
             order: -1;

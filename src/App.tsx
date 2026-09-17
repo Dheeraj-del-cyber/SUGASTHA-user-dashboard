@@ -298,10 +298,10 @@ export const App: React.FC = () => {
 
   if (isInitializing) {
     return (
-      <main className="sugastha-loading-screen" aria-live="polite" aria-label="Loading SWASTHYASETU">
+      <main className="sugastha-loading-screen" aria-live="polite" aria-label="Loading SUGASTHA">
         <div className="loading-brand-lockup">
-          <img src="/images/logo.png" alt="SWASTHYASETU logo" className="loading-logo" />
-          <div className="loading-brand-name">SWASTHYASETU</div>
+          <img src="/images/logo.png" alt="SUGASTHA logo" className="loading-logo" />
+          <div className="loading-brand-name">SUGASTHA</div>
           <div className="loading-progress" aria-hidden="true">
             <span />
           </div>

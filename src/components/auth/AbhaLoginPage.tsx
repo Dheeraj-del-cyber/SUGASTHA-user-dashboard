@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
+import logoImage from '../../../images/logo.png';
+import loginHeroImage from '../../../images/login.png';
 import { abhaService } from '../../services/abhaService';
 import { AbhaProfile, HealthRecord, ChronicCondition, Allergy } from '../../types';
 
@@ -60,15 +62,15 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
 
   return (
     <div className="swasthya-auth-page">
-      <div className="desktop-login" aria-label="Desktop SWASTHYASETU login">
+      <div className="desktop-login" aria-label="Desktop SUGASTHA login">
         <div className="desktop-shell">
-          <section className="desktop-visual-panel" aria-label="SWASTHYASETU overview">
+          <section className="desktop-visual-panel" aria-label="SUGASTHA overview">
             <div className="desktop-brand-row">
               <div className="desktop-brand-mark">
-                <img src="/images/logo.png" alt="SWASTHYASETU logo" />
+                <img src={logoImage} alt="SUGASTHA logo" />
               </div>
               <div className="desktop-brand-copy">
-                <span className="desktop-brand-name">SWASTHYASETU</span>
+                <span className="desktop-brand-name">SUGASTHA</span>
                 <span className="desktop-brand-tag">Your Healthcare, Connected</span>
               </div>
             </div>
@@ -85,93 +87,7 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
             </div>
 
             <div className="desktop-illustration" aria-hidden="true">
-              <svg viewBox="0 0 760 500" className="medtech-illustration" role="img" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <linearGradient id="deskSky" x1="0" x2="1">
-                    <stop offset="0%" stopColor="#EAF8FF" />
-                    <stop offset="100%" stopColor="#F5FBFF" />
-                  </linearGradient>
-                  <linearGradient id="deskWave" x1="0" x2="1">
-                    <stop offset="0%" stopColor="#2CB9C8" />
-                    <stop offset="100%" stopColor="#0D7AC7" />
-                  </linearGradient>
-                </defs>
-
-                <rect width="760" height="500" rx="32" fill="url(#deskSky)" />
-                <path d="M0 330 C110 290, 180 286, 260 305 C346 325, 430 356, 520 340 C608 323, 685 301, 760 318 L760 500 L0 500 Z" fill="#EAFBF4" />
-                <path d="M0 395 C120 362, 220 352, 308 380 C400 410, 500 402, 596 372 C670 349, 714 355, 760 365 L760 500 L0 500 Z" fill="#E5F7F3" />
-
-                <g opacity="0.8" stroke="#98dfe9" strokeWidth="2" fill="none" strokeDasharray="5 10">
-                  <path d="M70 120 L220 120" />
-                  <path d="M510 124 L670 124" />
-                  <path d="M100 230 L210 230" />
-                  <path d="M580 210 L700 210" />
-                </g>
-
-                <g transform="translate(84,120)">
-                  <rect x="0" y="120" width="118" height="84" rx="20" fill="#fff" stroke="#dfeef5" />
-                  <rect x="14" y="16" width="90" height="64" rx="18" fill="#e6f8ff" />
-                  <rect x="28" y="38" width="26" height="26" rx="8" fill="#d2f4ec" />
-                  <rect x="62" y="38" width="26" height="26" rx="8" fill="#d2f4ec" />
-                  <rect x="21" y="156" width="78" height="18" rx="8" fill="#d9f4f3" />
-                  <path d="M80 140 V34" stroke="#0a6e72" strokeWidth="3" strokeLinecap="round" />
-                  <path d="M81 35 H122" stroke="#0a6e72" strokeWidth="3" strokeLinecap="round" />
-                </g>
-
-                <g transform="translate(270,120)">
-                  <path d="M0 260 C50 214, 118 168, 182 177 S297 225, 360 182" stroke="url(#deskWave)" strokeWidth="8" fill="none" strokeLinecap="round" />
-                  <circle cx="32" cy="258" r="10" fill="#19afbd" />
-                  <circle cx="146" cy="176" r="10" fill="#1cb39d" />
-                  <circle cx="271" cy="225" r="11" fill="#5ac5dd" />
-                  <circle cx="358" cy="182" r="11" fill="#21a8b5" />
-                  <path d="M32 258 L146 176 L271 225 L358 182" stroke="#78d2e7" strokeWidth="3" fill="none" strokeDasharray="7 10" opacity="0.8" />
-
-                  <g transform="translate(120,118)">
-                    <circle cx="0" cy="70" r="62" fill="#fff" stroke="#e4edf8" />
-                    <circle cx="0" cy="70" r="32" fill="#def9f5" />
-                    <path d="M-16 70 C-8 52, 0 52, 8 70 S16 88, 20 70" stroke="#153b50" strokeWidth="5" fill="none" strokeLinecap="round" />
-                    <path d="M-18 90 C-8 103, 10 103, 18 90" stroke="#153b50" strokeWidth="5" fill="none" strokeLinecap="round" />
-                    <path d="M0 26 L0 142" stroke="#153b50" strokeWidth="7" strokeLinecap="round" />
-                    <path d="M0 26 L42 42" stroke="#153b50" strokeWidth="7" strokeLinecap="round" />
-                    <path d="M0 80 L36 112" stroke="#153b50" strokeWidth="7" strokeLinecap="round" />
-                    <path d="M0 74 L-34 56" stroke="#153b50" strokeWidth="7" strokeLinecap="round" />
-                  </g>
-
-                  <g transform="translate(292,152)">
-                    <circle cx="0" cy="54" r="54" fill="#fff" stroke="#e4edf8" />
-                    <circle cx="0" cy="54" r="27" fill="#f7e9ec" />
-                    <path d="M-18 56 C-8 42, 8 42, 18 56 S30 68, 18 68" stroke="#153b50" strokeWidth="5" fill="none" strokeLinecap="round" />
-                    <path d="M-18 76 C-7 85, 9 85, 18 76" stroke="#153b50" strokeWidth="5" fill="none" strokeLinecap="round" />
-                    <path d="M0 4 L0 104" stroke="#153b50" strokeWidth="6" strokeLinecap="round" />
-                    <path d="M0 4 L30 18" stroke="#153b50" strokeWidth="6" strokeLinecap="round" />
-                    <path d="M0 44 L30 70" stroke="#153b50" strokeWidth="6" strokeLinecap="round" />
-                    <path d="M0 68 L-28 94" stroke="#153b50" strokeWidth="6" strokeLinecap="round" />
-                  </g>
-                </g>
-
-                <g transform="translate(560,190)">
-                  <rect x="0" y="0" width="150" height="120" rx="22" fill="rgba(255,255,255,0.9)" stroke="#def3f8" />
-                  <path d="M20 36 H53 M20 56 H53 M20 76 H44" stroke="#0a6e72" strokeWidth="5" strokeLinecap="round" />
-                  <circle cx="103" cy="32" r="18" fill="#dffaf4" />
-                  <path d="M103 19 L103 44 M90 31 L116 31" stroke="#0d7a6d" strokeWidth="4" strokeLinecap="round" />
-                  <path d="M74 84 C88 66, 112 64, 129 84" stroke="#1ba5bb" strokeWidth="5" fill="none" strokeLinecap="round" />
-                  <circle cx="74" cy="84" r="6" fill="#1ba5bb" />
-                  <circle cx="129" cy="84" r="6" fill="#1ba5bb" />
-                </g>
-
-                <g transform="translate(610,116)">
-                  <path d="M40 18 L80 48 L40 80 L0 48 Z" fill="#dffaf4" opacity="0.9" />
-                  <path d="M40 22 V72" stroke="#0d7a6d" strokeWidth="4" strokeLinecap="round" />
-                  <path d="M12 48 H68" stroke="#0d7a6d" strokeWidth="4" strokeLinecap="round" />
-                </g>
-
-                <g opacity="0.8">
-                  <circle cx="96" cy="410" r="8" fill="#7CD9E8" />
-                  <circle cx="154" cy="382" r="6" fill="#8AE0C7" />
-                  <circle cx="638" cy="390" r="8" fill="#7CD9E8" />
-                  <circle cx="690" cy="426" r="6" fill="#8AE0C7" />
-                </g>
-              </svg>
+              <div className="desktop-login-hero" style={{ backgroundImage: `url(${loginHeroImage})` }} />
             </div>
           </section>
 
@@ -179,10 +95,10 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
             <div className="desktop-auth-card-shell">
               <div className="desktop-auth-brand-row">
                 <div className="desktop-auth-brand-mark">
-                  <img src="/images/logo.png" alt="SWASTHYASETU logo" />
+                  <img src={logoImage} alt="SUGASTHA logo" />
                 </div>
                 <div className="desktop-auth-brand-copy">
-                  <span className="desktop-auth-brand-name">SWASTHYASETU</span>
+                  <span className="desktop-auth-brand-name">SUGASTHA</span>
                   <span className="desktop-auth-brand-tag">SECURE ACCESS</span>
                 </div>
               </div>
@@ -254,70 +170,20 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
         </div>
       </div>
 
-      <div className="mobile-login" aria-label="Mobile SWASTHYASETU login">
+      <div className="mobile-login" aria-label="Mobile SUGASTHA login">
         <div className="mobile-shell">
           <header className="mobile-brand-row">
             <div className="mobile-brand-mark">
-              <img src="/images/logo.png" alt="SWASTHYASETU logo" />
+              <img src={logoImage} alt="SUGASTHA logo" />
             </div>
             <div className="mobile-brand-copy">
-              <span className="mobile-brand-name">SWASTHYASETU</span>
+              <span className="mobile-brand-name">SUGASTHA</span>
               <span className="mobile-brand-tag">Your Healthcare, Connected</span>
             </div>
           </header>
 
           <div className="mobile-illustration" aria-hidden="true">
-            <svg viewBox="0 0 420 240" className="mobile-medtech-art" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="mobBg" x1="0" x2="1">
-                  <stop offset="0%" stopColor="#EAF8FF" />
-                  <stop offset="100%" stopColor="#F3FBFA" />
-                </linearGradient>
-              </defs>
-              <rect width="420" height="240" rx="28" fill="url(#mobBg)" />
-              <path d="M0 168 C84 150, 146 145, 210 164 C276 181, 330 186, 420 158 L420 240 L0 240 Z" fill="#E9F9F5" />
-              <g opacity="0.7" stroke="#93dfe6" strokeWidth="2" fill="none" strokeDasharray="6 8">
-                <path d="M34 50 L120 50" />
-                <path d="M310 54 L384 54" />
-                <path d="M54 190 L150 190" />
-              </g>
-
-              <g transform="translate(32,54)">
-                <circle cx="58" cy="42" r="30" fill="#eaf9ff" />
-                <circle cx="58" cy="42" r="16" fill="#dff8f2" />
-                <path d="M48 42 C52 33, 64 33, 68 42" stroke="#153b50" strokeWidth="4" fill="none" strokeLinecap="round" />
-                <path d="M47 55 C53 61, 63 61, 69 55" stroke="#153b50" strokeWidth="4" fill="none" strokeLinecap="round" />
-                <path d="M58 12 L58 85" stroke="#153b50" strokeWidth="4" strokeLinecap="round" />
-                <path d="M58 12 L82 22" stroke="#153b50" strokeWidth="4" strokeLinecap="round" />
-                <path d="M58 54 L90 74" stroke="#153b50" strokeWidth="4" strokeLinecap="round" />
-                <path d="M58 47 L30 31" stroke="#153b50" strokeWidth="4" strokeLinecap="round" />
-              </g>
-
-              <g transform="translate(160,44)">
-                <path d="M0 104 C44 72, 110 52, 164 67 C210 79, 242 104, 270 92" stroke="url(#mobBg)" strokeWidth="6" fill="none" strokeLinecap="round" opacity="0.8" />
-                <circle cx="12" cy="101" r="7" fill="#1ba9bb" />
-                <circle cx="106" cy="65" r="8" fill="#1bb39e" />
-                <circle cx="202" cy="83" r="8" fill="#5ec5dc" />
-                <circle cx="270" cy="92" r="8" fill="#1ca3b8" />
-                <path d="M12 101 L106 65 L202 83 L270 92" stroke="#7cd7e8" strokeWidth="2.5" fill="none" strokeDasharray="6 8" opacity="0.8" />
-              </g>
-
-              <g transform="translate(270,98)">
-                <rect x="0" y="0" width="96" height="74" rx="16" fill="#fff" stroke="#dfeef5" />
-                <path d="M18 26 H44 M18 42 H44 M18 58 H38" stroke="#0d6d74" strokeWidth="4" strokeLinecap="round" />
-                <circle cx="64" cy="22" r="12" fill="#def9f2" />
-                <path d="M64 11 L64 33 M53 22 L75 22" stroke="#0d7a6d" strokeWidth="3" strokeLinecap="round" />
-                <path d="M46 58 C58 45, 73 45, 82 58" stroke="#1da5b6" strokeWidth="4" fill="none" strokeLinecap="round" />
-                <circle cx="46" cy="58" r="4" fill="#1da5b6" />
-                <circle cx="82" cy="58" r="4" fill="#1da5b6" />
-              </g>
-
-              <g transform="translate(100,136)">
-                <rect x="0" y="0" width="80" height="42" rx="12" fill="#fff" stroke="#dfeef5" />
-                <rect x="16" y="10" width="48" height="18" rx="8" fill="#eaf7ff" />
-                <path d="M32 10 L32 28 M18 19 L46 19" stroke="#0d7a6d" strokeWidth="3" strokeLinecap="round" />
-              </g>
-            </svg>
+            <div className="mobile-login-hero" style={{ backgroundImage: `url(${loginHeroImage})` }} />
           </div>
 
           <div className="mobile-header-copy">
@@ -533,6 +399,24 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
 
         .desktop-illustration {
           margin-top: 16px;
+        }
+
+        .desktop-login-hero,
+        .mobile-login-hero {
+          width: 100%;
+          height: 100%;
+          min-height: 280px;
+          border-radius: 28px;
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          box-shadow: 0 24px 30px rgba(15, 83, 103, 0.14);
+          border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .desktop-login-hero {
+          min-height: 450px;
+          border-radius: 30px;
         }
 
         .medtech-illustration {
@@ -809,10 +693,9 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
           overflow: hidden;
         }
 
-        .mobile-medtech-art {
-          width: 100%;
-          height: auto;
-          display: block;
+        .mobile-login-hero {
+          min-height: 220px;
+          border-radius: 22px;
         }
 
         .mobile-header-copy {
