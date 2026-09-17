@@ -304,7 +304,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 
           {/* Generate Button */}
           <button type="submit" className="btn btn-primary btn-lg generate-btn">
-            <span>Generate</span>
+            <span>Continue</span>
           </button>
         </form>
 
