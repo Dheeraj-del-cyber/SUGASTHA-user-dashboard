@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
 import logoImage from '../../../images/logo.png';
 import loginHeroImage from '../../../images/login.png';
@@ -24,6 +24,16 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [shakeError, setShakeError] = useState(false);
+
+  // Lock page scrolling while the login screen is visible (fixed viewport layout)
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.scrollTo(0, 0);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
 
   const triggerShake = () => {
     setShakeError(true);
@@ -257,8 +267,12 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
         * { box-sizing: border-box; }
 
         .swasthya-auth-page {
-          min-height: 100vh;
-          min-height: 100svh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          height: 100svh;
+          overflow: hidden;
           background:
             radial-gradient(circle at top left, rgba(126, 224, 255, 0.22), transparent 28%),
             linear-gradient(180deg, #dff5fd 0%, #eaf9ff 30%, #edf8fb 100%);
@@ -286,19 +300,23 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
 
         .desktop-shell {
           width: min(1280px, 100%);
-          min-height: calc(100vh - 36px);
+          height: calc(100vh - 36px);
+          height: calc(100svh - 36px);
           margin: 0 auto;
           display: grid;
           grid-template-columns: 1.35fr 0.78fr;
           gap: 28px;
-          align-items: center;
+          align-items: stretch;
         }
 
         .desktop-visual-panel {
+          display: flex;
+          flex-direction: column;
           background: rgba(255,255,255,0.36);
           border: 1px solid rgba(148,170,190,0.18);
           border-radius: 34px;
-          min-height: 760px;
+          height: 100%;
+          min-height: 0;
           padding: 24px 30px 18px;
           box-shadow: 0 26px 56px rgba(17, 69, 96, 0.08);
           position: relative;
@@ -398,6 +416,8 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
         }
 
         .desktop-illustration {
+          flex: 1;
+          min-height: 0;
           margin-top: 16px;
         }
 
@@ -415,7 +435,8 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
         }
 
         .desktop-login-hero {
-          min-height: 450px;
+          height: 100%;
+          min-height: 0;
           border-radius: 30px;
         }
 
@@ -430,10 +451,13 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
           display: flex;
           align-items: center;
           justify-content: center;
+          min-height: 0;
         }
 
         .desktop-auth-card-shell {
           width: min(100%, 450px);
+          max-height: 100%;
+          overflow: hidden;
         }
 
         .desktop-auth-brand-row {
@@ -655,7 +679,9 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
         .mobile-shell {
           width: min(100%, 440px);
           margin: 0 auto;
-          padding: 10px 8px 32px;
+          padding: 10px 8px 16px;
+          max-height: 100%;
+          overflow: hidden;
         }
 
         .mobile-brand-row {
@@ -694,7 +720,8 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
         }
 
         .mobile-login-hero {
-          min-height: 220px;
+          min-height: 150px;
+          height: 22vh;
           border-radius: 22px;
         }
 
@@ -703,7 +730,7 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
         }
 
         .mobile-header-copy h1 {
-          font-size: clamp(2.2rem, 10vw, 3.5rem);
+          font-size: clamp(1.9rem, 8.5vw, 3rem);
           line-height: 0.94;
           letter-spacing: -0.07em;
           color: #0d2139;
@@ -840,6 +867,32 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
           margin-top: 18px;
           font-size: 0.74rem;
           color: #4d6d7d;
+        }
+
+        @media (max-height: 720px) {
+          .mobile-shell { padding: 6px 8px 10px; }
+          .mobile-brand-row { margin-bottom: 8px; }
+          .mobile-brand-mark { width: 40px; height: 40px; border-radius: 12px; }
+          .mobile-brand-mark img { width: 28px; height: 28px; }
+          .mobile-login-hero { height: 16vh; min-height: 110px; }
+          .mobile-header-copy { margin-top: 10px; }
+          .mobile-header-copy h1 { font-size: clamp(1.6rem, 7.5vw, 2.2rem); }
+          .mobile-header-copy p { display: none; }
+          .mobile-auth-card { margin-top: 12px; padding: 14px 14px 12px; }
+          .mobile-auth-header h2 { font-size: 1.25rem; }
+          .mobile-login-form { margin-top: 12px; }
+          .mobile-login-input { padding: 12px 14px 12px 40px; }
+          .mobile-help-link { margin-top: 10px; }
+          .mobile-submit-btn { margin-top: 12px; padding: 12px 16px; }
+          .mobile-privacy-note { margin-top: 12px; }
+        }
+
+        @media (min-width: 768px) and (max-height: 760px) {
+          .swasthya-auth-page { padding: 16px; }
+          .desktop-shell { height: calc(100vh - 32px); height: calc(100svh - 32px); gap: 20px; }
+          .desktop-visual-panel { padding: 20px 24px 14px; }
+          .desktop-copy h1 { font-size: clamp(2.4rem, 3.6vw, 3.6rem); }
+          .desktop-copy p { margin-top: 12px; font-size: 0.95rem; }
         }
 
         @media (min-width: 768px) {
