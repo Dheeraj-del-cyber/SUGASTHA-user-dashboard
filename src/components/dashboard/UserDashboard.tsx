@@ -112,7 +112,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
     if (isFeaturePaused) return;
     const featureTimer = window.setInterval(() => {
       setActiveFeature((current) => (current + 1) % FEATURE_SLIDES.length);
-    }, 3800);
+    }, 2200);
     return () => window.clearInterval(featureTimer);
   }, [isFeaturePaused]);
 
