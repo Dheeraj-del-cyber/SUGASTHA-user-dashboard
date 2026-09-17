@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/common/Header';
 import { BottomNav, ActiveTab } from './components/common/BottomNav';
-import { AbhaLoginModal } from './components/auth/AbhaLoginModal';
+import { AbhaLoginPage } from './components/auth/AbhaLoginPage';
 import { AbhaRegisterModal } from './components/auth/AbhaRegisterModal';
 import { AbhaRecoverModal } from './components/auth/AbhaRecoverModal';
 import { UserDashboard } from './components/dashboard/UserDashboard';
@@ -41,7 +41,6 @@ export const App: React.FC = () => {
   const [allergies, setAllergies] = useState<Allergy[]>([]);
 
   // Auth Modals State
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isRecoverOpen, setIsRecoverOpen] = useState(false);
 
@@ -132,7 +131,6 @@ export const App: React.FC = () => {
     setRecords([]);
     setConditions([]);
     setAllergies([]);
-    setIsLoginOpen(true);
   };
 
   // Submit Symptoms -> Run AI Triage
@@ -300,10 +298,10 @@ export const App: React.FC = () => {
 
   if (isInitializing) {
     return (
-      <main className="sugastha-loading-screen" aria-live="polite" aria-label="Loading SUGASTHA">
+      <main className="sugastha-loading-screen" aria-live="polite" aria-label="Loading SWASTHYASETU">
         <div className="loading-brand-lockup">
-          <img src="/images/logo.png" alt="SUGASTHA logo" className="loading-logo" />
-          <div className="loading-brand-name">SUGASTHA</div>
+          <img src="/images/logo.png" alt="SWASTHYASETU logo" className="loading-logo" />
+          <div className="loading-brand-name">SWASTHYASETU</div>
           <div className="loading-progress" aria-hidden="true">
             <span />
           </div>
@@ -313,13 +311,40 @@ export const App: React.FC = () => {
     );
   }
 
+  // Show full-page login when not authenticated
+  if (!profile) {
+    return (
+      <>
+        <AbhaLoginPage
+          onSuccess={handleLoginSuccess}
+          onOpenRegister={() => setIsRegisterOpen(true)}
+          onOpenRecover={() => setIsRecoverOpen(true)}
+        />
+
+        <AbhaRegisterModal
+          isOpen={isRegisterOpen}
+          onClose={() => setIsRegisterOpen(false)}
+          onSuccess={handleRegisterSuccess}
+          onBackToLogin={() => setIsRegisterOpen(false)}
+        />
+
+        <AbhaRecoverModal
+          isOpen={isRecoverOpen}
+          onClose={() => setIsRecoverOpen(false)}
+          onSelectRecovered={handleRecoverSelection}
+          onBackToLogin={() => setIsRecoverOpen(false)}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="sugastha-app-root">
       {/* Top Application Header */}
       <Header
         profile={profile}
         activeConsultation={activeConsultation}
-        onOpenLogin={() => setIsLoginOpen(true)}
+        onOpenLogin={handleLogout}
         onLogout={handleLogout}
         onViewActiveConsultation={() => {
           setActiveTab('tracking');
@@ -485,32 +510,18 @@ export const App: React.FC = () => {
       />
 
       {/* Modals */}
-      <AbhaLoginModal
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-        onSuccess={handleLoginSuccess}
-        onOpenRegister={() => setIsRegisterOpen(true)}
-        onOpenRecover={() => setIsRecoverOpen(true)}
-      />
-
       <AbhaRegisterModal
         isOpen={isRegisterOpen}
         onClose={() => setIsRegisterOpen(false)}
         onSuccess={handleRegisterSuccess}
-        onBackToLogin={() => {
-          setIsRegisterOpen(false);
-          setIsLoginOpen(true);
-        }}
+        onBackToLogin={() => setIsRegisterOpen(false)}
       />
 
       <AbhaRecoverModal
         isOpen={isRecoverOpen}
         onClose={() => setIsRecoverOpen(false)}
         onSelectRecovered={handleRecoverSelection}
-        onBackToLogin={() => {
-          setIsRecoverOpen(false);
-          setIsLoginOpen(true);
-        }}
+        onBackToLogin={() => setIsRecoverOpen(false)}
       />
 
       {pendingHospital && pendingDoctor && profile && (

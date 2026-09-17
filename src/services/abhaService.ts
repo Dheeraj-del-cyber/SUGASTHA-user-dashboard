@@ -30,9 +30,10 @@ export const abhaService = {
     conditions: ChronicCondition[];
     allergies: Allergy[];
   } | null {
-    const savedAbhaNumber = localStorage.getItem(ABHA_STORAGE_KEY) || DEFAULT_ABHA_NUMBER;
+    const savedAbhaNumber = localStorage.getItem(ABHA_STORAGE_KEY);
+    if (!savedAbhaNumber) return null;
     const store = getStoredDataStore();
-    return store[savedAbhaNumber] || store[DEFAULT_ABHA_NUMBER] || null;
+    return store[savedAbhaNumber] || null;
   },
 
   // Login by ABHA ID or ABHA Address
