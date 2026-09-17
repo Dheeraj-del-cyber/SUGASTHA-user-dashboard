@@ -567,7 +567,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
           }
           .selection-cta-drawer {
             gap: 0.65rem;
-            bottom: calc(var(--bottom-nav-height) + 0.5rem);
+            bottom: calc(var(--bottom-nav-height) + 1.25rem);
           }
           .book-request-btn {
             width: auto;

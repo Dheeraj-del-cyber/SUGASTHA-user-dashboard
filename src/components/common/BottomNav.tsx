@@ -241,7 +241,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         .nav-center-btn {
           position: absolute;
           left: 50%;
-          top: -10px;
+          top: -4px;
           transform: translateX(-50%);
           display: grid;
           place-items: center;
