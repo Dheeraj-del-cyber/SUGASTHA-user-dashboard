@@ -414,14 +414,9 @@ export const App: React.FC = () => {
             records={records}
             conditions={conditions}
             allergies={allergies}
-            activeConsultation={activeConsultation}
             onStartNewConsultation={() => {
               setActiveTab('triage');
               setActiveSubView('SYMPTOMS');
-            }}
-            onOpenTracker={() => {
-              setActiveTab('tracking');
-              setActiveSubView('TRACKER');
             }}
             onOpenRecords={() => {
               setActiveTab('records');

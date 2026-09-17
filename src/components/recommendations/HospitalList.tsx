@@ -54,22 +54,14 @@ export const HospitalList: React.FC<HospitalListProps> = ({
       {/* Header Banner */}
       <div className="rec-header">
         <div>
-          <div className="rec-badge-row">
-            <span className={`badge ${triage.level === 'RED' ? 'badge-red' : 'badge-yellow'}`}>
-              {triage.level === 'RED' ? 'Urgent care needed' : 'See a doctor today'}
-            </span>
-          </div>
-          <h2 className="rec-title">Choose Hospital</h2>
-          <p className="rec-subtitle">
-            Pick a hospital near you. Then choose a doctor.
-          </p>
+          <h2 className="rec-title">Choose a hospital</h2>
         </div>
 
         {/* 3-Tier Queue Info Card */}
         <div className="queue-tip-card">
           <ShieldCheck size={18} className="text-teal flex-shrink-0" />
           <div className="queue-tip-text">
-            <strong>Do not worry if this hospital is full.</strong> We will automatically try the next nearby hospitals for you.
+            <strong>If this hospital is full,</strong> we will try the next one.
           </div>
         </div>
       </div>
@@ -116,27 +108,27 @@ export const HospitalList: React.FC<HospitalListProps> = ({
                 <div className="strip-item">
                   <MapPin size={14} className="text-teal" />
                   <span className="strip-val">{hosp.distanceKm} km</span>
-                  <span className="strip-sub">Distance</span>
+                  <span className="strip-sub">Away</span>
                 </div>
 
                 <div className="strip-item">
                   <Clock size={14} className="text-amber" />
                   <span className="strip-val">~{hosp.estimatedTravelTimeMinutes} mins</span>
-                  <span className="strip-sub">Travel time</span>
+                  <span className="strip-sub">Travel</span>
                 </div>
 
                 <div className="strip-item fare-item">
                   <Car size={14} className="text-emerald" />
                   <div className="fare-col">
-                    <span className="strip-val">Auto ₹{hosp.fareEstimates.autoFare} • Cab ₹{hosp.fareEstimates.cabFare}</span>
-                    <span className="strip-sub">Approx. fare</span>
+                    <span className="strip-val">₹{hosp.fareEstimates.autoFare} - ₹{hosp.fareEstimates.cabFare}</span>
+                    <span className="strip-sub">Auto - cab</span>
                   </div>
                 </div>
 
                 <div className="strip-item desk-item">
                   <span className={`status-dot ${hosp.emergencyQueueStatus === 'NORMAL' ? 'dot-green' : 'dot-yellow'}`}></span>
                   <span className="strip-val">{hosp.emergencyQueueStatus === 'NORMAL' ? 'Not crowded' : 'A little busy'}</span>
-                  <span className="strip-sub">Right now</span>
+                  <span className="strip-sub">Now</span>
                 </div>
               </div>
 
@@ -144,10 +136,10 @@ export const HospitalList: React.FC<HospitalListProps> = ({
               <div className="doctor-select-section">
                 <div className="doc-section-title">
                   <UserCheck size={15} className="text-teal" />
-                  <span>Choose a doctor at this hospital:</span>
+                  <span>Doctors</span>
                 </div>
 
-                <div className="doctors-chips-grid">
+                <div className="doctors-chips-grid" aria-label={`Doctors at ${hosp.name}`}>
                   {hosp.doctors.map((doc) => {
                     const isDocSelected = doc.id === activeDocId;
                     return (
@@ -168,8 +160,8 @@ export const HospitalList: React.FC<HospitalListProps> = ({
                         </div>
                         <span className="doc-spec text-teal">{doc.specialization}</span>
                         <div className="doc-slot-row">
-                          <span className="doc-exp">{doc.experienceYears} yrs experience</span>
-                          <span className="doc-slot">Free at: {doc.availableSlotToday}</span>
+                          <span className="doc-exp">{doc.experienceYears} yrs exp</span>
+                          <span className="doc-slot">Next: {doc.availableSlotToday}</span>
                         </div>
                       </div>
                     );
@@ -182,7 +174,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
                 <div className="selected-confirmation-pill">
                   <CheckCircle size={15} className="text-emerald" />
                   <span>
-                    Your doctor: <strong>{activeDoc.name}</strong> ({activeDoc.specialization})
+                    Selected: <strong>{activeDoc.name}</strong>
                   </span>
                 </div>
               )}
@@ -194,13 +186,9 @@ export const HospitalList: React.FC<HospitalListProps> = ({
       {/* Sticky Bottom Action Drawer */}
       <div className="selection-cta-drawer">
         <div className="selected-summary-col">
-          <span className="summary-label">Your visit will be at:</span>
           <div className="selected-entity-title">
-            <strong>{currentHospital.name}</strong> • <span>{currentDoctor.name}</span>
+            <strong>{currentHospital.name}</strong>
           </div>
-          <span className="queue-note">
-            If this hospital is full, we will try the next one for you.
-          </span>
         </div>
 
         <button
@@ -243,7 +231,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
           font-weight: 500;
         }
         .rec-title {
-          font-size: 1.55rem;
+          font-size: 1.4rem;
         }
         .rec-subtitle {
           font-size: 0.88rem;
@@ -253,8 +241,8 @@ export const HospitalList: React.FC<HospitalListProps> = ({
           display: flex;
           align-items: flex-start;
           gap: 0.75rem;
-          background: rgba(14, 165, 233, 0.08);
-          border: 1px solid rgba(14, 165, 233, 0.3);
+          background: var(--pastel-light-blue);
+          border: 1px solid var(--pastel-sky-blue);
           border-radius: var(--radius-sm);
           padding: 0.85rem 1.1rem;
         }
@@ -264,7 +252,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
           line-height: 1.45;
         }
         .queue-tip-text strong {
-          color: #38bdf8;
+          color: var(--brand-primary);
         }
         .hospitals-list-feed {
           display: flex;
@@ -274,15 +262,16 @@ export const HospitalList: React.FC<HospitalListProps> = ({
         .hospital-card {
           display: flex;
           flex-direction: column;
-          gap: 1.1rem;
+          gap: 0.75rem;
           cursor: pointer;
           border: 1px solid var(--border-subtle);
           position: relative;
+          padding: 1rem;
         }
         .selected-hospital-card {
           border-color: var(--brand-primary);
-          background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(15, 23, 42, 0.95) 100%);
-          box-shadow: 0 0 25px rgba(14, 165, 233, 0.2);
+          background: var(--pastel-light-blue);
+          box-shadow: var(--shadow-soft);
         }
         .hosp-card-header {
           display: flex;
@@ -314,16 +303,16 @@ export const HospitalList: React.FC<HospitalListProps> = ({
           flex-wrap: wrap;
         }
         .hosp-name {
-          font-size: 1.25rem;
+          font-size: 1.15rem;
           font-weight: 700;
-          color: #ffffff;
+          color: var(--dark-navy-text);
         }
         .nabh-badge {
           font-size: 0.65rem;
           font-weight: 800;
-          background: rgba(16, 185, 129, 0.15);
-          color: #10b981;
-          border: 1px solid rgba(16, 185, 129, 0.4);
+          background: var(--pastel-green-bg);
+          color: var(--pastel-green-accent);
+          border: 1px solid #B7DEC2;
           padding: 1px 6px;
           border-radius: var(--radius-xs);
         }
@@ -358,12 +347,17 @@ export const HospitalList: React.FC<HospitalListProps> = ({
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 0.75rem;
-          background: rgba(0, 0, 0, 0.35);
-          padding: 0.75rem 1rem;
+          background: var(--bg-surface-3);
+          padding: 0.6rem 0.8rem;
           border-radius: var(--radius-sm);
-          border: 1px solid var(--border-subtle);
+          border: 1px solid var(--border-light);
         }
         .strip-item {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .fare-col {
           display: flex;
           flex-direction: column;
           gap: 2px;
@@ -371,7 +365,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
         .strip-val {
           font-size: 0.85rem;
           font-weight: 600;
-          color: #ffffff;
+          color: var(--dark-navy-text);
         }
         .strip-sub {
           font-size: 0.7rem;
@@ -395,7 +389,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
         .doctor-select-section {
           display: flex;
           flex-direction: column;
-          gap: 0.6rem;
+          gap: 0.4rem;
         }
         .doc-section-title {
           display: flex;
@@ -406,25 +400,31 @@ export const HospitalList: React.FC<HospitalListProps> = ({
           color: var(--text-secondary);
         }
         .doctors-chips-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+          display: flex;
           gap: 0.65rem;
+          overflow-x: auto;
+          padding: 0.1rem 0.1rem 0.3rem;
+          scroll-snap-type: x proximity;
+          scrollbar-width: thin;
         }
         .doc-chip {
-          background: var(--bg-surface-2);
-          border: 1px solid var(--border-subtle);
-          padding: 0.75rem;
+          flex: 0 0 220px;
+          background: var(--white);
+          border: 1px solid var(--border-light);
+          padding: 0.6rem;
           border-radius: var(--radius-sm);
           display: flex;
           flex-direction: column;
           gap: 3px;
+          min-height: 92px;
+          scroll-snap-align: start;
           transition: all var(--transition-fast);
         }
         .doc-chip:hover {
           border-color: var(--border-highlight);
         }
         .doc-chip.active-doc-chip {
-          background: rgba(14, 165, 233, 0.15);
+          background: var(--pastel-light-blue);
           border-color: var(--brand-primary);
         }
         .doc-chip-top {
@@ -434,7 +434,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
         }
         .doc-name {
           font-size: 0.85rem;
-          color: #ffffff;
+          color: var(--dark-navy-text);
         }
         .doc-rating {
           font-size: 0.72rem;
@@ -451,78 +451,129 @@ export const HospitalList: React.FC<HospitalListProps> = ({
         }
         .doc-slot-row {
           display: flex;
-          justify-content: space-between;
+          flex-direction: column;
+          align-items: flex-start;
           font-size: 0.7rem;
           color: var(--text-muted);
           margin-top: 2px;
         }
         .doc-slot {
-          color: #10b981;
+          color: var(--pastel-green-accent);
           font-weight: 500;
         }
         .selected-confirmation-pill {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          background: rgba(16, 185, 129, 0.12);
-          border: 1px solid rgba(16, 185, 129, 0.3);
-          padding: 0.5rem 0.85rem;
+          background: var(--pastel-green-bg);
+          border: 1px solid #B7DEC2;
+          padding: 0.4rem 0.7rem;
           border-radius: var(--radius-sm);
           font-size: 0.8rem;
-          color: #ffffff;
+          color: var(--dark-navy-text);
+          min-width: 0;
+        }
+        .selected-confirmation-pill span {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
         .selection-cta-drawer {
           position: sticky;
           bottom: 1rem;
-          background: rgba(15, 23, 42, 0.95);
+          background: rgba(255, 255, 255, 0.96);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
-          border: 1px solid var(--border-highlight);
-          border-radius: var(--radius-md);
-          padding: 1.1rem 1.5rem;
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-sm);
+          padding: 0.65rem 0.85rem;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+          box-shadow: var(--shadow-md);
           z-index: 50;
         }
         .selected-summary-col {
           display: flex;
           flex-direction: column;
-          gap: 2px;
-        }
-        .summary-label {
-          font-size: 0.72rem;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
+          min-width: 0;
         }
         .selected-entity-title {
-          font-size: 1.05rem;
-          color: #ffffff;
+          font-size: 0.9rem;
+          color: var(--dark-navy-text);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
         .selected-entity-title strong {
-          color: #38bdf8;
-        }
-        .queue-note {
-          font-size: 0.75rem;
-          color: #94a3b8;
+          color: var(--brand-primary);
         }
         .book-request-btn {
-          padding: 0.85rem 1.75rem;
+          padding: 0.55rem 1rem;
+          font-size: 0.85rem;
+          flex-shrink: 0;
         }
         @media (max-width: 768px) {
+          .hospital-rec-container {
+            gap: 1rem;
+          }
+          .hospital-card {
+            padding: 1rem;
+            gap: 0.85rem;
+          }
+          .hosp-name {
+            font-size: 1.05rem;
+          }
+          .hosp-address {
+            max-width: 250px;
+            line-height: 1.3;
+          }
           .travel-fare-strip {
-            grid-template-columns: 1fr 1fr;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.5rem 0.55rem;
+            overflow: hidden;
+          }
+          .travel-fare-strip .strip-item {
+            flex: 1 1 0;
+            min-width: 0;
+            flex-direction: row;
+            align-items: center;
+            gap: 3px;
+            overflow: hidden;
+          }
+          .travel-fare-strip .desk-item {
+            display: none;
+          }
+          .travel-fare-strip .strip-item > svg {
+            width: 12px;
+            height: 12px;
+            flex-shrink: 0;
+          }
+          .travel-fare-strip .strip-val {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 0.68rem;
+          }
+          .travel-fare-strip .strip-sub {
+            display: none;
+          }
+          .travel-fare-strip .fare-col {
+            min-width: 0;
+            flex-direction: row;
           }
           .selection-cta-drawer {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
+            gap: 0.65rem;
             bottom: calc(var(--bottom-nav-height) + 0.5rem);
           }
           .book-request-btn {
-            width: 100%;
+            width: auto;
+          }
+          .doc-chip {
+            flex-basis: 220px;
           }
         }
       `}</style>

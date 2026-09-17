@@ -5,13 +5,11 @@ import {
   HealthRecord,
   ChronicCondition,
   Allergy,
-  ConsultationRequest,
   Hospital,
   Doctor,
   SymptomInput,
   TriageResult,
 } from '../../types';
-import { ActiveConsultationCard } from '../consultation/ActiveConsultationCard';
 import { triageEngine } from '../../services/triageEngine';
 
 interface UserDashboardProps {
@@ -19,9 +17,7 @@ interface UserDashboardProps {
   records?: HealthRecord[];
   conditions?: ChronicCondition[];
   allergies?: Allergy[];
-  activeConsultation: ConsultationRequest | null;
   onStartNewConsultation: () => void;
-  onOpenTracker: () => void;
   onOpenRecords: () => void;
   onOpenHistory?: () => void;
   onSelectHospitalAndDoctor?: (hosp: Hospital, doc: Doctor) => void;
@@ -71,12 +67,11 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
   records = [],
   conditions = [],
   allergies = [],
-  activeConsultation,
-  onOpenTracker,
   onStartNewConsultation,
   onSelectOption,
 }) => {
   const [symptomInput, setSymptomInput] = useState('');
+  const [symptomError, setSymptomError] = useState('');
   const [isGenerated, setIsGenerated] = useState(false);
   const [symptomRecommendation, setSymptomRecommendation] = useState<TriageResult | null>(null);
   const [activeFeature, setActiveFeature] = useState(0);
@@ -136,6 +131,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
   };
 
   const handleAddSymptom = (symptom: string) => {
+    setSymptomError('');
     if (!symptomInput.trim()) {
       setSymptomInput(symptom);
     } else {
@@ -151,6 +147,14 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 
   const handleGenerate = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    if (!symptomInput.trim()) {
+      setSymptomError('Enter symptoms first.');
+      setIsGenerated(false);
+      setSymptomRecommendation(null);
+      return;
+    }
+
+    setSymptomError('');
     const inputList = symptomInput
       .split(',')
       .map((symptom) => symptom.trim())
@@ -179,16 +183,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 
   return (
     <div className="home-dashboard-layout animate-fade-in">
-      {/* Active Consultation Hero Bar if present */}
-      {activeConsultation && (
-        <div className="active-visit-hero-banner">
-          <ActiveConsultationCard
-            consultation={activeConsultation}
-            onOpenTracker={onOpenTracker}
-          />
-        </div>
-      )}
-
       <section
         className="feature-carousel"
         aria-label="What you can do with SUGASTHA"
@@ -278,8 +272,14 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
             className="form-input symptom-input-field"
             placeholder="Type your symptoms here (e.g. Fever, Cough)"
             value={symptomInput}
-            onChange={(e) => setSymptomInput(e.target.value)}
+            onChange={(e) => {
+              setSymptomInput(e.target.value);
+              if (e.target.value.trim()) setSymptomError('');
+            }}
           />
+          {symptomError && (
+            <span className="symptom-error" role="alert">{symptomError}</span>
+          )}
 
           {/* Common Suggestions */}
           <div className="symptom-suggestions-row">
@@ -342,7 +342,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
               </div>
               <div className="option-content">
                 <div className="option-title-row">
-                  <h3 className="option-title">Hospital Dashboard</h3>
+                  <h3 className="option-title">Hospital visit</h3>
                   {symptomRecommendation?.recommendedRoute === 'HOSPITAL_VISIT' && (
                     <span className="recommendation-badge">Recommended</span>
                   )}
@@ -693,6 +693,13 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           background: var(--white);
           border-color: var(--border-focus);
           box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+        }
+
+        .symptom-error {
+          color: var(--triage-red);
+          font-size: 0.75rem;
+          font-weight: 600;
+          margin-top: -0.9rem;
         }
 
         .symptom-suggestions-row {
