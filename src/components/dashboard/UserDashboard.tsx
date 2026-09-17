@@ -8,8 +8,11 @@ import {
   ConsultationRequest,
   Hospital,
   Doctor,
+  SymptomInput,
+  TriageResult,
 } from '../../types';
 import { ActiveConsultationCard } from '../consultation/ActiveConsultationCard';
+import { triageEngine } from '../../services/triageEngine';
 
 interface UserDashboardProps {
   profile: AbhaProfile;
@@ -74,6 +77,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 }) => {
   const [symptomInput, setSymptomInput] = useState('');
   const [isGenerated, setIsGenerated] = useState(false);
+  const [symptomRecommendation, setSymptomRecommendation] = useState<TriageResult | null>(null);
   const [activeFeature, setActiveFeature] = useState(0);
   const [isFeaturePaused, setIsFeaturePaused] = useState(false);
   const featureTouchStart = useRef<number | null>(null);
@@ -121,6 +125,20 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 
   const handleGenerate = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    const inputList = symptomInput
+      .split(',')
+      .map((symptom) => symptom.trim())
+      .filter((symptom) => symptom.length > 0);
+    const symptoms: SymptomInput = {
+      primarySymptoms: inputList.length > 0 ? inputList : ['General Health Checkup'],
+      durationDays: 1,
+      painScale: 2,
+      bodyRegion: 'General',
+      additionalNotes: 'Entered via Home Page',
+      hasRedFlags: {},
+    };
+
+    setSymptomRecommendation(triageEngine.evaluateTriage(symptoms, conditions, records, allergies));
     setIsGenerated(true);
   };
 
@@ -268,28 +286,46 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         {isGenerated && (
           <div className="options-container animate-fade-in">
             <div
-              className="option-card option-esanjeevani card-interactive"
+              className={`option-card option-esanjeevani card-interactive ${symptomRecommendation?.recommendedRoute === 'TELECONSULTATION' ? 'recommended-option' : ''}`}
               onClick={() => handleOptionClick('TELECONSULTATION')}
             >
               <div className="option-icon-wrapper esanjeevani-icon">
                 <Video size={32} />
               </div>
               <div className="option-content">
-                <h3 className="option-title">eSanjeevani</h3>
-                <p className="option-description">For remote/online consultation</p>
+                <div className="option-title-row">
+                  <h3 className="option-title">eSanjeevani</h3>
+                  {symptomRecommendation?.recommendedRoute === 'TELECONSULTATION' && (
+                    <span className="recommendation-badge">Recommended</span>
+                  )}
+                </div>
+                <p className="option-description">
+                  {symptomRecommendation?.recommendedRoute === 'TELECONSULTATION'
+                    ? `Best suited for ${symptomRecommendation.suggestedSpecialties[0] || 'your symptoms'}.`
+                    : 'Remote consultation for stable symptoms.'}
+                </p>
               </div>
             </div>
 
             <div
-              className="option-card option-hospital card-interactive"
+              className={`option-card option-hospital card-interactive ${symptomRecommendation?.recommendedRoute === 'HOSPITAL_VISIT' ? 'recommended-option' : ''}`}
               onClick={() => handleOptionClick('HOSPITAL_VISIT')}
             >
               <div className="option-icon-wrapper hospital-icon">
                 <Building2 size={32} />
               </div>
               <div className="option-content">
-                <h3 className="option-title">Hospital Dashboard</h3>
-                <p className="option-description">For in-person hospital/doctor access</p>
+                <div className="option-title-row">
+                  <h3 className="option-title">Hospital Dashboard</h3>
+                  {symptomRecommendation?.recommendedRoute === 'HOSPITAL_VISIT' && (
+                    <span className="recommendation-badge">Recommended</span>
+                  )}
+                </div>
+                <p className="option-description">
+                  {symptomRecommendation?.recommendedRoute === 'HOSPITAL_VISIT'
+                    ? `See ${symptomRecommendation.suggestedSpecialties[0] || 'a doctor'} in person.`
+                    : 'In-person care when an examination is needed.'}
+                </p>
               </div>
             </div>
           </div>
@@ -333,6 +369,28 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           max-width: 760px;
           margin: 0 auto;
           padding-top: 1rem;
+        }
+
+        .option-title-row {
+          display: flex;
+          align-items: center;
+          gap: 0.55rem;
+          flex-wrap: wrap;
+        }
+
+        .recommendation-badge {
+          color: var(--brand-primary);
+          background: rgba(14, 165, 233, 0.12);
+          border: 1px solid rgba(14, 165, 233, 0.3);
+          border-radius: var(--radius-full);
+          padding: 0.2rem 0.5rem;
+          font-size: 0.68rem;
+          font-weight: 800;
+        }
+
+        .recommended-option {
+          border-color: var(--brand-primary);
+          box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.12), var(--shadow-md);
         }
 
         .active-visit-hero-banner {
