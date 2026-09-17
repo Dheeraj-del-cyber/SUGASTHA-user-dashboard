@@ -3,7 +3,6 @@ import {
   Clock,
   CheckCircle2,
   Building2,
-  UserCheck,
   Layers,
   ArrowRight,
   Sparkles,
@@ -207,7 +206,7 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
                 }`}
               >
                 <div className="node-rank-badge">
-                  {node.priorityOrder === 1 ? 'Your hospital' : 'Another hospital'}
+                  {node.priorityOrder === 1 ? 'Selected' : 'Backup'}
                 </div>
 
                 <div className="node-details">
@@ -215,26 +214,20 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
                     <Building2 size={15} className="text-muted" />
                     <strong>{node.hospitalName}</strong>
                   </div>
-                  <div className="node-doc-row">
-                    <UserCheck size={14} className="text-teal" />
-                    <span>
-                      {node.doctorName} • {node.doctorSpecialization}
-                    </span>
-                  </div>
                   {node.rejectionReason && (
-                    <span className="rejection-hint">This hospital was full, so we moved on.</span>
+                    <span className="rejection-hint">Hospital full</span>
                   )}
                 </div>
 
                 <div className="node-status-pill">
                   {isNodeAccepted ? (
-                    <span className="badge badge-green">Yes, visit here</span>
+                    <span className="badge badge-green">Here</span>
                   ) : isNodeActive ? (
-                    <span className="badge badge-yellow">Waiting for reply</span>
+                    <span className="badge badge-yellow">Waiting</span>
                   ) : isNodePassed ? (
-                    <span className="badge badge-red">Was full</span>
+                    <span className="badge badge-red">Full</span>
                   ) : (
-                    <span className="badge badge-info">Ready if needed</span>
+                    <span className="badge badge-info">Next</span>
                   )}
                 </div>
               </div>
@@ -316,6 +309,12 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
           flex-direction: column;
           gap: 0.7rem;
           align-items: stretch;
+          border: 1px solid #000000;
+        }
+        .timeline-card,
+        .queue-tracking-card,
+        .finish-action-card {
+          border: 1px solid #000000;
         }
         .tracker-id-row {
           display: flex;
@@ -382,11 +381,11 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
         }
         .callout-pending {
           background: rgba(245, 158, 11, 0.12);
-          border: 1px solid rgba(245, 158, 11, 0.35);
+          border: 1px solid #000000;
         }
         .callout-confirmed {
           background: rgba(16, 185, 129, 0.12);
-          border: 1px solid rgba(16, 185, 129, 0.35);
+          border: 1px solid #000000;
         }
         .callout-text h4 {
           font-size: 0.85rem;
@@ -429,6 +428,39 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
           .callout-text p {
             font-size: 0.68rem;
           }
+          .queue-tracking-card {
+            gap: 0.55rem;
+            padding: 0.75rem;
+          }
+          .queue-card-top .section-title {
+            font-size: 0.82rem;
+          }
+          .queue-card-top svg {
+            width: 15px;
+            height: 15px;
+          }
+          .queue-nodes-stream {
+            gap: 0.35rem;
+          }
+          .queue-node-box {
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            gap: 0.45rem;
+            padding: 0.45rem 0.55rem;
+          }
+          .node-rank-badge {
+            font-size: 0.6rem;
+          }
+          .node-hosp-row {
+            font-size: 0.7rem;
+          }
+          .node-hosp-row svg {
+            width: 13px;
+            height: 13px;
+          }
+          .node-status-pill .badge {
+            font-size: 0.58rem;
+            padding: 2px 5px;
+          }
         }
         .timeline-card {
           display: flex;
@@ -454,7 +486,7 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
           height: 34px;
           border-radius: 50%;
           background: var(--bg-surface-3);
-          border: 2px solid var(--border-subtle);
+          border: 2px solid #000000;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -527,19 +559,19 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
           padding: 0.85rem 1.1rem;
           border-radius: var(--radius-sm);
           background: var(--bg-surface-2);
-          border: 1px solid var(--border-subtle);
+          border: 1px solid #000000;
         }
         .node-active {
-          border-color: var(--brand-primary);
+          border-color: #000000;
           background: rgba(14, 165, 233, 0.1);
         }
         .node-accepted {
-          border-color: #10b981;
+          border-color: #000000;
           background: rgba(16, 185, 129, 0.1);
         }
         .node-passed {
           opacity: 0.65;
-          border-color: rgba(239, 68, 68, 0.3);
+          border-color: #000000;
         }
         .node-rank-badge {
           font-size: 0.72rem;
@@ -574,7 +606,7 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
         }
         .test-api-toolbar {
           background: rgba(245, 158, 11, 0.06);
-          border: 1px dashed rgba(245, 158, 11, 0.35);
+          border: 1px solid #000000;
           display: flex;
           flex-direction: column;
           gap: 0.85rem;
@@ -611,11 +643,30 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
         }
         @media (max-width: 768px) {
           .tracker-steps-line {
-            grid-template-columns: repeat(4, minmax(105px, 1fr));
-            gap: 0.35rem;
-            overflow-x: auto;
-            padding-bottom: 0.35rem;
-            scrollbar-width: thin;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.15rem;
+            overflow: hidden;
+            padding-bottom: 0;
+          }
+          .tracker-step-item {
+            min-width: 0;
+            gap: 0.3rem;
+          }
+          .step-marker {
+            width: 26px;
+            height: 26px;
+            font-size: 0.68rem;
+          }
+          .step-title {
+            font-size: 0.62rem;
+            line-height: 1.15;
+          }
+          .step-sub {
+            font-size: 0.54rem;
+            line-height: 1.15;
+          }
+          .step-connector {
+            top: 13px;
           }
           .queue-node-box {
             grid-template-columns: 1fr;

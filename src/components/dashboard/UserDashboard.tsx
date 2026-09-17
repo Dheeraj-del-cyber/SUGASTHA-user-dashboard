@@ -567,7 +567,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           gap: 1.15rem;
           padding: 2rem;
           background: var(--white);
-          border: 1px solid rgba(23, 32, 42, 0.32);
+          border: 1px solid #000000;
           border-radius: var(--radius-lg);
           box-shadow: var(--shadow-md);
         }

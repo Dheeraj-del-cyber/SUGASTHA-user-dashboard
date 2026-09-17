@@ -1,30 +1,24 @@
 import React, { useState } from 'react';
 import {
   Clock,
-  QrCode,
   Building2,
   UserCheck,
   Calendar,
 } from 'lucide-react';
 import { ConsultationRequest } from '../../types';
-import { Modal } from '../common/Modal';
-import { QrCodeDisplay } from '../consultation/QrCodeDisplay';
 
 interface ConsultationHistoryProps {
   history: ConsultationRequest[];
 }
 
 export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ history }) => {
-  const [selectedPass, setSelectedPass] = useState<ConsultationRequest | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
     <div className="history-view-container animate-fade-in">
       <div className="history-header">
         <div>
           <h3 className="section-title">Your Hospital Passes</h3>
-          <p className="section-subtitle">
-            Passes from your past visits. Show them at the hospital desk.
-          </p>
         </div>
       </div>
 
@@ -74,68 +68,59 @@ export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ histor
                 </div>
               </div>
 
-              <div className="history-details-grid">
-                <div className="history-detail-item">
-                  <Building2 size={15} className="text-teal" />
-                  <div>
-                    <strong>{item.selectedHospital.name}</strong>
-                    <span className="text-xs text-muted block">
-                      {item.selectedHospital.address}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="history-detail-item">
-                  <UserCheck size={15} className="text-emerald" />
-                  <div>
-                    <strong>{item.selectedDoctor.name}</strong>
-                    <span className="text-xs text-muted block">
-                      {item.selectedDoctor.specialization}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="history-detail-item">
-                  <Calendar size={15} className="text-muted" />
-                  <span className="text-sm">
-                    {new Date(item.createdAt).toLocaleDateString('en-IN', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
-                  </span>
-                </div>
-              </div>
-
-              {/* View Pass Action */}
               <div className="history-card-footer">
-                <span className="symptoms-hint">
-                  Symptoms: {item.primarySymptoms.slice(0, 2).join(', ')}
-                </span>
-
                 <button
-                  onClick={() => setSelectedPass(item)}
-                  className="btn btn-secondary btn-sm"
+                  type="button"
+                  onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
+                  className="history-more-btn"
+                  aria-expanded={expandedId === item.id}
                 >
-                  <QrCode size={14} className="text-teal" />
-                  <span>View Pass</span>
+                  {expandedId === item.id ? 'Hide details' : 'More'}
                 </button>
               </div>
+
+              {expandedId === item.id && (
+                <div className="history-details-grid">
+                  <div className="history-detail-item">
+                    <Building2 size={15} className="text-teal" />
+                    <div>
+                      <strong>{item.selectedHospital.name}</strong>
+                      <span className="text-xs text-muted block">
+                        {item.selectedHospital.address}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="history-detail-item">
+                    <UserCheck size={15} className="text-emerald" />
+                    <div>
+                      <strong>{item.selectedDoctor.name}</strong>
+                      <span className="text-xs text-muted block">
+                        {item.selectedDoctor.specialization}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="history-detail-item">
+                    <Calendar size={15} className="text-muted" />
+                    <span className="text-sm">
+                      {new Date(item.createdAt).toLocaleDateString('en-IN', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </span>
+                  </div>
+
+                  <span className="symptoms-hint">
+                    Symptoms: {item.primarySymptoms.slice(0, 2).join(', ')}
+                  </span>
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
-
-      {/* View Pass Modal */}
-      <Modal
-        isOpen={!!selectedPass}
-        onClose={() => setSelectedPass(null)}
-        title="Your Hospital Pass"
-        subtitle="Show this at the hospital desk"
-        maxWidth="440px"
-      >
-        {selectedPass && <QrCodeDisplay consultation={selectedPass} size={200} />}
-      </Modal>
 
       <style>{`
         .history-view-container {
@@ -151,7 +136,8 @@ export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ histor
         .history-item-card {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 0.55rem;
+          padding: 0.8rem 1rem;
           border-left: 3px solid var(--brand-primary);
         }
         .history-card-top {
@@ -168,8 +154,8 @@ export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ histor
           letter-spacing: 0.05em;
         }
         .item-id {
-          font-size: 1.15rem;
-          color: #ffffff;
+          font-size: 0.95rem;
+          color: var(--dark-navy-text);
         }
         .history-top-badges {
           display: flex;
@@ -193,8 +179,17 @@ export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ histor
           display: flex;
           justify-content: space-between;
           align-items: center;
-          border-top: 1px solid var(--border-subtle);
-          padding-top: 0.75rem;
+          border-top: 1px solid var(--border-light);
+          padding-top: 0.45rem;
+        }
+        .history-more-btn {
+          margin-left: auto;
+          color: var(--brand-primary);
+          font-size: 0.72rem;
+          font-weight: 700;
+          background: none;
+          border: 0;
+          padding: 0;
         }
         .symptoms-hint {
           font-size: 0.78rem;
@@ -211,14 +206,11 @@ export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ histor
         @media (max-width: 768px) {
           .history-details-grid {
             grid-template-columns: 1fr;
+            gap: 0.6rem;
+            padding: 0.65rem;
           }
           .history-card-footer {
-            flex-direction: column;
-            gap: 0.6rem;
             align-items: flex-start;
-          }
-          .history-card-footer button {
-            width: 100%;
           }
         }
       `}</style>

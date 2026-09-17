@@ -6,7 +6,6 @@ import {
   Building2,
   Activity,
   FileText,
-  Clock,
 } from 'lucide-react';
 import { Modal } from '../common/Modal';
 import { HealthcareJourneySummary } from '../../types';
@@ -41,15 +40,15 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
       isOpen={isOpen}
       onClose={onClose}
       title="Visit Summary"
-      subtitle="What happened during your visit"
-      maxWidth="620px"
+      subtitle="Your visit details"
+      maxWidth="560px"
     >
       <div className="journey-modal-body animate-fade-in">
-        {/* PIN & Date Strip */}
+        {/* PIN & date */}
         <div className="summary-token-strip">
           <div>
-            <span className="text-xs text-muted">YOUR CHECK-IN PIN</span>
-            <strong className="token-display">#{summary.consultationNumber}</strong>
+            <span className="summary-label">PIN</span>
+            <strong className="token-display">{summary.consultationNumber}</strong>
           </div>
           <div className="text-right">
             <span className="text-xs text-muted">DATE</span>
@@ -72,17 +71,9 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
               </span>
             ))}
           </div>
-          {summary.consideredMedicalHistory.length > 0 && (
-            <div className="history-considered-row">
-              <span className="text-xs text-muted">Your health history used:</span>
-              <p className="text-xs text-secondary">
-                {summary.consideredMedicalHistory.join(' • ')}
-              </p>
-            </div>
-          )}
         </div>
 
-        {/* Section 2: Your health priority */}
+        {/* Care priority */}
         <div className="summary-section-box">
           <h4 className="section-title-sm">
             <ShieldCheck size={15} className="text-teal" /> Your health priority
@@ -109,16 +100,16 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
           </div>
         </div>
 
-        {/* Section 3: Hospital & doctor */}
+        {/* Hospital & doctor */}
         {summary.hospitalDetails && (
           <div className="summary-section-box">
             <h4 className="section-title-sm">
-              <Building2 size={15} className="text-teal" /> Where you went
+              <Building2 size={15} className="text-teal" /> Visit details
             </h4>
             <div className="provider-details-grid">
               <div>
                 <span className="text-muted text-xs">Hospital:</span>
-                <p className="font-semibold text-white">{summary.hospitalDetails.hospitalName}</p>
+                <p className="font-semibold summary-dark-text">{summary.hospitalDetails.hospitalName}</p>
               </div>
               <div>
                 <span className="text-muted text-xs">Doctor:</span>
@@ -128,32 +119,12 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
           </div>
         )}
 
-        {/* Section 4: What happened (short) */}
-        <div className="summary-section-box">
-          <h4 className="section-title-sm">
-            <Clock size={15} className="text-teal" /> What happened
-          </h4>
-          <div className="events-timeline-list">
-            {summary.eventsTimeline.map((ev, i) => (
-              <div key={i} className="timeline-event-item">
-                <span className="event-bullet"></span>
-                <div className="event-content">
-                  <strong>{ev.event}</strong>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Save to records */}
         <div className="abha-sync-card">
           <div className="flex-row items-center gap-2">
             <FileText size={20} className="text-teal" />
             <div>
-              <strong className="text-white">Save to Health Records</strong>
-              <p className="text-xs text-muted">
-                Keep this visit in your health records. Only you can see it.
-              </p>
+              <strong className="summary-dark-text">Save this visit</strong>
             </div>
           </div>
 
@@ -170,7 +141,7 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
             ) : (
               <>
                 <ShieldCheck size={15} />
-                <span>Save to Health Records</span>
+                <span>Save visit</span>
               </>
             )}
           </button>
@@ -181,15 +152,15 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
         .journey-modal-body {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 0.7rem;
         }
         .summary-token-strip {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: rgba(14, 165, 233, 0.1);
-          border: 1px solid rgba(14, 165, 233, 0.3);
-          padding: 0.75rem 1rem;
+          background: var(--pastel-light-blue);
+          border: 1px solid #000000;
+          padding: 0.55rem 0.75rem;
           border-radius: var(--radius-sm);
         }
         .token-display {
@@ -197,10 +168,20 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
           font-size: 1.25rem;
           color: var(--brand-accent);
         }
+        .summary-label {
+          display: block;
+          color: var(--text-muted);
+          font-size: 0.65rem;
+          font-weight: 700;
+          text-transform: uppercase;
+        }
+        .summary-dark-text {
+          color: var(--dark-navy-text);
+        }
         .summary-section-box {
           background: var(--bg-surface-2);
-          border: 1px solid var(--border-subtle);
-          padding: 0.85rem 1rem;
+          border: 1px solid #000000;
+          padding: 0.65rem 0.75rem;
           border-radius: var(--radius-sm);
           display: flex;
           flex-direction: column;
@@ -211,7 +192,7 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
           display: flex;
           align-items: center;
           gap: 6px;
-          color: #ffffff;
+          color: var(--dark-navy-text);
         }
         .symptoms-tags-row {
           display: flex;
@@ -219,7 +200,7 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
           gap: 0.4rem;
         }
         .sym-tag {
-          background: rgba(255, 255, 255, 0.08);
+          background: var(--pastel-light-blue);
           font-size: 0.75rem;
           padding: 2px 8px;
           border-radius: var(--radius-xs);
@@ -235,7 +216,7 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
           color: var(--text-secondary);
         }
         .rec-path strong {
-          color: #ffffff;
+          color: var(--dark-navy-text);
         }
         .triage-rationale-text {
           font-size: 0.8rem;
@@ -248,41 +229,13 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
           gap: 0.6rem;
           font-size: 0.82rem;
         }
-        .events-timeline-list {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          position: relative;
-        }
-        .timeline-event-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 0.65rem;
-          font-size: 0.78rem;
-        }
-        .event-bullet {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: var(--brand-primary);
-          margin-top: 5px;
-          flex-shrink: 0;
-        }
-        .event-content strong {
-          color: #ffffff;
-          display: block;
-        }
-        .event-content p {
-          color: var(--text-muted);
-          font-size: 0.72rem;
-        }
         .abha-sync-card {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(15, 23, 42, 0.95) 100%);
-          border: 1px solid rgba(14, 165, 233, 0.4);
-          padding: 1rem 1.25rem;
+          background: var(--pastel-light-blue);
+          border: 1px solid #000000;
+          padding: 0.65rem 0.75rem;
           border-radius: var(--radius-sm);
         }
       `}</style>
