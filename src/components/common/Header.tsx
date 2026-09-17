@@ -9,6 +9,7 @@ interface HeaderProps {
   onLogout: () => void;
   onViewActiveConsultation: () => void;
   onOpenProfile?: () => void;
+  onGoHome?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -18,6 +19,7 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
   onViewActiveConsultation,
   onOpenProfile,
+  onGoHome,
 }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(2);
@@ -43,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="swasthya-header">
       <div className="container header-container">
         {/* Brand Logo & Title */}
-        <div className="brand-group" onClick={() => window.location.reload()}>
+        <div className="brand-group" onClick={onGoHome ?? (() => undefined)}>
           <div className="brand-icon-wrapper">
             <img src="/images/logo.png" alt="SUGASTHA logo" className="brand-logo-image" />
           </div>

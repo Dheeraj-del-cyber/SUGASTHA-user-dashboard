@@ -29,6 +29,7 @@ interface UserDashboardProps {
 }
 
 const COMMON_SYMPTOMS = ['Fever', 'Cough', 'Headache', 'Fatigue'];
+const DASHBOARD_STATE_KEY = 'sugastha_dashboard_state';
 
 const FEATURE_SLIDES = [
   {
@@ -81,6 +82,31 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
   const [activeFeature, setActiveFeature] = useState(0);
   const [isFeaturePaused, setIsFeaturePaused] = useState(false);
   const featureTouchStart = useRef<number | null>(null);
+
+  useEffect(() => {
+    try {
+      const savedState = window.localStorage.getItem(DASHBOARD_STATE_KEY);
+      if (!savedState) return;
+
+      const parsed = JSON.parse(savedState) as {
+        symptomInput?: string;
+        isGenerated?: boolean;
+        symptomRecommendation?: TriageResult | null;
+      };
+
+      if (typeof parsed.symptomInput === 'string') setSymptomInput(parsed.symptomInput);
+      if (typeof parsed.isGenerated === 'boolean') setIsGenerated(parsed.isGenerated);
+      if (parsed.symptomRecommendation) setSymptomRecommendation(parsed.symptomRecommendation);
+    } catch {
+      // Ignore invalid stored dashboard state.
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const dashboardState = { symptomInput, isGenerated, symptomRecommendation };
+    window.localStorage.setItem(DASHBOARD_STATE_KEY, JSON.stringify(dashboardState));
+  }, [symptomInput, isGenerated, symptomRecommendation]);
 
   useEffect(() => {
     if (isFeaturePaused) return;

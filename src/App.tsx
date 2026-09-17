@@ -127,6 +127,7 @@ export const App: React.FC = () => {
   // Handle Logout
   const handleLogout = () => {
     abhaService.logout();
+    window.localStorage.removeItem('sugastha_dashboard_state');
     setProfile(null);
     setRecords([]);
     setConditions([]);
@@ -353,6 +354,10 @@ export const App: React.FC = () => {
         onOpenProfile={() => {
           setActiveTab('records');
           setActiveSubView('RECORDS');
+        }}
+        onGoHome={() => {
+          setActiveTab('dashboard');
+          setActiveSubView('DASHBOARD');
         }}
       />
 
