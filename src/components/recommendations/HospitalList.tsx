@@ -264,12 +264,12 @@ export const HospitalList: React.FC<HospitalListProps> = ({
           flex-direction: column;
           gap: 0.75rem;
           cursor: pointer;
-          border: 1px solid var(--border-subtle);
+          border: 1px solid #17202A;
           position: relative;
           padding: 1rem;
         }
         .selected-hospital-card {
-          border-color: var(--brand-primary);
+          border-color: #17202A;
           background: var(--pastel-light-blue);
           box-shadow: var(--shadow-soft);
         }
