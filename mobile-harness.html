@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mobile Harness — My Record</title>
+    <style>
+      html, body { margin: 0; padding: 0; background: #31343d; min-height: 100vh; }
+      .phone {
+        width: 390px;
+        height: 844px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 0;
+        overflow: hidden;
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.12);
+      }
+      iframe { width: 390px; height: 844px; border: 0; display: block; }
+    </style>
+  </head>
+  <body>
+    <div class="phone">
+      <iframe
+        id="app"
+        src="/" 
+        title="SUGASTHA 390px" /></iframe>
+    </div>
+    <script>
+      const ABHA = '91-4523-8901-2345';
+      const STORE_KEY = 'sugastha_abha_profiles_store';
+      const SESSION_KEY = 'sugastha_active_abha_user';
+
+      // Seed the ABHA session in the app iframe's origin, then reload so App
+      // picks it up on mount. Origin is same (localhost:5173) so this works.
+      const frame = document.getElementById('app');
+      frame.addEventListener('load', () => {
+        try {
+          const doc = frame.contentDocument;
+          const win = frame.contentWindow;
+          const raw = win.localStorage.getItem(STORE_KEY);
+          if (!raw) {
+            // First load just initialized the store via the app itself; reload once.
+            win.location.reload();
+            return;
+          }
+          if (!win.localStorage.getItem(SESSION_KEY)) {
+            win.localStorage.setItem(SESSION_KEY, ABHA);
+            win.location.reload();
+          }
+        } catch (e) {
+          console.error('Harness seed failed:', e);
+        }
+      });
+    </script>
+  </body>
+</html>
