@@ -11,6 +11,7 @@ import {
   TriageResult,
 } from '../../types';
 import { triageEngine } from '../../services/triageEngine';
+import sideImage from '../../../images/side.png';
 
 interface UserDashboardProps {
   profile: AbhaProfile;
@@ -242,7 +243,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
       <div className="card symptom-home-card">
         <div className="symptom-intro-row">
           <div className="symptom-intro-icon">
-            <img src="/images/side.png" alt="AI health check" className="symptom-intro-image" />
+            <img src={sideImage} alt="AI health check" className="symptom-intro-image" />
           </div>
           <div className="symptom-intro-copy">
             <span className="eyebrow-label">AI HEALTH CHECK</span>

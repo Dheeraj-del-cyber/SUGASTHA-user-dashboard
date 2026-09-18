@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ShieldCheck, User, LogOut, Bell, CheckCircle2, Home, FileText, Ticket } from 'lucide-react';
 import { AbhaProfile, ConsultationRequest } from '../../types';
 import { ActiveTab } from './BottomNav';
+import logoImage from '../../../images/logo.png';
 
 interface HeaderProps {
   profile: AbhaProfile | null;
@@ -56,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Brand Logo & Title */}
         <div className="brand-group" onClick={onGoHome ?? (() => onSelectTab?.('dashboard'))}>
           <div className="brand-icon-wrapper">
-            <img src="/images/logo.png" alt="SUGASTHA logo" className="brand-logo-image" />
+            <img src={logoImage} alt="SUGASTHA logo" className="brand-logo-image" />
           </div>
           <div className="brand-text">
             <div className="brand-title-row">

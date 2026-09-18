@@ -15,6 +15,7 @@ import { HealthRecordsView } from './components/profile/HealthRecordsView';
 import { ConsultationHistory } from './components/history/ConsultationHistory';
 import { DoctorHistory } from './components/history/DoctorHistory';
 import { HealthcareJourneySummaryModal } from './components/summary/HealthcareJourneySummaryModal';
+import logoImage from '../images/logo.png';
 
 import { abhaService } from './services/abhaService';
 import { triageEngine } from './services/triageEngine';
@@ -307,7 +308,7 @@ export const App: React.FC = () => {
     return (
       <main className="sugastha-loading-screen" aria-live="polite" aria-label="Loading SUGASTHA">
         <div className="loading-brand-lockup">
-          <img src="/images/logo.png" alt="SUGASTHA logo" className="loading-logo" />
+          <img src={logoImage} alt="SUGASTHA logo" className="loading-logo" />
           <div className="loading-brand-name">SUGASTHA</div>
           <div className="loading-progress" aria-hidden="true">
             <span />
