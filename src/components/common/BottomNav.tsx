@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import { Home, FileText, User, Stethoscope, ShieldCheck } from 'lucide-react';
 
-export type ActiveTab = 'dashboard' | 'appointments' | 'doctors' | 'records' | 'profile' | 'triage' | 'tracking';
+export type ActiveTab = 'dashboard' | 'appointments' | 'doctors' | 'records' | 'profile' | 'triage' | 'tracking' | 'consents';
 
 interface BottomNavProps {
   activeTab: ActiveTab;
@@ -32,7 +32,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   }, []);
 
   const handleCenterAction = () => {
-    onSelectTab(hasActiveConsultation ? 'tracking' : 'appointments');
+    onSelectTab('appointments');
   };
 
   // Dimensions for pixel-perfect concentric cradle
@@ -119,8 +119,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       {/* Center Doctor Floating Action Button concentric with the cradle curve */}
       <button
         onClick={handleCenterAction}
-        className={`nav-center-btn ${activeTab === 'appointments' || activeTab === 'tracking' ? 'active' : ''}`}
-        aria-label={hasActiveConsultation ? 'Active consultation' : 'Doctor consultation'}
+        className={`nav-center-btn ${activeTab === 'appointments' ? 'active' : ''}`}
+        aria-label="Hospital passes"
       >
         <div className="doctor-inner-circle">
           <Stethoscope size={24} strokeWidth={2.4} color="#ffffff" />
@@ -129,8 +129,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       </button>
 
       <button
-        onClick={() => onSelectTab('appointments')}
-        className={`nav-item ${activeTab === 'appointments' || activeTab === 'tracking' ? 'active' : ''}`}
+        onClick={() => onSelectTab('consents')}
+        className={`nav-item ${activeTab === 'consents' ? 'active' : ''}`}
       >
         <div className="icon-box">
           <ShieldCheck size={20} className="nav-icon" />

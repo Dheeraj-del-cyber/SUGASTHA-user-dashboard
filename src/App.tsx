@@ -13,6 +13,7 @@ import { BookingConfirmationModal } from './components/consultation/BookingConfi
 import { ConsultationTracker } from './components/consultation/ConsultationTracker';
 import { HealthRecordsView } from './components/profile/HealthRecordsView';
 import { ConsultationHistory } from './components/history/ConsultationHistory';
+import { DoctorHistory } from './components/history/DoctorHistory';
 import { HealthcareJourneySummaryModal } from './components/summary/HealthcareJourneySummaryModal';
 
 import { abhaService } from './services/abhaService';
@@ -47,7 +48,7 @@ export const App: React.FC = () => {
   // Active View State
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [activeSubView, setActiveSubView] = useState<
-    'DASHBOARD' | 'SYMPTOMS' | 'TRIAGE_RESULT' | 'RECOMMENDATION' | 'TRACKER' | 'RECORDS' | 'HISTORY'
+    'DASHBOARD' | 'SYMPTOMS' | 'TRIAGE_RESULT' | 'RECOMMENDATION' | 'TRACKER' | 'RECORDS' | 'HISTORY' | 'CONSENTS'
   >('DASHBOARD');
 
   // Triage & Booking Pipeline State
@@ -87,6 +88,10 @@ export const App: React.FC = () => {
     const loadingTimer = window.setTimeout(() => setIsInitializing(false), 3000);
     return () => window.clearTimeout(loadingTimer);
   }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeTab, activeSubView]);
 
   // Handle Login Success
   const handleLoginSuccess = (data: {
@@ -293,7 +298,8 @@ export const App: React.FC = () => {
     else if (tab === 'appointments' || tab === 'tracking') {
       if (activeConsultation) setActiveSubView('TRACKER');
       else setActiveSubView('HISTORY');
-    } else if (tab === 'records' || tab === 'profile') setActiveSubView('RECORDS');
+    } else if (tab === 'consents') setActiveSubView('CONSENTS');
+    else if (tab === 'records' || tab === 'profile') setActiveSubView('RECORDS');
     else if (tab === 'doctors') setActiveSubView('SYMPTOMS');
   };
 
@@ -457,6 +463,11 @@ export const App: React.FC = () => {
         {/* View 7: Consultation Passes & History */}
         {activeSubView === 'HISTORY' && (
           <ConsultationHistory history={consultationHistory} />
+        )}
+
+        {/* View 8: Doctor Consultation History */}
+        {activeSubView === 'CONSENTS' && (
+          <DoctorHistory history={consultationHistory} />
         )}
       </main>
 

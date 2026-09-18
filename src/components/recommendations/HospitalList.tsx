@@ -404,8 +404,8 @@ export const HospitalList: React.FC<HospitalListProps> = ({
         }
         .doc-chip {
           flex: 0 0 220px;
-          background: var(--white);
-          border: 1px solid var(--border-light);
+          background: var(--bg-surface-3);
+          border: 1px solid #000000;
           padding: 0.6rem;
           border-radius: var(--radius-sm);
           display: flex;
@@ -416,11 +416,11 @@ export const HospitalList: React.FC<HospitalListProps> = ({
           transition: all var(--transition-fast);
         }
         .doc-chip:hover {
-          border-color: var(--border-highlight);
+          border-color: #000000;
         }
         .doc-chip.active-doc-chip {
           background: var(--pastel-light-blue);
-          border-color: var(--brand-primary);
+          border-color: #000000;
         }
         .doc-chip-top {
           display: flex;
