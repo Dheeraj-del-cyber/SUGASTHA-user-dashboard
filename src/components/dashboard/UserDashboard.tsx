@@ -35,7 +35,7 @@ const FEATURE_SLIDES = [
     description: 'Describe how you feel and get a guided care path in under a minute.',
     action: 'AI symptom check',
     icon: Sparkles,
-    image: '/images/side.png',
+    image: sideImage,
     theme: 'feature-slide-blue',
   },
   {
