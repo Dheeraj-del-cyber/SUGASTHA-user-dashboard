@@ -6,7 +6,6 @@ import {
   AlertTriangle,
   Pill,
   Stethoscope,
-  FileText,
   FlaskConical,
   ScanLine,
   Syringe,
@@ -24,7 +23,6 @@ import {
   Inbox,
   Calendar,
   ClipboardList,
-  Zap,
   Activity,
   HeartPulse,
   FileBarChart,
@@ -49,6 +47,22 @@ type UiRecord = HealthRecord & {
 function effCategory(r: UiRecord): string {
   return r.displayCategory ?? r.category;
 }
+
+// ─── Medical Alert (compact doctor-facing chips) ─────────────────────────────
+
+type MedAlertItem = {
+  record: UiRecord | null;
+  label: string; // short, scannable chip text
+  detail: string; // full clinical text for the chip tooltip
+  severity: 'Severe' | 'Moderate' | 'Mild' | null;
+  severe: boolean;
+};
+
+const ALLERGY_SEVERITY_LABEL: Record<Allergy['severity'], 'Severe' | 'Moderate' | 'Mild'> = {
+  SEVERE: 'Severe',
+  MODERATE: 'Moderate',
+  MILD: 'Mild',
+};
 
 // ─── Record type metadata (icon tile + badge tone per category) ──────────────
 
@@ -190,7 +204,6 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
   records,
   conditions,
   allergies,
-  onStartTriage,
   onAddRecord,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -331,19 +344,26 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
     ];
   }, [allRecords, conditions]);
 
-  const doctorAlertList = useMemo(() => {
+  // Compact Medical Alert chips: allergies first (most safety-critical),
+  // then critical flags from records. `label` is the short chip text;
+  // `detail` keeps the full clinical wording for the tooltip.
+  const doctorAlertList = useMemo<MedAlertItem[]>(() => {
+    const fromAllergies = allergies.map((a) => ({
+      record: null,
+      label: a.allergen,
+      detail: `Allergy: ${a.allergen} — ${a.reaction} (${ALLERGY_SEVERITY_LABEL[a.severity]})`,
+      severity: ALLERGY_SEVERITY_LABEL[a.severity],
+      severe: a.severity === 'SEVERE',
+    }));
     const fromRecords = allRecords.flatMap((r) =>
       (r.criticalFlags ?? []).map((flag) => ({
         record: r,
-        flag,
-        severe: /allerg/i.test(flag),
+        label: flag,
+        detail: flag,
+        severity: null,
+        severe: /allerg|severe|emergency|high priority/i.test(flag),
       }))
     );
-    const fromAllergies = allergies.map((a) => ({
-      record: null,
-      flag: `Allergy: ${a.allergen} — ${a.reaction} (${a.severity.toLowerCase()})`,
-      severe: true,
-    }));
     return [...fromAllergies, ...fromRecords];
   }, [allRecords, allergies]);
 
@@ -418,25 +438,62 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
         </div>
       </div>
 
-      {/* ── DOCTOR ALERTS (auto-derived, only if present) ──────────────── */}
-      {doctorAlertList.length > 0 && (
-        <section className="hrv-alerts-strip" aria-label="Important for doctor">
-          <AlertTriangle size={15} />
-          <span className="hrv-alerts-strip-label">Important for Doctor:</span>
-          <div className="hrv-alerts-strip-items">
-            {doctorAlertList.slice(0, 3).map(({ record, flag }, i) => (
-              <button
-                key={i}
-                type="button"
-                className={`hrv-alerts-strip-chip ${i === 0 && doctorAlertList[0].severe ? 'hrv-alert-severe' : ''}`}
-                onClick={() => record && setDetailRecord(record)}
-              >
-                {flag}
-              </button>
-            ))}
+      {/* ── MEDICAL ALERT (compact single-row card, always visible) ────── */}
+      <section
+        className={`hrv-med-alert ${doctorAlertList.length === 0 ? 'hrv-med-alert-empty' : ''}`}
+        aria-label="Medical alert"
+      >
+        <span className="hrv-med-alert-head">
+          <AlertTriangle size={13} strokeWidth={2.4} />
+          Medical Alert
+        </span>
+        {doctorAlertList.length > 0 ? (
+          <div className="hrv-med-alert-chips no-scrollbar">
+            {doctorAlertList.slice(0, 8).map((alert, i) => {
+              const chipClass = `hrv-med-alert-chip ${alert.severe ? 'hrv-med-alert-chip-severe' : ''}`;
+              const dotClass =
+                alert.severity === 'Moderate'
+                  ? 'hrv-dot-moderate'
+                  : alert.severity === 'Mild'
+                  ? 'hrv-dot-mild'
+                  : 'hrv-dot-severe';
+              const body = (
+                <>
+                  <span className={`hrv-med-alert-dot ${dotClass}`} aria-hidden="true" />
+                  <span className="hrv-med-alert-chip-label">{alert.label}</span>
+                  {alert.severity && (
+                    <span className={`hrv-med-alert-chip-sev hrv-sev-${alert.severity.toLowerCase()}`}>
+                      · {alert.severity}
+                    </span>
+                  )}
+                </>
+              );
+              return alert.record ? (
+                <button
+                  key={i}
+                  type="button"
+                  className={chipClass}
+                  onClick={() => {
+                    if (alert.record) setDetailRecord(alert.record);
+                  }}
+                  title={alert.detail}
+                >
+                  {body}
+                </button>
+              ) : (
+                <span key={i} className={chipClass} title={alert.detail}>
+                  {body}
+                </span>
+              );
+            })}
           </div>
-        </section>
-      )}
+        ) : (
+          <span className="hrv-med-alert-clear">
+            <ShieldCheck size={12} />
+            No medical alerts recorded
+          </span>
+        )}
+      </section>
 
       {/* ── CATEGORY CARDS ROW ───────────────────────────────────────── */}
       <div className="hrv-rail-wrap">
@@ -583,49 +640,6 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
                   </span>
                 </div>
               ))}
-            </div>
-          </section>
-
-          {/* QUICK ACTIONS */}
-          <section className="hrv-card hrv-actions-card" aria-label="Quick actions">
-            <div className="hrv-ov-head">
-              <span className="hrv-ov-head-icon hrv-qa-icon">
-                <Zap size={16} />
-              </span>
-              <div>
-                <h3>Quick Actions</h3>
-                <p>Access your important health services</p>
-              </div>
-            </div>
-            <div className="hrv-qa-list">
-              <button type="button" className="hrv-qa-item" onClick={() => goToTimeline('LAB_REPORT')}>
-                <span className="hrv-qa-item-icon hrv-tile-amber">
-                  <FlaskConical size={15} />
-                </span>
-                <span>Test Results</span>
-                <ChevronRight size={14} />
-              </button>
-              <button type="button" className="hrv-qa-item" onClick={() => goToTimeline('DOCUMENT')}>
-                <span className="hrv-qa-item-icon hrv-tile-violet">
-                  <FileText size={15} />
-                </span>
-                <span>Medical Reports</span>
-                <ChevronRight size={14} />
-              </button>
-              <button type="button" className="hrv-qa-item" onClick={() => goToTimeline('APPOINTMENT')}>
-                <span className="hrv-qa-item-icon hrv-tile-blue">
-                  <CalendarPlus size={15} />
-                </span>
-                <span>Appointments</span>
-                <ChevronRight size={14} />
-              </button>
-              <button type="button" className="hrv-qa-item" onClick={onStartTriage}>
-                <span className="hrv-qa-item-icon hrv-tile-teal">
-                  <Stethoscope size={15} />
-                </span>
-                <span>Check Symptoms</span>
-                <ChevronRight size={14} />
-              </button>
             </div>
           </section>
 
@@ -952,37 +966,92 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
         }
         .hrv-safety-pill svg { flex-shrink: 0; }
 
-        /* ═══ Doctor alerts strip ═══ */
-        .hrv-alerts-strip {
+        /* ═══ Medical Alert — compact single-row card ═══ */
+        .hrv-med-alert {
           display: flex;
           align-items: center;
-          gap: 0.6rem;
-          flex-wrap: wrap;
-          background: #FFF7ED;
-          border: 1px solid #FED7AA;
-          border-radius: 12px;
-          padding: 0.6rem 0.9rem;
-          color: #9A3412;
-          font-size: 0.78rem;
-        }
-        .hrv-alerts-strip-label { font-weight: 800; white-space: nowrap; }
-        .hrv-alerts-strip-items { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-        .hrv-alerts-strip-chip {
+          gap: 0.7rem;
+          min-width: 0;
           background: #fff;
-          border: 1px solid #FED7AA;
-          color: #9A3412;
+          border: 1px solid #EEF0F6;
+          border-radius: 12px;
+          padding: 0.45rem 0.7rem;
+          box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+        }
+        .hrv-med-alert-head {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          flex-shrink: 0;
+          font-size: 0.78rem;
+          font-weight: 800;
+          color: #B42318;
+          white-space: nowrap;
+        }
+        .hrv-med-alert-head svg { color: #E11D48; }
+        .hrv-med-alert-empty .hrv-med-alert-head { color: #667085; }
+        .hrv-med-alert-empty .hrv-med-alert-head svg { color: #98A2B3; }
+        /* Chips live in their own internal scroll rail, so many alerts never
+           grow the card taller or wider — one compact row everywhere. */
+        .hrv-med-alert-chips {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          flex: 1 1 auto;
+          min-width: 0;
+          overflow-x: auto;
+          padding: 2px;
+          overscroll-behavior-x: contain;
+          -webkit-overflow-scrolling: touch;
+        }
+        .hrv-med-alert-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          flex-shrink: 0;
+          max-width: 250px;
+          background: #fff;
+          border: 1px solid #F2DCDC;
+          border-radius: 999px;
+          padding: 3px 10px;
           font-size: 0.72rem;
           font-weight: 700;
-          padding: 3px 10px;
-          border-radius: 999px;
-          max-width: 100%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          transition: all var(--transition-fast);
+          color: #344054;
+          white-space: nowrap;
+          font-family: inherit;
         }
-        .hrv-alerts-strip-chip:hover { background: #FFEDD5; }
-        .hrv-alert-severe { background: #FEF2F2; border-color: #FECACA; color: #B91C1C; }
-        .hrv-alert-severe:hover { background: #FEE2E2; }
+        .hrv-med-alert-chip-label { overflow: hidden; text-overflow: ellipsis; }
+        .hrv-med-alert-chip-sev { font-weight: 800; }
+        .hrv-sev-severe { color: #B42318; }
+        .hrv-sev-moderate { color: #B45309; }
+        .hrv-sev-mild { color: #64748B; }
+        .hrv-med-alert-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+        .hrv-dot-severe { background: #E11D48; }
+        .hrv-dot-moderate { background: #F59E0B; }
+        .hrv-dot-mild { background: #94A3B8; }
+        .hrv-med-alert-chip-severe { background: #FEF5F5; border-color: #F4CACA; }
+        button.hrv-med-alert-chip {
+          cursor: pointer;
+          transition: background var(--transition-fast), border-color var(--transition-fast);
+        }
+        button.hrv-med-alert-chip:hover { background: #FDF0F0; border-color: #EFC0C0; }
+        button.hrv-med-alert-chip:focus-visible { outline: 2px solid #F43F5E; outline-offset: 2px; }
+        .hrv-med-alert-clear {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          min-width: 0;
+          font-size: 0.74rem;
+          font-weight: 600;
+          color: #059669;
+          white-space: nowrap;
+        }
+        .hrv-med-alert-clear svg { color: #10B981; flex-shrink: 0; }
 
         /* ═══ Category cards row ═══ */
         .hrv-cat-row {
@@ -1262,7 +1331,7 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
         /* ═══ Sidebar ═══ */
         .hrv-sidebar { display: flex; flex-direction: column; gap: 1.15rem; min-width: 0; }
         .hrv-sidebar > * { min-width: 0; }
-        .hrv-overview-card, .hrv-actions-card { padding: 1.05rem 1.15rem; }
+        .hrv-overview-card { padding: 1.05rem 1.15rem; }
         .hrv-ov-head { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.9rem; }
         .hrv-ov-head-icon {
           width: 38px;
@@ -1274,7 +1343,6 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
           place-items: center;
           flex-shrink: 0;
         }
-        .hrv-qa-icon { background: #EDE9FE; color: #7C3AED; }
         .hrv-ov-head h3 { font-size: 1rem; font-weight: 800; color: #1E1B4B; font-family: var(--font-display); }
         .hrv-ov-head p { font-size: 0.72rem; color: #64748B; }
 
@@ -1306,36 +1374,6 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
         .hrv-ov-amber .hrv-ov-mini-icon { color: #D97706; }
         .hrv-ov-lav { background: #F5F3FF; }
         .hrv-ov-lav .hrv-ov-mini-icon { color: #7C3AED; }
-
-        .hrv-qa-list { display: flex; flex-direction: column; gap: 0.5rem; }
-        .hrv-qa-item {
-          display: flex;
-          align-items: center;
-          gap: 0.7rem;
-          width: 100%;
-          background: #F8FAFF;
-          border: 1px solid #EDF1FA;
-          border-radius: 12px;
-          padding: 0.6rem 0.75rem;
-          font-size: 0.82rem;
-          font-weight: 700;
-          color: #334155;
-          text-align: left;
-          font-family: inherit;
-          cursor: pointer;
-          transition: all var(--transition-fast);
-        }
-        .hrv-qa-item:hover { background: #fff; border-color: #DDE4F8; box-shadow: 0 6px 14px -8px rgba(30, 27, 75, 0.2); }
-        .hrv-qa-item svg:last-child { margin-left: auto; color: #94A3B8; }
-        .hrv-qa-item-icon {
-          width: 32px;
-          height: 32px;
-          border-radius: 9px;
-          display: grid;
-          place-items: center;
-          color: #fff;
-          flex-shrink: 0;
-        }
 
         /* ═══ Add record banner ═══ */
         .hrv-add-banner {
@@ -1830,6 +1868,10 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
           }
           .hrv-safety-pill { display: none; }
 
+          /* Medical Alert stays a slim single row; chips scroll inside */
+          .hrv-med-alert { gap: 0.55rem; padding: 0.45rem 0.6rem; }
+          .hrv-med-alert-chip { max-width: 200px; }
+
           /* Category cards: comfortable fixed-width swipe rail */
           .hrv-cat-row {
             margin: 0 -1rem;
@@ -1872,7 +1914,7 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
 
           /* Sidebar reflows below the timeline */
           .hrv-sidebar { grid-template-columns: 1fr; gap: 0.9rem; }
-          .hrv-ov-head-icon, .hrv-qa-icon { width: 34px; height: 34px; }
+          .hrv-ov-head-icon { width: 34px; height: 34px; }
           .hrv-ov-head h3 { font-size: 0.95rem; }
           .hrv-ov-head p { font-size: 0.7rem; }
 
