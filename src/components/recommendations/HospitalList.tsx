@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   MapPin,
   Car,
@@ -11,6 +11,26 @@ import {
 import { Hospital, Doctor, TriageResult } from '../../types';
 import { hospitalQueueService } from '../../services/hospitalQueueService';
 
+const getDistanceKm = (
+  latitude1: number,
+  longitude1: number,
+  latitude2: number,
+  longitude2: number
+) => {
+  const toRadians = (value: number) => (value * Math.PI) / 180;
+  const earthRadiusKm = 6371;
+  const deltaLat = toRadians(latitude2 - latitude1);
+  const deltaLon = toRadians(longitude2 - longitude1);
+  const lat1 = toRadians(latitude1);
+  const lat2 = toRadians(latitude2);
+
+  const a =
+    Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+
+  return (2 * earthRadiusKm * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))) / 1;
+};
+
 interface HospitalListProps {
   triage: TriageResult;
   onSelectHospitalAndDoctor: (hospital: Hospital, doctor: Doctor) => void;
@@ -20,18 +40,76 @@ export const HospitalList: React.FC<HospitalListProps> = ({
   triage,
   onSelectHospitalAndDoctor,
 }) => {
-  const hospitals = hospitalQueueService.getRecommendedHospitals(triage);
+  const baseHospitals = hospitalQueueService.getRecommendedHospitals(triage);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationStatus, setLocationStatus] = useState<'idle' | 'granted' | 'denied' | 'unsupported'>('idle');
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationStatus('unsupported');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        setLocationStatus('granted');
+      },
+      () => {
+        setLocationStatus('denied');
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }, []);
+
+  const hospitals = useMemo(() => {
+    if (!userLocation) {
+      return [...baseHospitals];
+    }
+
+    return [...baseHospitals]
+      .map((hospital) => {
+        if (typeof hospital.latitude !== 'number' || typeof hospital.longitude !== 'number') {
+          return hospital;
+        }
+
+        const calculatedDistance = getDistanceKm(
+          userLocation.latitude,
+          userLocation.longitude,
+          hospital.latitude,
+          hospital.longitude
+        );
+
+        return {
+          ...hospital,
+          distanceKm: Number(calculatedDistance.toFixed(1)),
+          estimatedTravelTimeMinutes: Math.max(5, Math.round(calculatedDistance * 4.5)),
+        };
+      })
+      .sort((a, b) => a.distanceKm - b.distanceKm);
+  }, [baseHospitals, userLocation]);
 
   // Selected hospital and doctor states
   const [selectedHospId, setSelectedHospId] = useState<string>(hospitals[0]?.id || '');
   const [selectedDocIdByHosp, setSelectedDocIdByHosp] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
-    hospitals.forEach((h) => {
+    baseHospitals.forEach((h) => {
       const bestDoc = hospitalQueueService.getBestMatchingDoctor(h, triage);
       initial[h.id] = bestDoc.id;
     });
     return initial;
   });
+
+  useEffect(() => {
+    if (!hospitals.length) return;
+
+    if (!selectedHospId || !hospitals.some((h) => h.id === selectedHospId)) {
+      setSelectedHospId(hospitals[0].id);
+    }
+  }, [hospitals, selectedHospId]);
 
   const handleDoctorChange = (hospId: string, docId: string) => {
     setSelectedDocIdByHosp({
@@ -55,6 +133,36 @@ export const HospitalList: React.FC<HospitalListProps> = ({
         <div>
           <h2 className="rec-title">Choose a hospital</h2>
         </div>
+
+        {userLocation && (
+          <div className="queue-tip-card location-tip-card">
+            <MapPin size={18} className="text-teal flex-shrink-0" />
+            <div className="queue-tip-text">
+              <strong>Nearby hospitals are ranked using your current location.</strong>
+              <div className="location-coords">
+                Current location: {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {locationStatus === 'denied' && (
+          <div className="queue-tip-card location-tip-card">
+            <MapPin size={18} className="text-teal flex-shrink-0" />
+            <div className="queue-tip-text">
+              <strong>Location access was not shared, so the standard recommended list is shown.</strong>
+            </div>
+          </div>
+        )}
+
+        {locationStatus === 'unsupported' && (
+          <div className="queue-tip-card location-tip-card">
+            <MapPin size={18} className="text-teal flex-shrink-0" />
+            <div className="queue-tip-text">
+              <strong>This browser does not support location access, so standard nearby recommendations are shown.</strong>
+            </div>
+          </div>
+        )}
 
         {/* 3-Tier Queue Info Card */}
         <div className="queue-tip-card">
@@ -240,6 +348,16 @@ export const HospitalList: React.FC<HospitalListProps> = ({
           border: 1px solid var(--pastel-sky-blue);
           border-radius: var(--radius-sm);
           padding: 0.85rem 1.1rem;
+        }
+        .location-tip-card {
+          background: rgba(16, 185, 129, 0.12);
+          border-color: rgba(16, 185, 129, 0.28);
+        }
+        .location-coords {
+          margin-top: 0.4rem;
+          font-size: 0.75rem;
+          color: var(--text-secondary);
+          letter-spacing: 0.02em;
         }
         .queue-tip-text {
           font-size: 0.82rem;

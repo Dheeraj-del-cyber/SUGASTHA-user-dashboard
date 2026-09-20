@@ -113,6 +113,8 @@ export interface Hospital {
   address: string;
   district: string;
   pincode: string;
+  latitude?: number;
+  longitude?: number;
   distanceKm: number;
   estimatedTravelTimeMinutes: number;
   fareEstimates: {

@@ -8,6 +8,8 @@ export const MOCK_HOSPITALS: Hospital[] = [
     address: 'Sri Aurobindo Marg, Ansari Nagar, New Delhi',
     district: 'South Delhi',
     pincode: '110029',
+    latitude: 28.5656,
+    longitude: 77.2101,
     distanceKm: 2.8,
     estimatedTravelTimeMinutes: 12,
     fareEstimates: {
@@ -60,6 +62,8 @@ export const MOCK_HOSPITALS: Hospital[] = [
     address: 'Ring Road, Opposite AIIMS, New Delhi',
     district: 'South Delhi',
     pincode: '110029',
+    latitude: 28.6089,
+    longitude: 77.2129,
     distanceKm: 3.4,
     estimatedTravelTimeMinutes: 15,
     fareEstimates: {
@@ -102,6 +106,8 @@ export const MOCK_HOSPITALS: Hospital[] = [
     address: '1, 2, Press Enclave Marg, Saket, New Delhi',
     district: 'South Delhi',
     pincode: '110017',
+    latitude: 28.5219,
+    longitude: 77.2056,
     distanceKm: 5.2,
     estimatedTravelTimeMinutes: 20,
     fareEstimates: {
@@ -144,6 +150,8 @@ export const MOCK_HOSPITALS: Hospital[] = [
     address: 'Delhi-Mathura Road, Sarita Vihar, New Delhi',
     district: 'South East Delhi',
     pincode: '110076',
+    latitude: 28.5204,
+    longitude: 77.2908,
     distanceKm: 7.6,
     estimatedTravelTimeMinutes: 25,
     fareEstimates: {
@@ -186,6 +194,8 @@ export const MOCK_HOSPITALS: Hospital[] = [
     address: 'Moti Nagar, Near Metro Station, New Delhi',
     district: 'West Delhi',
     pincode: '110015',
+    latitude: 28.6557,
+    longitude: 77.1436,
     distanceKm: 8.9,
     estimatedTravelTimeMinutes: 30,
     fareEstimates: {
