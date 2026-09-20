@@ -12,7 +12,7 @@ interface HeaderProps {
   onOpenProfile?: () => void;
   onGoHome?: () => void;
   activeTab?: ActiveTab;
-  activeSubView?: 'DASHBOARD' | 'SYMPTOMS' | 'TRIAGE_RESULT' | 'RECOMMENDATION' | 'TRACKER' | 'RECORDS' | 'HISTORY' | 'CONSENTS';
+  activeSubView?: 'DASHBOARD' | 'SYMPTOMS' | 'TRIAGE_RESULT' | 'RECOMMENDATION' | 'TRACKER' | 'RECORDS' | 'HISTORY' | 'CONSENTS' | 'PROFILE';
   onSelectTab?: (tab: ActiveTab) => void;
   recordsCount?: number;
   historyCount?: number;

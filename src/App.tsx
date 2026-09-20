@@ -12,6 +12,7 @@ import { HospitalList } from './components/recommendations/HospitalList';
 import { BookingConfirmationModal } from './components/consultation/BookingConfirmationModal';
 import { ConsultationTracker } from './components/consultation/ConsultationTracker';
 import { HealthRecordsView } from './components/profile/HealthRecordsView';
+import { UserProfileView } from './components/profile/UserProfileView';
 import { ConsultationHistory } from './components/history/ConsultationHistory';
 import { DoctorHistory } from './components/history/DoctorHistory';
 import { HealthcareJourneySummaryModal } from './components/summary/HealthcareJourneySummaryModal';
@@ -49,7 +50,7 @@ export const App: React.FC = () => {
   // Active View State
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [activeSubView, setActiveSubView] = useState<
-    'DASHBOARD' | 'SYMPTOMS' | 'TRIAGE_RESULT' | 'RECOMMENDATION' | 'TRACKER' | 'RECORDS' | 'HISTORY' | 'CONSENTS'
+    'DASHBOARD' | 'SYMPTOMS' | 'TRIAGE_RESULT' | 'RECOMMENDATION' | 'TRACKER' | 'RECORDS' | 'HISTORY' | 'CONSENTS' | 'PROFILE'
   >('DASHBOARD');
 
   // Triage & Booking Pipeline State
@@ -308,7 +309,8 @@ export const App: React.FC = () => {
       if (activeConsultation) setActiveSubView('TRACKER');
       else setActiveSubView('HISTORY');
     } else if (tab === 'consents') setActiveSubView('CONSENTS');
-    else if (tab === 'records' || tab === 'profile') setActiveSubView('RECORDS');
+    else if (tab === 'records') setActiveSubView('RECORDS');
+    else if (tab === 'profile') setActiveSubView('PROFILE');
     else if (tab === 'doctors') setActiveSubView('SYMPTOMS');
   };
 
@@ -363,8 +365,8 @@ export const App: React.FC = () => {
         onOpenLogin={handleLogout}
         onLogout={handleLogout}
         onOpenProfile={() => {
-          setActiveTab('records');
-          setActiveSubView('RECORDS');
+          setActiveTab('profile');
+          setActiveSubView('PROFILE');
         }}
         onGoHome={() => {
           setActiveTab('dashboard');
@@ -477,6 +479,15 @@ export const App: React.FC = () => {
         {/* View 8: Doctor Consultation History */}
         {activeSubView === 'CONSENTS' && (
           <DoctorHistory history={consultationHistory} />
+        )}
+
+        {/* View 9: User Profile & Account Management */}
+        {activeSubView === 'PROFILE' && profile && (
+          <UserProfileView
+            profile={profile}
+            onLogout={handleLogout}
+            onUpdateProfile={(updated) => setProfile(updated)}
+          />
         )}
       </main>
 
