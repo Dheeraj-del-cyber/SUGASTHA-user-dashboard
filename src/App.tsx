@@ -60,6 +60,9 @@ export const App: React.FC = () => {
   // Selected Hospital / Doctor for Booking
   const [pendingHospital, setPendingHospital] = useState<Hospital | null>(null);
   const [pendingDoctor, setPendingDoctor] = useState<Doctor | null>(null);
+  const [pendingUserLocation, setPendingUserLocation] = useState<
+    { latitude: number; longitude: number } | null
+  >(null);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isBookingInProgress, setIsBookingInProgress] = useState(false);
 
@@ -182,9 +185,14 @@ export const App: React.FC = () => {
   };
 
   // Switch between physical hospital and teleconsultation
-  const handleSelectHospitalAndDoctor = (hosp: Hospital, doc: Doctor) => {
+  const handleSelectHospitalAndDoctor = (
+    hosp: Hospital,
+    doc: Doctor,
+    userLocation?: { latitude: number; longitude: number }
+  ) => {
     setPendingHospital(hosp);
     setPendingDoctor(doc);
+    setPendingUserLocation(userLocation ?? null);
     setIsBookingModalOpen(true);
   };
 
@@ -500,6 +508,7 @@ export const App: React.FC = () => {
           onClose={() => setIsBookingModalOpen(false)}
           hospital={pendingHospital}
           doctor={pendingDoctor}
+          userLocation={pendingUserLocation}
           triage={
             triageResult || {
               level: 'GREEN',

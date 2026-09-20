@@ -1,14 +1,75 @@
 import { Hospital, Doctor, TriageResult, HospitalQueueNode } from '../types';
 import { MOCK_HOSPITALS } from '../data/mockHospitals';
 
+const getDistanceKm = (
+  latitude1: number,
+  longitude1: number,
+  latitude2: number,
+  longitude2: number
+) => {
+  const toRadians = (value: number) => (value * Math.PI) / 180;
+  const earthRadiusKm = 6371;
+  const deltaLat = toRadians(latitude2 - latitude1);
+  const deltaLon = toRadians(longitude2 - longitude1);
+  const lat1 = toRadians(latitude1);
+  const lat2 = toRadians(latitude2);
+
+  const a =
+    Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+
+  return (2 * earthRadiusKm * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))) / 1;
+};
+
 export const hospitalQueueService = {
   /**
    * Filter and rank hospitals according to triage level, suggested specialties, and distance.
    */
-  getRecommendedHospitals(triage: TriageResult): Hospital[] {
-    const list = [...MOCK_HOSPITALS];
+  getRecommendedHospitals(
+    triage: TriageResult,
+    userLocation?: { latitude: number; longitude: number }
+  ): Hospital[] {
+    const list = [...MOCK_HOSPITALS].map((hospital) => {
+      if (
+        userLocation &&
+        typeof hospital.latitude === 'number' &&
+        typeof hospital.longitude === 'number'
+      ) {
+        const distanceKm = getDistanceKm(
+          userLocation.latitude,
+          userLocation.longitude,
+          hospital.latitude,
+          hospital.longitude
+        );
+
+        return {
+          ...hospital,
+          distanceKm: Number(distanceKm.toFixed(1)),
+          estimatedTravelTimeMinutes: Math.max(5, Math.round(distanceKm * 4.5)),
+        };
+      }
+
+      return hospital;
+    });
 
     return list.sort((a, b) => {
+      if (userLocation) {
+        const aEmergency = a.type === 'GOVERNMENT_TERTIARY' || a.type === 'PRIVATE_SUPERSPECIALTY';
+        const bEmergency = b.type === 'GOVERNMENT_TERTIARY' || b.type === 'PRIVATE_SUPERSPECIALTY';
+
+        const distanceDiff = a.distanceKm - b.distanceKm;
+        if (Math.abs(distanceDiff) > 0.1) {
+          return distanceDiff;
+        }
+
+        if (triage.level === 'RED') {
+          if (aEmergency && !bEmergency) return -1;
+          if (!aEmergency && bEmergency) return 1;
+        }
+
+        return distanceDiff;
+      }
+
       // If RED triage, prioritize tertiary government / superspeciality hospitals with active emergency desks
       if (triage.level === 'RED') {
         const aEmergency = a.type === 'GOVERNMENT_TERTIARY' || a.type === 'PRIVATE_SUPERSPECIALTY';
@@ -17,7 +78,6 @@ export const hospitalQueueService = {
         if (!aEmergency && bEmergency) return 1;
       }
 
-      // Distance score
       return a.distanceKm - b.distanceKm;
     });
   },
@@ -43,7 +103,8 @@ export const hospitalQueueService = {
     selectedHospital: Hospital,
     selectedDoctor: Doctor,
     allHospitals: Hospital[],
-    triage: TriageResult
+    triage: TriageResult,
+    userLocation?: { latitude: number; longitude: number }
   ): HospitalQueueNode[] {
     const queue: HospitalQueueNode[] = [];
 
@@ -58,8 +119,13 @@ export const hospitalQueueService = {
       requestedAt: new Date().toISOString(),
     });
 
-    // Pick top 2 remaining suitable hospitals as Priority 2 & Priority 3 fallbacks
-    const fallbackCandidates = allHospitals.filter((h) => h.id !== selectedHospital.id);
+    const rankedHospitals = userLocation
+      ? this.getRecommendedHospitals(triage, userLocation)
+      : allHospitals.length
+        ? [...allHospitals]
+        : this.getRecommendedHospitals(triage);
+
+    const fallbackCandidates = rankedHospitals.filter((h) => h.id !== selectedHospital.id);
 
     // Fallback 1
     if (fallbackCandidates.length > 0) {

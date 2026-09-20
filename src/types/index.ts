@@ -122,12 +122,14 @@ export interface Hospital {
     cabFare: number;
     transitFare?: number;
   };
-  bedAvailabilityStatus: 'AVAILABLE' | 'LIMITED' | 'HIGH_DEMAND';
-  emergencyQueueStatus: 'NORMAL' | 'MODERATE' | 'BUSY';
-  nabhAccredited: boolean;
+  bedAvailabilityStatus?: 'AVAILABLE' | 'LIMITED' | 'HIGH_DEMAND';
+  emergencyQueueStatus?: 'NORMAL' | 'MODERATE' | 'BUSY';
+  nabhAccredited?: boolean;
   doctors: Doctor[];
   contactPhone: string;
   ambulanceHotline: string;
+  source?: 'MOCK' | 'LIVE_OSM';
+  availabilityNote?: string;
 }
 
 // Queue & Backup Consultation System Models

@@ -50,11 +50,11 @@ export const FacilityCard: React.FC<FacilityCardProps> = ({
         <div className="facility-status-row">
           <div className="status-item">
             <span className="status-label">Beds:</span>
-            <StatusBadge status={hospital.bedAvailabilityStatus} size="sm" />
+            <StatusBadge status={hospital.bedAvailabilityStatus ?? 'AVAILABLE'} size="sm" />
           </div>
           <div className="status-item">
             <span className="status-label">ER Queue:</span>
-            <StatusBadge status={hospital.emergencyQueueStatus} size="sm" />
+            <StatusBadge status={hospital.emergencyQueueStatus ?? 'NORMAL'} size="sm" />
           </div>
         </div>
 

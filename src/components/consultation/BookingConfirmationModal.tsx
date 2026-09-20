@@ -19,6 +19,7 @@ interface BookingConfirmationModalProps {
   doctor: Doctor;
   triage: TriageResult;
   profile: AbhaProfile;
+  userLocation?: { latitude: number; longitude: number } | null;
   onConfirmBooking: () => void;
   isBooking: boolean;
 }
@@ -29,6 +30,7 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
   hospital,
   doctor,
   triage,
+  userLocation,
   onConfirmBooking,
   isBooking,
 }) => {
@@ -36,7 +38,8 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
     hospital,
     doctor,
     MOCK_HOSPITALS,
-    triage
+    triage,
+    userLocation ?? undefined
   );
 
   return (

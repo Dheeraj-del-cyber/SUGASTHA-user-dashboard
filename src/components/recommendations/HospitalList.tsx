@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   MapPin,
   Car,
@@ -10,90 +10,58 @@ import {
 } from 'lucide-react';
 import { Hospital, Doctor, TriageResult } from '../../types';
 import { hospitalQueueService } from '../../services/hospitalQueueService';
-
-const getDistanceKm = (
-  latitude1: number,
-  longitude1: number,
-  latitude2: number,
-  longitude2: number
-) => {
-  const toRadians = (value: number) => (value * Math.PI) / 180;
-  const earthRadiusKm = 6371;
-  const deltaLat = toRadians(latitude2 - latitude1);
-  const deltaLon = toRadians(longitude2 - longitude1);
-  const lat1 = toRadians(latitude1);
-  const lat2 = toRadians(latitude2);
-
-  const a =
-    Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
-
-  return (2 * earthRadiusKm * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))) / 1;
-};
+import { hospitalSearchService } from '../../services/hospitalSearchService';
 
 interface HospitalListProps {
   triage: TriageResult;
-  onSelectHospitalAndDoctor: (hospital: Hospital, doctor: Doctor) => void;
+  onSelectHospitalAndDoctor: (
+    hospital: Hospital,
+    doctor: Doctor,
+    userLocation?: { latitude: number; longitude: number }
+  ) => void;
 }
 
 export const HospitalList: React.FC<HospitalListProps> = ({
   triage,
   onSelectHospitalAndDoctor,
 }) => {
-  const baseHospitals = hospitalQueueService.getRecommendedHospitals(triage);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationStatus, setLocationStatus] = useState<'idle' | 'granted' | 'denied' | 'unsupported'>('idle');
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
 
   useEffect(() => {
     if (!navigator.geolocation) {
       setLocationStatus('unsupported');
+      setHospitals(hospitalQueueService.getRecommendedHospitals(triage));
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserLocation({
+      async (position) => {
+        const nextLocation = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
-        });
+        };
+        setUserLocation(nextLocation);
         setLocationStatus('granted');
+
+        const nearby = await hospitalSearchService.searchNearbyHospitals(nextLocation, 8, 5);
+        setHospitals(
+          nearby.length ? nearby : hospitalQueueService.getRecommendedHospitals(triage, nextLocation)
+        );
       },
       () => {
         setLocationStatus('denied');
+        setHospitals(hospitalQueueService.getRecommendedHospitals(triage));
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
-  }, []);
+  }, [triage]);
 
-  const hospitals = useMemo(() => {
-    if (!userLocation) {
-      return [...baseHospitals];
-    }
-
-    return [...baseHospitals]
-      .map((hospital) => {
-        if (typeof hospital.latitude !== 'number' || typeof hospital.longitude !== 'number') {
-          return hospital;
-        }
-
-        const calculatedDistance = getDistanceKm(
-          userLocation.latitude,
-          userLocation.longitude,
-          hospital.latitude,
-          hospital.longitude
-        );
-
-        return {
-          ...hospital,
-          distanceKm: Number(calculatedDistance.toFixed(1)),
-          estimatedTravelTimeMinutes: Math.max(5, Math.round(calculatedDistance * 4.5)),
-        };
-      })
-      .sort((a, b) => a.distanceKm - b.distanceKm);
-  }, [baseHospitals, userLocation]);
+  const baseHospitals = hospitals.length ? hospitals : hospitalQueueService.getRecommendedHospitals(triage);
 
   // Selected hospital and doctor states
-  const [selectedHospId, setSelectedHospId] = useState<string>(hospitals[0]?.id || '');
+  const [selectedHospId, setSelectedHospId] = useState<string>(baseHospitals[0]?.id || '');
   const [selectedDocIdByHosp, setSelectedDocIdByHosp] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
     baseHospitals.forEach((h) => {
@@ -106,10 +74,17 @@ export const HospitalList: React.FC<HospitalListProps> = ({
   useEffect(() => {
     if (!hospitals.length) return;
 
+    const shouldPreferNearest = !!userLocation;
+
     if (!selectedHospId || !hospitals.some((h) => h.id === selectedHospId)) {
       setSelectedHospId(hospitals[0].id);
+      return;
     }
-  }, [hospitals, selectedHospId]);
+
+    if (shouldPreferNearest) {
+      setSelectedHospId(hospitals[0].id);
+    }
+  }, [hospitals, selectedHospId, userLocation]);
 
   const handleDoctorChange = (hospId: string, docId: string) => {
     setSelectedDocIdByHosp({
@@ -118,12 +93,57 @@ export const HospitalList: React.FC<HospitalListProps> = ({
     });
   };
 
-  const currentHospital = hospitals.find((h) => h.id === selectedHospId) || hospitals[0];
-  const currentDocId = selectedDocIdByHosp[currentHospital.id] || currentHospital.doctors[0].id;
-  const currentDoctor = currentHospital.doctors.find((d) => d.id === currentDocId) || currentHospital.doctors[0];
+  const currentHospital = hospitals.find((h) => h.id === selectedHospId) || hospitals[0] || null;
+  const demoDoctorFallbacks: Doctor[] = [
+    {
+      id: 'demo-doctor-ananya-rao',
+      name: 'Dr. Ananya Rao',
+      specialization: 'General Medicine',
+      qualifications: 'Demo Physician • Prototype Only',
+      experienceYears: 10,
+      availableSlotToday: 'Demo availability slot',
+      rating: 4.7,
+      languages: ['English', 'Hindi'],
+    },
+    {
+      id: 'demo-doctor-arjun-nair',
+      name: 'Dr. Arjun Nair',
+      specialization: 'Cardiology',
+      qualifications: 'Demo Specialist • Prototype Only',
+      experienceYears: 12,
+      availableSlotToday: 'Demo availability slot',
+      rating: 4.8,
+      languages: ['English', 'Hindi', 'Malayalam'],
+    },
+    {
+      id: 'demo-doctor-meera-sharma',
+      name: 'Dr. Meera Sharma',
+      specialization: 'Neurology',
+      qualifications: 'Demo Specialist • Prototype Only',
+      experienceYears: 9,
+      availableSlotToday: 'Demo availability slot',
+      rating: 4.6,
+      languages: ['English', 'Hindi'],
+    },
+    {
+      id: 'demo-doctor-rahul-menon',
+      name: 'Dr. Rahul Menon',
+      specialization: 'Orthopedics',
+      qualifications: 'Demo Specialist • Prototype Only',
+      experienceYears: 11,
+      availableSlotToday: 'Demo availability slot',
+      rating: 4.7,
+      languages: ['English', 'Hindi', 'Tamil'],
+    },
+  ];
+
+  const currentDoctorList = currentHospital?.doctors?.length ? currentHospital.doctors : demoDoctorFallbacks;
+  const currentDocId = currentHospital ? (selectedDocIdByHosp[currentHospital.id] || currentDoctorList[0].id) : currentDoctorList[0].id;
+  const currentDoctor = currentDoctorList.find((d) => d.id === currentDocId) || currentDoctorList[0];
 
   const handleProceed = () => {
-    onSelectHospitalAndDoctor(currentHospital, currentDoctor);
+    if (!currentHospital) return;
+    onSelectHospitalAndDoctor(currentHospital, currentDoctor, userLocation ?? undefined);
   };
 
   return (
@@ -174,134 +194,158 @@ export const HospitalList: React.FC<HospitalListProps> = ({
       </div>
 
       {/* Hospital Cards Feed */}
-      <div className="hospitals-list-feed">
-        {hospitals.map((hosp, index) => {
-          const isSelectedHosp = hosp.id === selectedHospId;
-          const activeDocId = selectedDocIdByHosp[hosp.id] || hosp.doctors[0].id;
-          const activeDoc = hosp.doctors.find((d) => d.id === activeDocId) || hosp.doctors[0];
-
-          return (
-            <div
-              key={hosp.id}
-              onClick={() => setSelectedHospId(hosp.id)}
-              className={`card hospital-card card-interactive ${
-                isSelectedHosp ? 'selected-hospital-card' : ''
-              }`}
-            >
-              {/* Card Top: Name, Distance & Accreditation */}
-              <div className="hosp-card-header">
-                <div className="hosp-main-info">
-                  <div className="rank-indicator">{index === 0 ? '★' : index + 1}</div>
-                  <div>
-                    <div className="hosp-name-row">
-                      <h3 className="hosp-name">{hosp.name}</h3>
-                      {index === 0 && <span className="nabh-badge">Best match for you</span>}
-                    </div>
-                    <div className="hosp-address">
-                      <MapPin size={13} className="text-muted" />
-                      <span>{hosp.address}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Selection Radio Indicator */}
-                <div className={`selection-radio ${isSelectedHosp ? 'checked' : ''}`}>
-                  {isSelectedHosp && <div className="radio-inner"></div>}
-                </div>
-              </div>
-
-              {/* Travel & Wait Strip */}
-              <div className="travel-fare-strip">
-                <div className="strip-item">
-                  <MapPin size={14} className="text-teal" />
-                  <span className="strip-val">{hosp.distanceKm} km</span>
-                  <span className="strip-sub">Away</span>
-                </div>
-
-                <div className="strip-item">
-                  <Clock size={14} className="text-amber" />
-                  <span className="strip-val">~{hosp.estimatedTravelTimeMinutes} mins</span>
-                  <span className="strip-sub">Travel</span>
-                </div>
-
-                <div className="strip-item fare-item">
-                  <Car size={14} className="text-emerald" />
-                  <div className="fare-col">
-                    <span className="strip-val">₹{hosp.fareEstimates.autoFare} - ₹{hosp.fareEstimates.cabFare}</span>
-                    <span className="strip-sub">Auto - cab</span>
-                  </div>
-                </div>
-
-                <div className="strip-item desk-item">
-                  <span className={`status-dot ${hosp.emergencyQueueStatus === 'NORMAL' ? 'dot-green' : 'dot-yellow'}`}></span>
-                  <span className="strip-val">{hosp.emergencyQueueStatus === 'NORMAL' ? 'Not crowded' : 'A little busy'}</span>
-                  <span className="strip-sub">Now</span>
-                </div>
-              </div>
-
-              {/* Doctor Selection Section */}
-              <div className="doctor-select-section">
-                <div className="doc-section-title">
-                  <UserCheck size={15} className="text-teal" />
-                  <span>Doctors</span>
-                </div>
-
-                <div className="doctors-chips-grid" aria-label={`Doctors at ${hosp.name}`}>
-                  {hosp.doctors.map((doc) => {
-                    const isDocSelected = doc.id === activeDocId;
-                    return (
-                      <div
-                        key={doc.id}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedHospId(hosp.id);
-                          handleDoctorChange(hosp.id, doc.id);
-                        }}
-                        className={`doc-chip ${isDocSelected ? 'active-doc-chip' : ''}`}
-                      >
-                        <div className="doc-chip-top">
-                          <strong className="doc-name">{doc.name}</strong>
-                        </div>
-                        <span className="doc-spec text-teal">{doc.specialization}</span>
-                        <div className="doc-slot-row">
-                          <span className="doc-slot">Next: {doc.availableSlotToday}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Selected Highlight Footer */}
-              {isSelectedHosp && (
-                <div className="selected-confirmation-pill">
-                  <CheckCircle size={15} className="text-emerald" />
-                  <span>
-                    Selected: <strong>{activeDoc.name}</strong>
-                  </span>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Sticky Bottom Action Drawer */}
-      <div className="selection-cta-drawer">
-        <div className="selected-summary-col">
-          <div className="selected-entity-title">
-            <strong>{currentHospital.name}</strong>
+      {(!hospitals.length && locationStatus !== 'granted') && (
+        <div className="queue-tip-card location-tip-card">
+          <MapPin size={18} className="text-teal flex-shrink-0" />
+          <div className="queue-tip-text">
+            <strong>Finding nearby hospitals from your current location…</strong>
           </div>
         </div>
+      )}
 
-        <button
-          onClick={handleProceed}
-          className="btn btn-primary btn-lg book-request-btn"
-        >
-          <span>Book Visit</span>
-          <ArrowRight size={18} />
-        </button>
-      </div>
+      {hospitals.length > 0 && (
+        <div className="hospitals-list-feed">
+          {hospitals.map((hosp, index) => {
+            const isSelectedHosp = hosp.id === selectedHospId;
+            const doctorList = hosp.doctors?.length ? hosp.doctors : demoDoctorFallbacks;
+            const activeDocId = selectedDocIdByHosp[hosp.id] || doctorList[0].id;
+            const activeDoc = doctorList.find((d) => d.id === activeDocId) || doctorList[0];
+
+            return (
+              <div
+                key={hosp.id}
+                onClick={() => setSelectedHospId(hosp.id)}
+                className={`card hospital-card card-interactive ${
+                  isSelectedHosp ? 'selected-hospital-card' : ''
+                }`}
+              >
+                {/* Card Top: Name, Distance & Accreditation */}
+                <div className="hosp-card-header">
+                  <div className="hosp-main-info">
+                    <div className="rank-indicator">{index === 0 ? '★' : index + 1}</div>
+                    <div>
+                      <div className="hosp-name-row">
+                        <h3 className="hosp-name">{hosp.name}</h3>
+                        {index === 0 && <span className="nabh-badge">Best match for you</span>}
+                      </div>
+                      <div className="hosp-address">
+                        <MapPin size={13} className="text-muted" />
+                        <span>{hosp.address}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Selection Radio Indicator */}
+                  <div className={`selection-radio ${isSelectedHosp ? 'checked' : ''}`}>
+                    {isSelectedHosp && <div className="radio-inner"></div>}
+                  </div>
+                </div>
+
+                {/* Travel & Wait Strip */}
+                <div className="travel-fare-strip">
+                  <div className="strip-item">
+                    <MapPin size={14} className="text-teal" />
+                    <span className="strip-val">{hosp.distanceKm} km</span>
+                    <span className="strip-sub">Away</span>
+                  </div>
+
+                  <div className="strip-item">
+                    <Clock size={14} className="text-amber" />
+                    <span className="strip-val">~{hosp.estimatedTravelTimeMinutes} mins</span>
+                    <span className="strip-sub">Travel</span>
+                  </div>
+
+                  <div className="strip-item fare-item">
+                    <Car size={14} className="text-emerald" />
+                    <div className="fare-col">
+                      <span className="strip-val">
+                        {hosp.source === 'LIVE_OSM' ? 'Live data' : `₹${hosp.fareEstimates.autoFare} - ₹${hosp.fareEstimates.cabFare}`}
+                      </span>
+                      <span className="strip-sub">{hosp.source === 'LIVE_OSM' ? 'Source' : 'Auto - cab'}</span>
+                    </div>
+                  </div>
+
+                  <div className="strip-item desk-item">
+                    <span className={`status-dot ${hosp.emergencyQueueStatus === 'NORMAL' ? 'dot-green' : 'dot-yellow'}`}></span>
+                    <span className="strip-val">
+                      {hosp.availabilityNote ? 'Live queue status pending' : (hosp.emergencyQueueStatus === 'NORMAL' ? 'Steady flow' : 'Moderate wait')}
+                    </span>
+                    <span className="strip-sub">Now</span>
+                  </div>
+                </div>
+
+                {/* Doctor Selection Section */}
+                <div className="doctor-select-section">
+                  <div className="doc-section-title">
+                    <UserCheck size={15} className="text-teal" />
+                    <span>Doctors</span>
+                  </div>
+
+                  <div className="doctors-chips-grid" aria-label={`Doctors at ${hosp.name}`}>
+                    {doctorList.map((doc) => {
+                      const isDocSelected = doc.id === activeDocId;
+                      return (
+                        <div
+                          key={doc.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedHospId(hosp.id);
+                            handleDoctorChange(hosp.id, doc.id);
+                          }}
+                          className={`doc-chip ${isDocSelected ? 'active-doc-chip' : ''}`}
+                        >
+                          <div className="doc-chip-top">
+                            <strong className="doc-name">{doc.name}</strong>
+                          </div>
+                          <span className="doc-spec text-teal">{doc.specialization}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Selected Highlight Footer */}
+                {isSelectedHosp && (
+                  <div className="selected-confirmation-pill">
+                    <CheckCircle size={15} className="text-emerald" />
+                    <span>
+                      Selected: <strong>{activeDoc.name}</strong>
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {!hospitals.length && locationStatus !== 'granted' && (
+        <div className="queue-tip-card location-tip-card">
+          <MapPin size={18} className="text-teal flex-shrink-0" />
+          <div className="queue-tip-text">
+            <strong>No nearby hospitals were available yet. Please try again in a moment.</strong>
+          </div>
+        </div>
+      )}
+
+      {/* Sticky Bottom Action Drawer */}
+      {currentHospital && (
+        <div className="selection-cta-drawer">
+          <div className="selected-summary-col">
+            <div className="selected-entity-title">
+              <strong>{currentHospital.name}</strong>
+            </div>
+          </div>
+
+          <button
+            onClick={handleProceed}
+            className="btn btn-primary btn-lg book-request-btn"
+          >
+            <span>Book Visit</span>
+            <ArrowRight size={18} />
+          </button>
+        </div>
+      )}
 
       <style>{`
         .hospital-rec-container {
