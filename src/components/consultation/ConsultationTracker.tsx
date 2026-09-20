@@ -87,10 +87,7 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
     onJourneyCompleted(summary);
   };
 
-  const activeNode =
-    consultation.queueState.queueNodes.find((n) => n.status === 'PENDING_RESPONSE') ||
-    consultation.queueState.queueNodes.find((n) => n.status === 'ACCEPTED') ||
-    consultation.queueState.queueNodes[0];
+  const selectedHospital = consultation.selectedHospital;
 
   return (
     <div className="tracker-wrapper animate-fade-in">
@@ -138,12 +135,12 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
             <h4>
               {consultation.status === 'CONFIRMED'
                 ? 'Visit confirmed!'
-                : `Waiting for ${activeNode.hospitalName}`}
+                : `Waiting for ${selectedHospital.name}`}
             </h4>
             <p>
               {consultation.status === 'CONFIRMED'
-                ? `Go to ${consultation.selectedHospital.name} at your appointment time. Show your QR pass or PIN #${consultation.consultationNumber} at the desk.`
-                : `The hospital is checking your request. If they are full, we will try the next hospital for you.`}
+                ? `Go to ${selectedHospital.name} at your appointment time. Show your QR pass or PIN #${consultation.consultationNumber} at the desk.`
+                : `The hospital is checking your request. If they are full, we will try the next nearby hospital for you.`}
             </p>
           </div>
         </div>
@@ -187,52 +184,19 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
         </div>
 
         <div className="queue-nodes-stream">
-          {consultation.queueState.queueNodes.map((node) => {
-            const isNodeActive = node.status === 'PENDING_RESPONSE';
-            const isNodeAccepted = node.status === 'ACCEPTED';
-            const isNodePassed = node.status === 'PASSED_TO_NEXT';
+          <div className="queue-node-box node-active">
+            <div className="node-rank-badge">Selected</div>
 
-            return (
-              <div
-                key={node.priorityOrder}
-                className={`queue-node-box ${
-                  isNodeAccepted
-                    ? 'node-accepted'
-                    : isNodeActive
-                    ? 'node-active'
-                    : isNodePassed
-                    ? 'node-passed'
-                    : 'node-queued'
-                }`}
-              >
-                <div className="node-rank-badge">
-                  {node.priorityOrder === 1 ? 'Selected' : 'Backup'}
-                </div>
-
-                <div className="node-details">
-                  <div className="node-hosp-row">
-                    <Building2 size={15} className="text-muted" />
-                    <strong>{node.hospitalName}</strong>
-                  </div>
-                  {node.rejectionReason && (
-                    <span className="rejection-hint">Hospital full</span>
-                  )}
-                </div>
-
-                <div className="node-status-pill">
-                  {isNodeAccepted ? (
-                    <span className="badge badge-green">Here</span>
-                  ) : isNodeActive ? (
-                    <span className="badge badge-yellow">Waiting</span>
-                  ) : isNodePassed ? (
-                    <span className="badge badge-red">Full</span>
-                  ) : (
-                    <span className="badge badge-info">Next</span>
-                  )}
-                </div>
+            <div className="node-details">
+              <div className="node-hosp-row">
+                <Building2 size={15} className="text-muted" />
+                <strong>{selectedHospital.name}</strong>
               </div>
-            );
-          })}
+              {selectedHospital.address && (
+                <span className="rejection-hint">{selectedHospital.address}</span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

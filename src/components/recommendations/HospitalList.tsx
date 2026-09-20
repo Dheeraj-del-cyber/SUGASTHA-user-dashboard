@@ -17,7 +17,8 @@ interface HospitalListProps {
   onSelectHospitalAndDoctor: (
     hospital: Hospital,
     doctor: Doctor,
-    userLocation?: { latitude: number; longitude: number }
+    userLocation?: { latitude: number; longitude: number },
+    nearbyHospitals?: Hospital[]
   ) => void;
 }
 
@@ -143,7 +144,12 @@ export const HospitalList: React.FC<HospitalListProps> = ({
 
   const handleProceed = () => {
     if (!currentHospital) return;
-    onSelectHospitalAndDoctor(currentHospital, currentDoctor, userLocation ?? undefined);
+    onSelectHospitalAndDoctor(
+      currentHospital,
+      currentDoctor,
+      userLocation ?? undefined,
+      hospitals.length ? hospitals : baseHospitals
+    );
   };
 
   return (

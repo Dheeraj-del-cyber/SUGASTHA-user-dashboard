@@ -27,9 +27,10 @@ export const hospitalQueueService = {
    */
   getRecommendedHospitals(
     triage: TriageResult,
-    userLocation?: { latitude: number; longitude: number }
+    userLocation?: { latitude: number; longitude: number },
+    hospitalCatalog: Hospital[] = MOCK_HOSPITALS
   ): Hospital[] {
-    const list = [...MOCK_HOSPITALS].map((hospital) => {
+    const list = [...hospitalCatalog].map((hospital) => {
       if (
         userLocation &&
         typeof hospital.latitude === 'number' &&
@@ -86,13 +87,28 @@ export const hospitalQueueService = {
    * Find the most fitting doctor in a given hospital for the triage result
    */
   getBestMatchingDoctor(hospital: Hospital, triage: TriageResult): Doctor {
+    const safeDoctors = Array.isArray(hospital.doctors) ? hospital.doctors : [];
+
+    if (!safeDoctors.length) {
+      return {
+        id: `demo-fallback-${hospital.id}`,
+        name: 'Demo Doctor',
+        specialization: 'General Consultation',
+        qualifications: 'Prototype fallback only',
+        experienceYears: 0,
+        availableSlotToday: 'Prototype availability',
+        rating: 4.5,
+        languages: ['English'],
+      };
+    }
+
     const preferredSpecialties = triage.suggestedSpecialties.map((s) => s.toLowerCase());
 
-    const matchingDoc = hospital.doctors.find((doc) =>
+    const matchingDoc = safeDoctors.find((doc) =>
       preferredSpecialties.some((pref) => doc.specialization.toLowerCase().includes(pref))
     );
 
-    return matchingDoc || hospital.doctors[0];
+    return matchingDoc || safeDoctors[0];
   },
 
   /**
@@ -120,7 +136,7 @@ export const hospitalQueueService = {
     });
 
     const rankedHospitals = userLocation
-      ? this.getRecommendedHospitals(triage, userLocation)
+      ? this.getRecommendedHospitals(triage, userLocation, allHospitals)
       : allHospitals.length
         ? [...allHospitals]
         : this.getRecommendedHospitals(triage);

@@ -10,7 +10,6 @@ import {
 import { Modal } from '../common/Modal';
 import { Hospital, Doctor, TriageResult, AbhaProfile } from '../../types';
 import { hospitalQueueService } from '../../services/hospitalQueueService';
-import { MOCK_HOSPITALS } from '../../data/mockHospitals';
 
 interface BookingConfirmationModalProps {
   isOpen: boolean;
@@ -20,6 +19,7 @@ interface BookingConfirmationModalProps {
   triage: TriageResult;
   profile: AbhaProfile;
   userLocation?: { latitude: number; longitude: number } | null;
+  nearbyHospitals?: Hospital[];
   onConfirmBooking: () => void;
   isBooking: boolean;
 }
@@ -31,13 +31,14 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
   doctor,
   triage,
   userLocation,
+  nearbyHospitals,
   onConfirmBooking,
   isBooking,
 }) => {
   const queueNodes = hospitalQueueService.build3TierHospitalQueue(
     hospital,
     doctor,
-    MOCK_HOSPITALS,
+    nearbyHospitals && nearbyHospitals.length > 0 ? nearbyHospitals : [hospital],
     triage,
     userLocation ?? undefined
   );

@@ -64,6 +64,7 @@ export const App: React.FC = () => {
   const [pendingUserLocation, setPendingUserLocation] = useState<
     { latitude: number; longitude: number } | null
   >(null);
+  const [pendingNearbyHospitals, setPendingNearbyHospitals] = useState<Hospital[]>([]);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isBookingInProgress, setIsBookingInProgress] = useState(false);
 
@@ -189,11 +190,13 @@ export const App: React.FC = () => {
   const handleSelectHospitalAndDoctor = (
     hosp: Hospital,
     doc: Doctor,
-    userLocation?: { latitude: number; longitude: number }
+    userLocation?: { latitude: number; longitude: number },
+    nearbyHospitals?: Hospital[]
   ) => {
     setPendingHospital(hosp);
     setPendingDoctor(doc);
     setPendingUserLocation(userLocation ?? null);
+    setPendingNearbyHospitals(nearbyHospitals ?? [hosp]);
     setIsBookingModalOpen(true);
   };
 
@@ -520,6 +523,7 @@ export const App: React.FC = () => {
           hospital={pendingHospital}
           doctor={pendingDoctor}
           userLocation={pendingUserLocation}
+          nearbyHospitals={pendingNearbyHospitals}
           triage={
             triageResult || {
               level: 'GREEN',
