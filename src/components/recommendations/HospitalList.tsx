@@ -14,6 +14,8 @@ import { hospitalSearchService } from '../../services/hospitalSearchService';
 
 interface HospitalListProps {
   triage: TriageResult;
+  userLocation?: { latitude: number; longitude: number } | null;
+  locationStatus?: 'idle' | 'granted' | 'denied' | 'unsupported';
   onSelectHospitalAndDoctor: (
     hospital: Hospital,
     doctor: Doctor,
@@ -24,40 +26,27 @@ interface HospitalListProps {
 
 export const HospitalList: React.FC<HospitalListProps> = ({
   triage,
+  userLocation = null,
+  locationStatus = 'idle',
   onSelectHospitalAndDoctor,
 }) => {
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [locationStatus, setLocationStatus] = useState<'idle' | 'granted' | 'denied' | 'unsupported'>('idle');
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setLocationStatus('unsupported');
+    if (!userLocation) {
       setHospitals(hospitalQueueService.getRecommendedHospitals(triage));
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const nextLocation = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        };
-        setUserLocation(nextLocation);
-        setLocationStatus('granted');
+    const loadNearbyHospitals = async () => {
+      const nearby = await hospitalSearchService.searchNearbyHospitals(userLocation, 8, 5);
+      setHospitals(
+        nearby.length ? nearby : hospitalQueueService.getRecommendedHospitals(triage, userLocation)
+      );
+    };
 
-        const nearby = await hospitalSearchService.searchNearbyHospitals(nextLocation, 8, 5);
-        setHospitals(
-          nearby.length ? nearby : hospitalQueueService.getRecommendedHospitals(triage, nextLocation)
-        );
-      },
-      () => {
-        setLocationStatus('denied');
-        setHospitals(hospitalQueueService.getRecommendedHospitals(triage));
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
-  }, [triage]);
+    void loadNearbyHospitals();
+  }, [triage, userLocation]);
 
   const baseHospitals = hospitals.length ? hospitals : hospitalQueueService.getRecommendedHospitals(triage);
 
@@ -160,36 +149,6 @@ export const HospitalList: React.FC<HospitalListProps> = ({
           <h2 className="rec-title">Choose a hospital</h2>
         </div>
 
-        {userLocation && (
-          <div className="queue-tip-card location-tip-card">
-            <MapPin size={18} className="text-teal flex-shrink-0" />
-            <div className="queue-tip-text">
-              <strong>Nearby hospitals are ranked using your current location.</strong>
-              <div className="location-coords">
-                Current location: {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {locationStatus === 'denied' && (
-          <div className="queue-tip-card location-tip-card">
-            <MapPin size={18} className="text-teal flex-shrink-0" />
-            <div className="queue-tip-text">
-              <strong>Location access was not shared, so the standard recommended list is shown.</strong>
-            </div>
-          </div>
-        )}
-
-        {locationStatus === 'unsupported' && (
-          <div className="queue-tip-card location-tip-card">
-            <MapPin size={18} className="text-teal flex-shrink-0" />
-            <div className="queue-tip-text">
-              <strong>This browser does not support location access, so standard nearby recommendations are shown.</strong>
-            </div>
-          </div>
-        )}
-
         {/* 3-Tier Queue Info Card */}
         <div className="queue-tip-card">
           <ShieldCheck size={18} className="text-teal flex-shrink-0" />
@@ -200,14 +159,6 @@ export const HospitalList: React.FC<HospitalListProps> = ({
       </div>
 
       {/* Hospital Cards Feed */}
-      {(!hospitals.length && locationStatus !== 'granted') && (
-        <div className="queue-tip-card location-tip-card">
-          <MapPin size={18} className="text-teal flex-shrink-0" />
-          <div className="queue-tip-text">
-            <strong>Finding nearby hospitals from your current location…</strong>
-          </div>
-        </div>
-      )}
 
       {hospitals.length > 0 && (
         <div className="hospitals-list-feed">
