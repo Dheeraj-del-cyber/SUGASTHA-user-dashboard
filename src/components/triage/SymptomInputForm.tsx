@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Stethoscope,
   AlertCircle,
@@ -9,6 +9,8 @@ import {
   Clock,
   MapPin,
   ShieldCheck,
+  Mic,
+  Square,
 } from 'lucide-react';
 import { SymptomInput, AbhaProfile } from '../../types';
 
@@ -69,6 +71,12 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
   const [additionalNotes, setAdditionalNotes] = useState(
     'Experiencing heavy retrosternal pressure radiating slightly to left arm for the past 2 hours. Feels worse on exertion.'
   );
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [voiceError, setVoiceError] = useState('');
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordingTimerRef = useRef<number | null>(null);
+  const voiceTargetRef = useRef<'notes' | 'symptom'>('notes');
 
   // Red flags
   const [redFlags, setRedFlags] = useState({
@@ -99,6 +107,88 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
   const removeSymptom = (sym: string) => {
     setSelectedSymptoms(selectedSymptoms.filter((s) => s !== sym));
   };
+
+  const transcribeRecording = async (audio: Blob) => {
+    setIsTranscribing(true);
+    setVoiceError('');
+
+    try {
+      const response = await fetch('/api/sarvam/transcribe', {
+        method: 'POST',
+        headers: { 'Content-Type': audio.type || 'audio/webm' },
+        body: audio,
+      });
+      const result = (await response.json()) as { transcript?: string; error?: string };
+
+      if (!response.ok || !result.transcript) {
+        throw new Error(result.error || 'No speech was detected.');
+      }
+
+      const transcript = result.transcript;
+      if (voiceTargetRef.current === 'symptom') {
+        setCustomSymptom((current) => current.trim() ? `${current.trim()} ${transcript}` : transcript);
+      } else {
+        setAdditionalNotes((current) => current.trim() ? `${current.trim()}\n${transcript}` : transcript);
+      }
+    } catch (error) {
+      setVoiceError(error instanceof Error ? error.message : 'Speech transcription failed.');
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
+  const stopRecording = () => {
+    if (recordingTimerRef.current !== null) {
+      window.clearTimeout(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+    mediaRecorderRef.current?.stop();
+  };
+
+  const startRecording = async (target: 'notes' | 'symptom') => {
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      setVoiceError('Voice recording is not supported in this browser.');
+      return;
+    }
+
+    try {
+      voiceTargetRef.current = target;
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const preferredMimeType = 'audio/webm;codecs=opus';
+      const options = MediaRecorder.isTypeSupported(preferredMimeType)
+        ? { mimeType: preferredMimeType }
+        : undefined;
+      const recorder = new MediaRecorder(stream, options);
+      const chunks: Blob[] = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) chunks.push(event.data);
+      };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        setIsRecording(false);
+        if (chunks.length) void transcribeRecording(new Blob(chunks, { type: recorder.mimeType }));
+      };
+      recorder.onerror = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        setVoiceError('Recording failed. Please try again.');
+        setIsRecording(false);
+      };
+
+      mediaRecorderRef.current = recorder;
+      setVoiceError('');
+      setIsRecording(true);
+      recorder.start();
+      recordingTimerRef.current = window.setTimeout(stopRecording, 25000);
+    } catch {
+      setVoiceError('Microphone access was not granted.');
+    }
+  };
+
+  useEffect(() => () => {
+    if (recordingTimerRef.current !== null) window.clearTimeout(recordingTimerRef.current);
+    mediaRecorderRef.current?.stream.getTracks().forEach((track) => track.stop());
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,6 +261,15 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
             value={customSymptom}
             onChange={(e) => setCustomSymptom(e.target.value)}
           />
+          <button
+            type="button"
+            onClick={isRecording ? stopRecording : () => void startRecording('symptom')}
+            className={`btn ${isRecording ? 'btn-danger' : 'btn-secondary'} voice-symptom-btn`}
+            disabled={isTranscribing || isAnalyzing}
+            aria-label={isRecording ? 'Stop recording symptom' : 'Speak a custom symptom'}
+          >
+            {isRecording ? <Square size={16} /> : <Mic size={16} />}
+          </button>
           <button type="button" onClick={addCustomSymptom} className="btn btn-secondary btn-sm">
             <Plus size={16} />
             <span>Add</span>
@@ -326,6 +425,19 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
           onChange={(e) => setAdditionalNotes(e.target.value)}
           placeholder="Write in your own words if you want..."
         ></textarea>
+        <div className="voice-input-row">
+          <button
+            type="button"
+            onClick={isRecording ? stopRecording : () => void startRecording('notes')}
+            className={`btn ${isRecording ? 'btn-danger' : 'btn-secondary'} voice-record-btn`}
+            disabled={isTranscribing || isAnalyzing}
+          >
+            {isRecording ? <Square size={16} /> : <Mic size={16} />}
+            <span>{isRecording ? 'Stop recording' : isTranscribing ? 'Converting speech...' : 'Speak symptoms'}</span>
+          </button>
+          {isRecording && <span className="voice-recording-status">Listening for up to 25 seconds...</span>}
+        </div>
+        {voiceError && <p className="voice-error" role="alert">{voiceError}</p>}
       </div>
 
       {/* Automated Triage Notice */}
@@ -593,6 +705,27 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
           font-size: 0.8rem;
           color: var(--text-secondary);
           line-height: 1.4;
+        }
+        .voice-input-row {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+        }
+        .voice-record-btn {
+          min-height: 40px;
+        }
+        .voice-symptom-btn {
+          min-width: 42px;
+          min-height: 40px;
+          padding: 0.65rem;
+        }
+        .voice-recording-status, .voice-error {
+          font-size: 0.78rem;
+          color: var(--text-secondary);
+        }
+        .voice-error {
+          color: #dc2626;
         }
         .auto-triage-notice strong {
           color: var(--text-primary);
