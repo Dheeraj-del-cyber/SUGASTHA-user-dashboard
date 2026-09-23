@@ -42,8 +42,6 @@ export const App: React.FC = () => {
   const [records, setRecords] = useState<HealthRecord[]>([]);
   const [conditions, setConditions] = useState<ChronicCondition[]>([]);
   const [allergies, setAllergies] = useState<Allergy[]>([]);
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [locationStatus, setLocationStatus] = useState<'idle' | 'granted' | 'denied' | 'unsupported'>('idle');
 
   // Auth Modals State
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
@@ -101,30 +99,6 @@ export const App: React.FC = () => {
     window.scrollTo(0, 0);
   }, [activeTab, activeSubView]);
 
-  const requestUserLocation = () => {
-    if (!('geolocation' in navigator)) {
-      setUserLocation(null);
-      setLocationStatus('unsupported');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const nextLocation = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        };
-        setUserLocation(nextLocation);
-        setLocationStatus('granted');
-      },
-      (error) => {
-        setUserLocation(null);
-        setLocationStatus(error.code === 1 ? 'denied' : 'unsupported');
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
-  };
-
   // Handle Login Success
   const handleLoginSuccess = (data: {
     profile: AbhaProfile;
@@ -139,11 +113,6 @@ export const App: React.FC = () => {
     setActiveTab('dashboard');
     setActiveSubView('DASHBOARD');
   };
-
-  useEffect(() => {
-    if (!profile) return;
-    requestUserLocation();
-  }, [profile]);
 
   // Handle Registration Success
   const handleRegisterSuccess = (newProfile: AbhaProfile) => {
@@ -174,8 +143,6 @@ export const App: React.FC = () => {
     setRecords([]);
     setConditions([]);
     setAllergies([]);
-    setUserLocation(null);
-    setLocationStatus('idle');
   };
 
   // Submit Symptoms -> Run AI Triage
@@ -478,8 +445,6 @@ export const App: React.FC = () => {
             ) : (
               <HospitalList
                 triage={triageResult}
-                userLocation={userLocation}
-                locationStatus={locationStatus}
                 onSelectHospitalAndDoctor={handleSelectHospitalAndDoctor}
               />
             )}
