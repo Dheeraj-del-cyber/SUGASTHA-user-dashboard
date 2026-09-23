@@ -75,17 +75,10 @@ export const HospitalList: React.FC<HospitalListProps> = ({
   useEffect(() => {
     if (!hospitals.length) return;
 
-    const shouldPreferNearest = !!userLocation;
-
     if (!selectedHospId || !hospitals.some((h) => h.id === selectedHospId)) {
       setSelectedHospId(hospitals[0].id);
-      return;
     }
-
-    if (shouldPreferNearest) {
-      setSelectedHospId(hospitals[0].id);
-    }
-  }, [hospitals, selectedHospId, userLocation]);
+  }, [hospitals, selectedHospId]);
 
   const handleDoctorChange = (hospId: string, docId: string) => {
     setSelectedDocIdByHosp({
