@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Video, Building2, FileText, Sparkles, Check, ShieldCheck, Clock3, Route, ArrowRight } from 'lucide-react';
+import { Video, Building2, FileText, Sparkles, Check, ShieldCheck, Clock3, Route, ArrowRight, Mic, Square } from 'lucide-react';
 import {
   AbhaProfile,
   HealthRecord,
@@ -75,9 +75,14 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
   const [symptomError, setSymptomError] = useState('');
   const [isGenerated, setIsGenerated] = useState(false);
   const [symptomRecommendation, setSymptomRecommendation] = useState<TriageResult | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [voiceError, setVoiceError] = useState('');
   const [activeFeature, setActiveFeature] = useState(0);
   const [isFeaturePaused, setIsFeaturePaused] = useState(false);
   const featureTouchStart = useRef<number | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordingTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     try {
@@ -111,6 +116,76 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
     }, 2200);
     return () => window.clearInterval(featureTimer);
   }, [isFeaturePaused]);
+
+  const stopRecording = () => {
+    if (recordingTimerRef.current !== null) {
+      window.clearTimeout(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+    mediaRecorderRef.current?.stop();
+  };
+
+  const startRecording = async () => {
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      setVoiceError('Voice recording is not supported in this browser.');
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const preferredMimeType = 'audio/webm;codecs=opus';
+      const options = MediaRecorder.isTypeSupported(preferredMimeType)
+        ? { mimeType: preferredMimeType }
+        : undefined;
+      const recorder = new MediaRecorder(stream, options);
+      const chunks: Blob[] = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) chunks.push(event.data);
+      };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        setIsRecording(false);
+        if (!chunks.length) return;
+        setIsTranscribing(true);
+        void fetch('/api/sarvam/transcribe', {
+          method: 'POST',
+          headers: { 'Content-Type': recorder.mimeType || 'audio/webm' },
+          body: new Blob(chunks, { type: recorder.mimeType || 'audio/webm' }),
+        })
+          .then(async (response) => {
+            const result = (await response.json()) as { transcript?: string; error?: string };
+            if (!response.ok || !result.transcript) {
+              throw new Error(result.error || 'No speech was detected.');
+            }
+            setSymptomInput((current) => current.trim() ? `${current.trim()}, ${result.transcript}` : result.transcript!);
+            setSymptomError('');
+          })
+          .catch((error) => {
+            setVoiceError(error instanceof Error ? error.message : 'Speech transcription failed.');
+          })
+          .finally(() => setIsTranscribing(false));
+      };
+      recorder.onerror = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        setVoiceError('Recording failed. Please try again.');
+        setIsRecording(false);
+      };
+
+      mediaRecorderRef.current = recorder;
+      setVoiceError('');
+      setIsRecording(true);
+      recorder.start();
+      recordingTimerRef.current = window.setTimeout(stopRecording, 25000);
+    } catch {
+      setVoiceError('Microphone access was not granted.');
+    }
+  };
+
+  useEffect(() => () => {
+    if (recordingTimerRef.current !== null) window.clearTimeout(recordingTimerRef.current);
+    mediaRecorderRef.current?.stream.getTracks().forEach((track) => track.stop());
+  }, []);
 
   const handleFeatureTouchStart = (event: React.TouchEvent<HTMLElement>) => {
     featureTouchStart.current = event.touches[0]?.clientX ?? null;
@@ -266,17 +341,34 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         {/* Input Form */}
         <form onSubmit={handleGenerate} className="symptom-input-group">
           <label htmlFor="symptom-input" className="input-label">Describe your symptoms</label>
-          <input
-            id="symptom-input"
-            type="text"
-            className="form-input symptom-input-field"
-            placeholder="Type your symptoms here (e.g. Fever, Cough)"
-            value={symptomInput}
-            onChange={(e) => {
-              setSymptomInput(e.target.value);
-              if (e.target.value.trim()) setSymptomError('');
-            }}
-          />
+          <div className="dashboard-symptom-input-row">
+            <input
+              id="symptom-input"
+              type="text"
+              className="form-input symptom-input-field"
+              placeholder="Type your symptoms here (e.g. Fever, Cough)"
+              value={symptomInput}
+              onChange={(e) => {
+                setSymptomInput(e.target.value);
+                if (e.target.value.trim()) setSymptomError('');
+              }}
+            />
+            <button
+              type="button"
+              onClick={isRecording ? stopRecording : () => void startRecording()}
+              className={`btn ${isRecording ? 'btn-danger' : 'btn-secondary'} dashboard-voice-btn`}
+              disabled={isTranscribing}
+              aria-label={isRecording ? 'Stop recording symptoms' : 'Speak your symptoms'}
+              title={isRecording ? 'Stop recording' : 'Speak your symptoms'}
+            >
+              {isRecording ? <Square size={18} /> : <Mic size={18} />}
+            </button>
+          </div>
+          {(voiceError || isTranscribing) && (
+            <span className={voiceError ? 'symptom-error' : 'voice-status'} role={voiceError ? 'alert' : undefined}>
+              {voiceError || 'Transcribing your symptoms...'}
+            </span>
+          )}
           {symptomError && (
             <span className="symptom-error" role="alert">{symptomError}</span>
           )}
@@ -687,6 +779,32 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           border: 1.5px solid var(--border-light);
           background: var(--bg-surface-2);
           transition: all var(--transition-fast);
+        }
+
+        .dashboard-symptom-input-row {
+          display: flex;
+          align-items: stretch;
+          gap: 0.55rem;
+        }
+
+        .dashboard-symptom-input-row .symptom-input-field {
+          min-width: 0;
+        }
+
+        .dashboard-voice-btn {
+          flex: 0 0 3.25rem;
+          min-height: 3.25rem;
+          padding: 0;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .voice-status {
+          color: var(--brand-primary);
+          font-size: 0.75rem;
+          font-weight: 600;
+          margin-top: -0.9rem;
         }
 
         .symptom-input-field:focus {
