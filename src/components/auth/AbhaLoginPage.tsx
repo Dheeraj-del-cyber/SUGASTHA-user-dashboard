@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
 import logoImage from '../../../images/logo.png';
 import loginHeroImage from '../../../images/login.png';
@@ -20,7 +21,19 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
   onSuccess,
   onOpenRecover,
 }) => {
-  const [identifier, setIdentifier] = useState('');
+  const { t, i18n } = useTranslation();
+  const languageCode = i18n.language.startsWith('hi') ? 'hi' : i18n.language.startsWith('kn') ? 'kn' : i18n.language.startsWith('mr') ? 'mr' : i18n.language.startsWith('ta') ? 'ta' : i18n.language.startsWith('te') ? 'te' : 'en';
+  const heroCopy: Record<string, { overview: string; connectedCare: string; secureAccess: string; protected: string; welcome: string; accessTitle: string; betterHealthcare: string; }> = {
+    en: { overview: 'Your Healthcare, Connected', connectedCare: 'CONNECTED CARE NETWORK', secureAccess: 'SECURE ACCESS', protected: 'Protected', welcome: 'WELCOME BACK', accessTitle: 'Access your healthcare journey securely', betterHealthcare: 'Better Healthcare' },
+    hi: { overview: 'आपका स्वास्थ्य, जुड़ा हुआ', connectedCare: 'कनेक्टेड केयर नेटवर्क', secureAccess: 'सिक्योर एक्सेस', protected: 'सुरक्षित', welcome: 'फिर से स्वागत है', accessTitle: 'अपने स्वास्थ्य यात्रा को सुरक्षित रूप से एक्सेस करें', betterHealthcare: 'बेहतर स्वास्थ्य सेवा' },
+    kn: { overview: 'ನಿಮ್ಮ ಆರೋಗ್ಯ, ಸಂಪರ್ಕಿತ', connectedCare: 'ಸಂಯುಕ್ತ ಕೇರ್ ನೆಟ್‌ವರ್ಕ್', secureAccess: 'ಸುರಕ್ಷಿತ ಪ್ರವೇಶ', protected: 'ಸುರಕ್ಷಿತ', welcome: 'ಮರಳಿ ಸ್ವಾಗತ', accessTitle: 'ನಿಮ್ಮ ಆರೋಗ್ಯ ಪ್ರಯಾಣವನ್ನು ಸುರಕ್ಷಿತವಾಗಿ ಪ್ರವೇಶಿಸಿ', betterHealthcare: 'ಉತ್ತಮ ಆರೋಗ್ಯ ಸೇವೆ' },
+    mr: { overview: 'तुमचे आरोग्य, जोडलेले', connectedCare: 'कनेक्टेड केअर नेटवर्क', secureAccess: 'सुरक्षित प्रवेश', protected: 'सुरक्षित', welcome: 'पुन्हा स्वागत आहे', accessTitle: 'तुमचा आरोग्य प्रवास सुरक्षितपणे प्रवेश करा', betterHealthcare: 'चांगली आरोग्य सेवा' },
+    ta: { overview: 'உங்கள் சுகாதாரம், இணைக்கப்பட்டுள்ளது', connectedCare: 'கनेक்டட் கேர் நெட்வொர்க்', secureAccess: 'பாதுகாப்பான அணுகல்', protected: 'பாதுகாக்கப்பட்டது', welcome: 'மீண்டும் வருக', accessTitle: 'உங்கள் சுகாதாரப் பயணத்தை பாதுகாப்பாக அணுகவும்', betterHealthcare: 'சிறந்த சுகாதார பராமரிப்பு' },
+    te: { overview: 'మీ ఆరోగ్యం, కనెక్ట్ చేయబడింది', connectedCare: 'కనెక్ట్‌డ్ కేర్ నెట్‌వర్క్', secureAccess: 'సురక్షిత ప్రాప్యత', protected: 'సురక్షిత', welcome: 'మళ్లీ స్వాగతం', accessTitle: 'మీ ఆరోగ్య ప్రయాణాన్ని సురక్షితంగా యాక్సెస్ చేయండి', betterHealthcare: 'మంచి ఆరోగ్య సేవ' },
+  };
+  // Demo/test ABHA ID only for evaluation. Not a real patient's ABHA identifier.
+  const DEMO_TEST_ABHA_ID = '12-3456-7890-1234';
+  const [identifier, setIdentifier] = useState(DEMO_TEST_ABHA_ID);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [shakeError, setShakeError] = useState(false);
@@ -46,14 +59,14 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
 
     const trimmed = identifier.trim();
     if (!trimmed) {
-      setErrorMsg('Please enter your ABHA ID to continue.');
+      setErrorMsg(t('auth.login.errorEmpty'));
       triggerShake();
       return;
     }
 
     const digitsOnly = trimmed.replace(/[-\s]/g, '');
     if (digitsOnly.length < 5) {
-      setErrorMsg('Please enter a valid ABHA ID (e.g. 91-4523-8901-2345).');
+      setErrorMsg(t('auth.login.errorInvalid'));
       triggerShake();
       return;
     }
@@ -65,7 +78,7 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
       onSuccess(session);
     } catch {
       setLoading(false);
-      setErrorMsg('Login failed. Please check your ABHA ID and try again.');
+      setErrorMsg(t('auth.login.errorFailed'));
       triggerShake();
     }
   };
@@ -81,15 +94,15 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
               </div>
               <div className="desktop-brand-copy">
                 <span className="desktop-brand-name">SUGASTHA</span>
-                <span className="desktop-brand-tag">Your Healthcare, Connected</span>
+                <span className="desktop-brand-tag">{heroCopy[languageCode].overview}</span>
               </div>
             </div>
 
             <div className="desktop-copy">
-              <div className="desktop-pill">CONNECTED CARE NETWORK</div>
+              <div className="desktop-pill">{heroCopy[languageCode].connectedCare}</div>
               <h1>
-                Connecting You to
-                <span>Better Healthcare</span>
+                {t('auth.login.title').split(' ').slice(0, 3).join(' ')}
+                <span>{heroCopy[languageCode].betterHealthcare}</span>
               </h1>
             </div>
 
@@ -106,31 +119,31 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
                 </div>
                 <div className="desktop-auth-brand-copy">
                   <span className="desktop-auth-brand-name">SUGASTHA</span>
-                  <span className="desktop-auth-brand-tag">SECURE ACCESS</span>
+                  <span className="desktop-auth-brand-tag">{heroCopy[languageCode].secureAccess}</span>
                 </div>
               </div>
 
               <div className={`desktop-auth-card ${shakeError ? 'shake' : ''}`}>
                 <div className="desktop-auth-header">
                   <div>
-                    <span className="desktop-auth-kicker">WELCOME BACK</span>
-                    <h2>Your healthcare journey starts here</h2>
+                    <span className="desktop-auth-kicker">{t('auth.login.welcome')}</span>
+                    <h2>{t('auth.login.title')}</h2>
                   </div>
                   <div className="desktop-protected-pill">
                     <ShieldCheck size={14} />
-                    <span>Protected</span>
+                    <span>{heroCopy[languageCode].protected}</span>
                   </div>
                 </div>
 
                 <form onSubmit={handleLogin} className="desktop-login-form" autoComplete="off">
-                  <label htmlFor="abha-id-desktop" className="desktop-login-label">ABHA ID</label>
+                  <label htmlFor="abha-id-desktop" className="desktop-login-label">{t('auth.login.label')}</label>
                   <div className="desktop-input-shell">
                     <ShieldCheck size={18} className="desktop-input-icon" />
                     <input
                       id="abha-id-desktop"
                       type="text"
                       className="desktop-login-input"
-                      placeholder="Enter your ABHA ID"
+                      placeholder={t('auth.login.placeholder')}
                       value={identifier}
                       onChange={(e) => {
                         setIdentifier(e.target.value);
@@ -149,18 +162,18 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
                   )}
 
                   <button type="button" className="desktop-help-link" onClick={onOpenRecover} disabled={loading}>
-                    Don't remember your ABHA ID?
+                    {t('auth.login.remember')}
                   </button>
 
                   <button type="submit" className="desktop-submit-btn" disabled={loading} aria-disabled={loading}>
                     {loading ? (
                       <>
                         <Loader2 size={18} className="desktop-spin" />
-                        <span>Logging in...</span>
+                        <span>{t('auth.login.loggingIn')}</span>
                       </>
                     ) : (
                       <>
-                        <span>Login</span>
+                        <span>{t('auth.login.login')}</span>
                         <ArrowRight size={18} />
                       </>
                     )}
@@ -169,7 +182,7 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
 
                 <div className="desktop-privacy-note">
                   <ShieldCheck size={15} />
-                  <span>Your health information is protected and handled securely.</span>
+                  <span>{t('auth.login.secureText')}</span>
                 </div>
               </div>
             </div>
@@ -185,7 +198,7 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
             </div>
             <div className="mobile-brand-copy">
               <span className="mobile-brand-name">SUGASTHA</span>
-              <span className="mobile-brand-tag">Your Healthcare, Connected</span>
+              <span className="mobile-brand-tag">{heroCopy[languageCode].overview}</span>
             </div>
           </header>
 
@@ -195,26 +208,26 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
 
           <div className="mobile-header-copy">
             <h1>
-              Connecting You to
-              <span>Better Healthcare</span>
+              {t('auth.login.title').split(' ').slice(0, 3).join(' ')}
+              <span>{heroCopy[languageCode].betterHealthcare}</span>
             </h1>
           </div>
 
           <div className={`mobile-auth-card ${shakeError ? 'shake' : ''}`}>
             <div className="mobile-auth-header">
-              <span>WELCOME BACK</span>
-              <h2>Access your healthcare journey securely</h2>
+              <span>{heroCopy[languageCode].welcome}</span>
+              <h2>{heroCopy[languageCode].accessTitle}</h2>
             </div>
 
             <form onSubmit={handleLogin} className="mobile-login-form" autoComplete="off">
-              <label htmlFor="abha-id-mobile" className="mobile-login-label">ABHA ID</label>
+              <label htmlFor="abha-id-mobile" className="mobile-login-label">{t('auth.login.label')}</label>
               <div className="mobile-input-shell">
                 <ShieldCheck size={18} className="mobile-input-icon" />
                 <input
                   id="abha-id-mobile"
                   type="text"
                   className="mobile-login-input"
-                  placeholder="Enter your ABHA ID"
+                  placeholder={t('auth.login.placeholder')}
                   value={identifier}
                   onChange={(e) => {
                     setIdentifier(e.target.value);
@@ -233,18 +246,18 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
               )}
 
               <button type="button" className="mobile-help-link" onClick={onOpenRecover} disabled={loading}>
-                Don't remember your ABHA ID?
+                {t('auth.login.remember')}
               </button>
 
               <button type="submit" className="mobile-submit-btn" disabled={loading} aria-disabled={loading}>
                 {loading ? (
                   <>
                     <Loader2 size={18} className="mobile-spin" />
-                    <span>Logging in...</span>
+                    <span>{t('auth.login.loggingIn')}</span>
                   </>
                 ) : (
                   <>
-                    <span>Login</span>
+                    <span>{t('auth.login.login')}</span>
                     <ArrowRight size={18} />
                   </>
                 )}
@@ -253,7 +266,7 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
 
             <div className="mobile-privacy-note">
               <ShieldCheck size={15} />
-              <span>Secure health information</span>
+              <span>{t('auth.login.secureText')}</span>
             </div>
           </div>
         </div>

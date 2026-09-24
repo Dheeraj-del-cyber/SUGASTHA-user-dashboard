@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   MapPin,
   Car,
@@ -26,8 +27,36 @@ export const HospitalList: React.FC<HospitalListProps> = ({
   triage,
   onSelectHospitalAndDoctor,
 }) => {
+<<<<<<< HEAD
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationStatus, setLocationStatus] = useState<'idle' | 'granted' | 'denied' | 'unsupported'>('idle');
+=======
+  const { t, i18n } = useTranslation();
+  const languageCode = i18n.language.startsWith('hi') ? 'hi' : i18n.language.startsWith('kn') ? 'kn' : i18n.language.startsWith('mr') ? 'mr' : i18n.language.startsWith('ta') ? 'ta' : i18n.language.startsWith('te') ? 'te' : 'en';
+  const hospitalNameMap: Record<string, string> = {
+    'AIIMS (All India Institute of Medical Sciences)': { en: 'AIIMS (All India Institute of Medical Sciences)', hi: 'एम्स (ऑल इंडिया इंस्टीट्यूट ऑफ मेडिकल साइंसेज)', kn: 'AIIMS (ಎಲ್ಲ ಭಾರತ ವೈದ್ಯಕೀಯ ವಿಜ್ಞಾನಗಳ ಸಂಸ್ಥೆ)', mr: 'एम्स (ऑल इंडिया इन्स्टिट्यूट ऑफ मेडिकल सायन्सेस)', ta: 'AIIMS (அனைத்திந்திய மருத்துவ அறிவியல் நிறுவனம்)', te: 'AIIMS (అన్ని భారత వైద్య శాస్త్రాల సంస్థ)' }[languageCode],
+    'VMMMC & Safdarjung Hospital': { en: 'VMMMC & Safdarjung Hospital', hi: 'वीएमएमएमसी एंड सफदरजंग अस्पताल', kn: 'VMMMC & ಸಫ್ದರ್ಜಂಗ ಆಸ್ಪತ್ರೆ', mr: 'VMMMC & सफदरजंग रुग्णालय', ta: 'VMMMC & சஃப்தர்ஜங் மருத்துவமனை', te: 'VMMMC & సఫ్దర్జంగ్ ఆసుపత్రి' }[languageCode],
+    'Max Super Speciality Hospital': { en: 'Max Super Speciality Hospital', hi: 'मैक्स सुपर स्पेशियलिटी अस्पताल', kn: 'ಮ್ಯಾಕ್ಸ್ ಸೂಪರ್ ಸ್ಪೆಷಾಲಿಟಿ ಆಸ್ಪತ್ರೆ', mr: 'मॅक्स सुपर स्पेशालिटी रुग्णालय', ta: 'மக்ஸ் சூப்பர் ஸ்பெஷாலிட்டி மருத்துவமனை', te: 'మ్యాక్స్ సూపర్ స్పెషాలిటీ ఆసుపత్రి' }[languageCode],
+    'Indraprastha Apollo Hospital': { en: 'Indraprastha Apollo Hospital', hi: 'इंद्रप्रस्थ अपोलो अस्पताल', kn: 'ಇಂದ್ರಪ್ರಸ್ಥ ಅಪೋಲೋ ಆಸ್ಪತ್ರೆ', mr: 'इंद्रप्रस्थ अपोलो रुग्णालय', ta: 'இந்திரபிரஸ்தா அப்பல்லோ மருத்துவமனை', te: 'ఇంద్రప్రస్థ అపోలో ఆసుపత్రి' }[languageCode],
+    'Acharya Shree Bhikshu District Hospital': { en: 'Acharya Shree Bhikshu District Hospital', hi: 'आचार्य श्री भिक्षु जिला अस्पताल', kn: 'ಅಚಾರ್ಯ ಶ್ರೀ ಭಿಕ್ಷು ಜಿಲ್ಲೆ ಆಸ್ಪತ್ರೆ', mr: 'आचार्य श्री भिक्षु जिल्हा रुग्णालय', ta: 'ஆச்சார்யா ஸ்ரீ பிக்ஷு மாவட்ட மருத்துவமனை', te: 'ఆచార్య శ్రీ భిక్షు జిల్లా ఆసుపత్రి' }[languageCode],
+  };
+  const doctorNameMap: Record<string, string> = {
+    'Dr. Vivek Sharma': { en: 'Dr. Vivek Sharma', hi: 'डॉ. विवेक शर्मा', kn: 'ಡಾ. ವಿವೇಕ ಶರ್ಮಾ', mr: 'डॉ. विवेक शर्मा', ta: 'டாக்டர் விவேக் ஷர்மா', te: 'డా. వివేక్ శర్మ' }[languageCode],
+    'Dr. Suniti Singhania': { en: 'Dr. Suniti Singhania', hi: 'डॉ. सुनिती सिंग्हानिया', kn: 'ಡಾ. ಸುನಿತಿ ಸಿಂಗ್‌ಹಾನಿಯಾ', mr: 'डॉ. सुनिती सिंगहनिया', ta: 'டாக்டர் சுனிதி சிங்ஹானியா', te: 'డా. సునితి సింగ్‌హానియా' }[languageCode],
+    'Dr. Arvind Mehra': { en: 'Dr. Arvind Mehra', hi: 'डॉ. अरविंद मेहरा', kn: 'ಡಾ. ಅರ್ವಿಂದ ಮೆಹ್ರಾ', mr: 'डॉ. अरविंद मेहरा', ta: 'டாக்டர் அர்விந்த் மெஹ்ரா', te: 'డా. అర్వింద్ మెహ్రా' }[languageCode],
+    'Dr. Rajeshwari Nair': { en: 'Dr. Rajeshwari Nair', hi: 'डॉ. राजेश्वरी नायर', kn: 'ಡಾ. ರಾಜೇಶ್ವರಿ ನಾಯರ್', mr: 'डॉ. राजेश्वरी नायर', ta: 'டாக்டர் ராஜேஷ்வரி நாயர்', te: 'డా. రాజేశ్వరి నాయర్' }[languageCode],
+    'Dr. Harsh Vardhan Rao': { en: 'Dr. Harsh Vardhan Rao', hi: 'डॉ. हर्ष वर्धन राव', kn: 'ಡಾ. ಹರಷ್ ವರ್ಧನ್ ರಾವ್', mr: 'डॉ. हर्षवर्धन राव', ta: 'டாக்டர் ஹர்ஷ் வர்தன் ராவ்', te: 'డా. హర్ష్ వర్థన్ రావ్' }[languageCode],
+    'Dr. Anupam Sachdev': { en: 'Dr. Anupam Sachdev', hi: 'डॉ. अनुपम सचदेव', kn: 'ಡಾ. ಅನೂಪಮ್ ಸಚ್ಚದೇವ್', mr: 'डॉ. अनुपम साचदेव', ta: 'டாக்டர் ஆனுப்பம் சச்சதேவ்', te: 'డా. అనుపమ్ సచ్దేవ్' }[languageCode],
+    'Dr. Shalini Taneja': { en: 'Dr. Shalini Taneja', hi: 'डॉ. शालिनी तनेजा', kn: 'ಡಾ. ಶಾಲಿನಿ ತನೆಜಾ', mr: 'डॉ. शालिनी तनेजा', ta: 'டாக்டர் ஷாலினி தானேஜா', te: 'డా. శాలిని తానెజా' }[languageCode],
+    'Dr. Preeti Khosla': { en: 'Dr. Preeti Khosla', hi: 'डॉ. प्रीति खोसला', kn: 'ಡಾ. ಪ್ರೀತಿ ಖೋಸ್ಲಾ', mr: 'डॉ. प्रीति खोसला', ta: 'டாக்டர் ப்ரீதி கோஸ்லா', te: 'డా. ప్రీతి ఖోస్లా' }[languageCode],
+    'Dr. Manoj Saxena': { en: 'Dr. Manoj Saxena', hi: 'डॉ. मनोज सक्सेना', kn: 'ಡಾ. ಮನೋಜ್ ಸಕ್ಸೆನಾ', mr: 'डॉ. मनोज सक्सेना', ta: 'டாக்டர் மனோஜ் சாக்சேனா', te: 'డా. మనోజ్ సక్సేన' }[languageCode],
+    'Dr. K. N. Bhardwaj': { en: 'Dr. K. N. Bhardwaj', hi: 'डॉ. के. एन. भारद्वाज', kn: 'ಡಾ. ಕೆ. ಎನ್. ಭಾರದ್ವಾಜ್', mr: 'डॉ. के. एन. भारद्वाज', ta: 'டாக்டர் கே. என். பார்த்வாஜ்', te: 'డా. కె. ఎన్. భారద్వాజ్' }[languageCode],
+    'Dr. Ananya Rao': { en: 'Dr. Ananya Rao', hi: 'डॉ. अनन्या राव', kn: 'ಡಾ. ಅನನ್ಯ ರಾವ್', mr: 'डॉ. अनन्या राव', ta: 'டாக்டர் அனன்யா ராவ்', te: 'డా. అనన్య రావు' }[languageCode],
+    'Dr. Arjun Nair': { en: 'Dr. Arjun Nair', hi: 'डॉ. अर्जुन नायर', kn: 'ಡಾ. ಅರ್ಜುನ್ ನಾಯರ್', mr: 'डॉ. अर्जुन नायर', ta: 'டாக்டர் அர்ஜுன் நாயர்', te: 'డా. అర్జున్ నాయర్' }[languageCode],
+    'Dr. Meera Sharma': { en: 'Dr. Meera Sharma', hi: 'डॉ. मीरा शर्मा', kn: 'ಡಾ. ಮೀನಾ ಶರ್ಮಾ', mr: 'डॉ. मीरा शर्मा', ta: 'டாக்டர் மீரா ஷர்மா', te: 'డా. మీరా శర్మ' }[languageCode],
+    'Dr. Rahul Menon': { en: 'Dr. Rahul Menon', hi: 'डॉ. राहुल मेनन', kn: 'ಡಾ. ರಾಹುಲ್ ಮೇನನ್', mr: 'डॉ. राहुल मेनन', ta: 'டாக்டர் ரஹுல் மேனன்', te: 'డా. రాహుల్ మేనన్' }[languageCode],
+  };
+>>>>>>> 09c53f5 (madhura's work)
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
 
   useEffect(() => {
@@ -91,41 +120,41 @@ export const HospitalList: React.FC<HospitalListProps> = ({
   const demoDoctorFallbacks: Doctor[] = [
     {
       id: 'demo-doctor-ananya-rao',
-      name: 'Dr. Ananya Rao',
-      specialization: 'General Medicine',
+      name: t('providers.doctors.ananyaRao'),
+      specialization: t('providers.specializations.generalMedicine'),
       qualifications: 'Demo Physician • Prototype Only',
       experienceYears: 10,
-      availableSlotToday: 'Demo availability slot',
+      availableSlotToday: t('providers.demoAvailability'),
       rating: 4.7,
       languages: ['English', 'Hindi'],
     },
     {
       id: 'demo-doctor-arjun-nair',
-      name: 'Dr. Arjun Nair',
-      specialization: 'Cardiology',
+      name: t('providers.doctors.arjunNair'),
+      specialization: t('providers.specializations.cardiology'),
       qualifications: 'Demo Specialist • Prototype Only',
       experienceYears: 12,
-      availableSlotToday: 'Demo availability slot',
+      availableSlotToday: t('providers.demoAvailability'),
       rating: 4.8,
       languages: ['English', 'Hindi', 'Malayalam'],
     },
     {
       id: 'demo-doctor-meera-sharma',
-      name: 'Dr. Meera Sharma',
-      specialization: 'Neurology',
+      name: t('providers.doctors.meeraSharma'),
+      specialization: t('providers.specializations.neurology'),
       qualifications: 'Demo Specialist • Prototype Only',
       experienceYears: 9,
-      availableSlotToday: 'Demo availability slot',
+      availableSlotToday: t('providers.demoAvailability'),
       rating: 4.6,
       languages: ['English', 'Hindi'],
     },
     {
       id: 'demo-doctor-rahul-menon',
-      name: 'Dr. Rahul Menon',
-      specialization: 'Orthopedics',
+      name: t('providers.doctors.rahulMenon'),
+      specialization: t('providers.specializations.orthopedics'),
       qualifications: 'Demo Specialist • Prototype Only',
       experienceYears: 11,
-      availableSlotToday: 'Demo availability slot',
+      availableSlotToday: t('providers.demoAvailability'),
       rating: 4.7,
       languages: ['English', 'Hindi', 'Tamil'],
     },
@@ -150,7 +179,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
       {/* Header Banner */}
       <div className="rec-header">
         <div>
-          <h2 className="rec-title">Choose a hospital</h2>
+          <h2 className="rec-title">{t('recommendations.chooseHospital')}</h2>
         </div>
 
         {userLocation && (
@@ -188,7 +217,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
         <div className="queue-tip-card">
           <ShieldCheck size={18} className="text-teal flex-shrink-0" />
           <div className="queue-tip-text">
-            <strong>If this hospital is full,</strong> we will try the next one.
+            <strong>{t('recommendations.queueTip')}</strong>
           </div>
         </div>
       </div>
@@ -225,8 +254,8 @@ export const HospitalList: React.FC<HospitalListProps> = ({
                     <div className="rank-indicator">{index === 0 ? '★' : index + 1}</div>
                     <div>
                       <div className="hosp-name-row">
-                        <h3 className="hosp-name">{hosp.name}</h3>
-                        {index === 0 && <span className="nabh-badge">Best match for you</span>}
+                        <h3 className="hosp-name">{hospitalNameMap[hosp.name] ?? hosp.name}</h3>
+                        {index === 0 && <span className="nabh-badge">{t('recommendations.bestMatch')}</span>}
                       </div>
                       <div className="hosp-address">
                         <MapPin size={13} className="text-muted" />
@@ -246,31 +275,31 @@ export const HospitalList: React.FC<HospitalListProps> = ({
                   <div className="strip-item">
                     <MapPin size={14} className="text-teal" />
                     <span className="strip-val">{hosp.distanceKm} km</span>
-                    <span className="strip-sub">Away</span>
+                    <span className="strip-sub">{t('recommendations.away')}</span>
                   </div>
 
                   <div className="strip-item">
                     <Clock size={14} className="text-amber" />
                     <span className="strip-val">~{hosp.estimatedTravelTimeMinutes} mins</span>
-                    <span className="strip-sub">Travel</span>
+                    <span className="strip-sub">{t('recommendations.travel')}</span>
                   </div>
 
                   <div className="strip-item fare-item">
                     <Car size={14} className="text-emerald" />
                     <div className="fare-col">
                       <span className="strip-val">
-                        {hosp.source === 'LIVE_OSM' ? 'Live data' : `₹${hosp.fareEstimates.autoFare} - ₹${hosp.fareEstimates.cabFare}`}
+                        {hosp.source === 'LIVE_OSM' ? t('recommendations.liveData') : `₹${hosp.fareEstimates.autoFare} - ₹${hosp.fareEstimates.cabFare}`}
                       </span>
-                      <span className="strip-sub">{hosp.source === 'LIVE_OSM' ? 'Source' : 'Auto - cab'}</span>
+                      <span className="strip-sub">{hosp.source === 'LIVE_OSM' ? t('recommendations.source') : t('recommendations.autoCab')}</span>
                     </div>
                   </div>
 
                   <div className="strip-item desk-item">
                     <span className={`status-dot ${hosp.emergencyQueueStatus === 'NORMAL' ? 'dot-green' : 'dot-yellow'}`}></span>
                     <span className="strip-val">
-                      {hosp.availabilityNote ? 'Live queue status pending' : (hosp.emergencyQueueStatus === 'NORMAL' ? 'Steady flow' : 'Moderate wait')}
+                      {hosp.availabilityNote ? 'Live queue status pending' : (hosp.emergencyQueueStatus === 'NORMAL' ? t('recommendations.steadyFlow') : t('recommendations.moderateWait'))}
                     </span>
-                    <span className="strip-sub">Now</span>
+                    <span className="strip-sub">{t('recommendations.now')}</span>
                   </div>
                 </div>
 
@@ -278,7 +307,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
                 <div className="doctor-select-section">
                   <div className="doc-section-title">
                     <UserCheck size={15} className="text-teal" />
-                    <span>Doctors</span>
+                    <span>{t('recommendations.doctors')}</span>
                   </div>
 
                   <div className="doctors-chips-grid" aria-label={`Doctors at ${hosp.name}`}>
@@ -295,7 +324,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
                           className={`doc-chip ${isDocSelected ? 'active-doc-chip' : ''}`}
                         >
                           <div className="doc-chip-top">
-                            <strong className="doc-name">{doc.name}</strong>
+                            <strong className="doc-name">{doctorNameMap[doc.name] ?? doc.name}</strong>
                           </div>
                           <span className="doc-spec text-teal">{doc.specialization}</span>
                         </div>
@@ -309,7 +338,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
                   <div className="selected-confirmation-pill">
                     <CheckCircle size={15} className="text-emerald" />
                     <span>
-                      Selected: <strong>{activeDoc.name}</strong>
+                      {t('recommendations.selected')}: <strong>{doctorNameMap[activeDoc.name] ?? activeDoc.name}</strong>
                     </span>
                   </div>
                 )}
@@ -333,7 +362,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
         <div className="selection-cta-drawer">
           <div className="selected-summary-col">
             <div className="selected-entity-title">
-              <strong>{currentHospital.name}</strong>
+              <strong>{hospitalNameMap[currentHospital.name] ?? currentHospital.name}</strong>
             </div>
           </div>
 
@@ -341,7 +370,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
             onClick={handleProceed}
             className="btn btn-primary btn-lg book-request-btn"
           >
-            <span>Book Visit</span>
+            <span>{t('recommendations.bookVisit')}</span>
             <ArrowRight size={18} />
           </button>
         </div>

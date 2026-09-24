@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   User,
   ShieldCheck,
@@ -145,6 +146,16 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
   onLogout,
   onUpdateProfile
 }) => {
+  const { t, i18n } = useTranslation();
+  const languageCode = i18n.language.startsWith('hi') ? 'hi' : i18n.language.startsWith('kn') ? 'kn' : i18n.language.startsWith('mr') ? 'mr' : i18n.language.startsWith('ta') ? 'ta' : i18n.language.startsWith('te') ? 'te' : 'en';
+  const profileCopy: Record<string, { connected: string; viewCard: string; hideCard: string; edit: string; personalInfo: string; fullName: string; abhaNumber: string; abhaAddress: string; dob: string; gender: string; bloodGroup: string; email: string; mobile: string; emergency: string; residential: string; abhaCardTitle: string; }> = {
+    en: { connected: 'ABDM Connected', viewCard: 'View ABHA Card', hideCard: 'Hide ABHA Card', edit: 'Edit', personalInfo: 'Personal Information', fullName: 'Full Name', abhaNumber: 'ABHA Number', abhaAddress: 'ABHA Address', dob: 'Date of Birth', gender: 'Gender', bloodGroup: 'Blood Group', email: 'Email Address', mobile: 'Mobile Number', emergency: 'Emergency Contact', residential: 'Residential Address', abhaCardTitle: 'Digital Ayushman Bharat Health Card' },
+    hi: { connected: 'ABDM जुड़ा', viewCard: 'ABHA कार्ड देखें', hideCard: 'ABHA कार्ड छिपाएँ', edit: 'संपादित करें', personalInfo: 'व्यक्तिगत जानकारी', fullName: 'पूरा नाम', abhaNumber: 'ABHA नंबर', abhaAddress: 'ABHA पता', dob: 'जन्म तिथि', gender: 'लिंग', bloodGroup: 'रक्त समूह', email: 'ईमेल पता', mobile: 'मोबाइल नंबर', emergency: 'आपातकालीन संपर्क', residential: 'निवास पता', abhaCardTitle: 'डिजिटल आयुष्मान भारत हेल्थ कार्ड' },
+    kn: { connected: 'ABDM ಸಂಪರ್ಕಿತ', viewCard: 'ABHA ಕಾರ್ಡ್ ವೀಕ್ಷಿಸಿ', hideCard: 'ABHA ಕಾರ್ಡ್ ಮರೆಮಾಡಿ', edit: 'ಸಂಪಾದಿಸಿ', personalInfo: 'ವೈಯಕ್ತಿಕ ಮಾಹಿತಿ', fullName: 'ಪೂರ್ಣ ಹೆಸರು', abhaNumber: 'ABHA ಸಂಖ್ಯೆ', abhaAddress: 'ABHA पता', dob: 'ಜನ್ಮ ದಿನಾಂಕ', gender: 'ಲಿಂಗ', bloodGroup: 'ರಕ್ತ ಗುಂಪು', email: 'ಇಮೇಲ್ ವಿಳಾಸ', mobile: 'ಮೊಬೈಲ್ ಸಂಖ್ಯೆ', emergency: 'ಅಪಘಾತ ಸಂಪರ್ಕ', residential: 'ನಿವಾಸ ವಿಳಾಸ', abhaCardTitle: 'ಡಿಜಿಟಲ್ ಆಯುಷ್ಮಾನ್ ಭಾರತ ಆರೋಗ್ಯ ಕಾರ್ಡ್' },
+    mr: { connected: 'ABDM जोडलेले', viewCard: 'ABHA कार्ड पहा', hideCard: 'ABHA कार्ड लपवा', edit: 'संपादित करा', personalInfo: 'वैयक्तिक माहिती', fullName: 'पूर्ण नाव', abhaNumber: 'ABHA क्रमांक', abhaAddress: 'ABHA पत्ता', dob: 'जन्मतारीख', gender: 'लिंग', bloodGroup: 'रक्तगट', email: 'ईमेल पत्ता', mobile: 'मोबाइल क्रमांक', emergency: 'आपत्कालीन संपर्क', residential: 'निवास पत्ता', abhaCardTitle: 'डिजिटल आयुष्मान भारत आरोग्य कार्ड' },
+    ta: { connected: 'ABDM இணைக்கப்பட்டது', viewCard: 'ABHA அட்டை பார்க்கவும்', hideCard: 'ABHA அட்டையை மறை', edit: 'திருத்து', personalInfo: 'தனிப்பட்ட தகவல்', fullName: 'முழுப் பெயர்', abhaNumber: 'ABHA எண்', abhaAddress: 'ABHA முகவரி', dob: 'பிறந்த நாள்', gender: 'பாலினம்', bloodGroup: 'இரத்த வகை', email: 'மின்னஞ்சல் முகவரி', mobile: 'மொபைல் எண்', emergency: 'அவசர தொடர்பு', residential: 'வதிவிட முகவரி', abhaCardTitle: 'டிஜிட்டல் ஆயுஷ்மான் பாரத் சுகாதார அட்டை' },
+    te: { connected: 'ABDM కనెక్ట్ చేయబడింది', viewCard: 'ABHA కార్డ్ చూడండి', hideCard: 'ABHA కార్డ్ దాచండి', edit: 'సవరించండి', personalInfo: 'వ్యక్తిగత సమాచారం', fullName: 'పూర్తి పేరు', abhaNumber: 'ABHA నంబర్', abhaAddress: 'ABHA అడ్రస్', dob: 'పుట్టిన తేదీ', gender: 'లింగం', bloodGroup: 'రక్త వర్గం', email: 'ఇమెయిల్ చిరునామా', mobile: 'మొబైల్ నంబర్', emergency: 'అత్యవసర సంప్రదింపు', residential: 'నివాస చిరునామా', abhaCardTitle: 'డిజిటల్ ఆయుష్మాన్ భారత్ ఆరోగ్య కార్డ్' },
+  };
   // Local Profile State (supports Edit Profile)
   const [currentProfile, setCurrentProfile] = useState<AbhaProfile>(profile);
   
@@ -289,7 +300,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
               <h2 className="hero-user-name">{currentProfile.fullName}</h2>
               <span className="hero-abha-badge">
                 <ShieldCheck size={13} />
-                <span>ABDM Connected</span>
+                <span>{profileCopy[languageCode].connected}</span>
               </span>
             </div>
             
@@ -310,14 +321,14 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
               className="btn btn-outline btn-edit-profile"
             >
               <Edit3 size={15} />
-              <span>Edit Profile</span>
+              <span>{t('nav.profile')}</span>
             </button>
             <button
               onClick={() => setIsAbhaCardOpen(!isAbhaCardOpen)}
               className="btn btn-primary btn-view-card"
             >
               <QrCode size={15} />
-              <span>{isAbhaCardOpen ? 'Hide ABHA Card' : 'View ABHA Card'}</span>
+              <span>{isAbhaCardOpen ? profileCopy[languageCode].hideCard : profileCopy[languageCode].viewCard}</span>
             </button>
           </div>
         </div>
@@ -327,7 +338,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
       {isAbhaCardOpen && (
         <div className="abha-card-expand-container animate-fade-in">
           <div className="section-head-mini">
-            <h3>Digital Ayushman Bharat Health Card</h3>
+            <h3>{profileCopy[languageCode].abhaCardTitle}</h3>
             <button onClick={() => setIsAbhaCardOpen(false)} className="btn-close-sm">
               <X size={16} />
             </button>
@@ -345,36 +356,36 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
             <div className="card-header-bar">
               <div className="card-title-group">
                 <User size={18} className="icon-teal" />
-                <h3>Personal Information</h3>
+                <h3>{profileCopy[languageCode].personalInfo}</h3>
               </div>
               <button
                 onClick={() => setIsEditModalOpen(true)}
                 className="btn-icon-link"
-                title="Edit Personal Information"
+                title={profileCopy[languageCode].personalInfo}
               >
                 <Edit3 size={15} />
-                <span>Edit</span>
+                <span>{profileCopy[languageCode].edit}</span>
               </button>
             </div>
 
             <div className="info-fields-grid">
               <div className="info-field-item">
-                <span className="field-label">Full Name</span>
+                <span className="field-label">{profileCopy[languageCode].fullName}</span>
                 <p className="field-value">{currentProfile.fullName}</p>
               </div>
 
               <div className="info-field-item">
-                <span className="field-label">ABHA Number</span>
+                <span className="field-label">{profileCopy[languageCode].abhaNumber}</span>
                 <p className="field-value font-mono">{currentProfile.abhaNumber}</p>
               </div>
 
               <div className="info-field-item">
-                <span className="field-label">ABHA Address</span>
+                <span className="field-label">{profileCopy[languageCode].abhaAddress}</span>
                 <p className="field-value text-teal">{currentProfile.abhaAddress}</p>
               </div>
 
               <div className="info-field-item">
-                <span className="field-label">Date of Birth</span>
+                <span className="field-label">{profileCopy[languageCode].dob}</span>
                 <p className="field-value">
                   <Calendar size={13} className="inline-icon" />
                   {currentProfile.dateOfBirth}
@@ -382,12 +393,12 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
               </div>
 
               <div className="info-field-item">
-                <span className="field-label">Gender</span>
+                <span className="field-label">{profileCopy[languageCode].gender}</span>
                 <p className="field-value">{currentProfile.gender}</p>
               </div>
 
               <div className="info-field-item">
-                <span className="field-label">Blood Group</span>
+                <span className="field-label">{profileCopy[languageCode].bloodGroup}</span>
                 <p className="field-value blood-highlight">
                   <Heart size={13} className="text-red inline-icon" />
                   {currentProfile.bloodGroup}
@@ -395,24 +406,24 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
               </div>
 
               <div className="info-field-item">
-                <span className="field-label">Email Address</span>
+                <span className="field-label">{profileCopy[languageCode].email}</span>
                 <p className="field-value">{currentProfile.email || 'user@sugastha.gov.in'}</p>
               </div>
 
               <div className="info-field-item">
-                <span className="field-label">Mobile Number</span>
+                <span className="field-label">{profileCopy[languageCode].mobile}</span>
                 <p className="field-value">{currentProfile.mobileNumber}</p>
               </div>
 
               <div className="info-field-item col-span-2">
-                <span className="field-label">Emergency Contact</span>
+                <span className="field-label">{profileCopy[languageCode].emergency}</span>
                 <p className="field-value">
                   {currentProfile.emergencyContact.name} ({currentProfile.emergencyContact.relation}) — {currentProfile.emergencyContact.phone}
                 </p>
               </div>
 
               <div className="info-field-item col-span-2">
-                <span className="field-label">Residential Address</span>
+                <span className="field-label">{profileCopy[languageCode].residential}</span>
                 <p className="field-value">
                   {currentProfile.address.line}, {currentProfile.address.district},{' '}
                   {currentProfile.address.state} - {currentProfile.address.pincode}
@@ -428,14 +439,14 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                 <Users size={22} className="text-primary" />
               </div>
               <div className="team-text-box">
-                <h4>Meet the Developers</h4>
-                <p>Discover the engineering & design team behind SUGASTHA patient portal.</p>
+                <h4>{languageCode === 'en' ? 'Meet the Developers' : languageCode === 'hi' ? 'डेवलपर्स से मिलें' : languageCode === 'kn' ? 'ಡೆವಲಪರ್‌ಗಳನ್ನು ಭೇಟಿ ಮಾಡಿ' : languageCode === 'mr' ? 'डेव्हलपर्स भेट द्या' : languageCode === 'ta' ? 'டெவலப்பர்களை காண்க' : 'డెవలపర్లు ontmoeten'}</h4>
+                <p>{languageCode === 'en' ? 'Discover the engineering & design team behind SUGASTHA patient portal.' : languageCode === 'hi' ? 'SUGASTHA रोगी पोर्टल के पीछे इंजीनियरिंग और डिज़ाइन टीम को जानें।' : languageCode === 'kn' ? 'SUGASTHA ರೋಗಿ ಪೋರ್ಟಲ್ ಹಿಂದೆ ಇರುವ ಇಂಜಿನಿಯರಿಂಗ್ ಮತ್ತು ವಿನ್ಯಾಸ ತಂಡವನ್ನು ontdekken하세요.' : languageCode === 'mr' ? 'SUGASTHA रुग्ण पोर्टल मागे असलेल्या अभियांत्रिकी आणि डिझाइन टीमचा परिचय घ्या.' : languageCode === 'ta' ? 'SUGASTHA நோயாளி போர்ட்டலுக்கு பின்னால் உள்ள பொறியியல் மற்றும் வடிவமைப்பு குழுவைக் கண்டறியுங்கள்.' : 'SUGASTHA పేషెంట్ పోర్టల్ వెనుక ఉన్న ఇంజినీరింగ్ & డిజైన్ బృందాన్ని కనుగొనండి.'}</p>
               </div>
               <button
                 onClick={() => setIsTeamModalOpen(true)}
                 className="btn btn-outline btn-team"
               >
-                <span>Meet the Team</span>
+                <span>{languageCode === 'en' ? 'Meet the Team' : languageCode === 'hi' ? 'टीम से मिलें' : languageCode === 'kn' ? 'ಟೀಂ ಅನ್ನು ಭೇಟಿ ಮಾಡಿ' : languageCode === 'mr' ? 'टिम भेटा' : languageCode === 'ta' ? 'குழுவை சந்தியுங்கள்' : 'టీమ్‌ను కలవండి'}</span>
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -448,7 +459,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
             <div className="card-header-bar">
               <div className="card-title-group">
                 <Sliders size={18} className="icon-teal" />
-                <h3>Account & Settings</h3>
+                <h3>{languageCode === 'en' ? 'Account & Settings' : languageCode === 'hi' ? 'अकाउंट और सेटिंग्स' : languageCode === 'kn' ? 'ಖಾತೆ ಮತ್ತು ಸೆಟ್ಟಿಂಗ್‌ಗಳು' : languageCode === 'mr' ? 'खाते आणि सेटिंग्ज' : languageCode === 'ta' ? 'கணக்கு மற்றும் அமைப்புகள்' : 'ఖాతా మరియు సెట్టింగ్‌లు'}</h3>
               </div>
             </div>
 
@@ -462,8 +473,8 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                   <Key size={17} className="text-blue" />
                 </div>
                 <div className="setting-item-text">
-                  <span className="setting-title">Change Password</span>
-                  <span className="setting-desc">Update your security password</span>
+                  <span className="setting-title">{languageCode === 'en' ? 'Change Password' : languageCode === 'hi' ? 'पासवर्ड बदलें' : languageCode === 'kn' ? 'ಪಾಸ್‌ವರ್ಡ್ ಬದಲಿಸಿ' : languageCode === 'mr' ? 'पासवर्ड बदला' : languageCode === 'ta' ? 'கடவுச்சொல்லை மாற்றவும்' : 'పాస్వర్డ్ మార్చండి'}</span>
+                  <span className="setting-desc">{languageCode === 'en' ? 'Update your security password' : languageCode === 'hi' ? 'अपना सुरक्षा पासवर्ड अपडेट करें' : languageCode === 'kn' ? 'ನಿಮ್ಮ ಭದ್ರತಾ ಪಾಸ್‌ವರ್ಡ್ ನವೀಕರಿಸಿ' : languageCode === 'mr' ? 'तुमचा सुरक्षा पासवर्ड अपडेट करा' : languageCode === 'ta' ? 'உங்கள் பாதுகாப்பு கடவுச்சொல்லை புதுப்பிக்கவும்' : 'మీ భద్రతా పాస్వర్డ్‌ను అప్‌డేట్ చేయండి'}</span>
                 </div>
                 <ChevronRight size={17} className="setting-arrow" />
               </button>
@@ -477,7 +488,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                   <Globe size={17} className="text-emerald" />
                 </div>
                 <div className="setting-item-text">
-                  <span className="setting-title">Language & Regional</span>
+                  <span className="setting-title">{languageCode === 'en' ? 'Language & Regional' : languageCode === 'hi' ? 'भाषा और क्षेत्रीय' : languageCode === 'kn' ? 'ಭಾಷೆ ಮತ್ತು ಪ್ರದೇಶೀಯ' : languageCode === 'mr' ? 'भाषा आणि प्रादेशिक' : languageCode === 'ta' ? 'மொழி மற்றும் பிராந்திய' : 'భాష మరియు ప్రాంతీయ'}</span>
                   <span className="setting-desc">{selectedLanguage}</span>
                 </div>
                 <ChevronRight size={17} className="setting-arrow" />
@@ -492,8 +503,8 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                   <Bell size={17} className="text-amber" />
                 </div>
                 <div className="setting-item-text">
-                  <span className="setting-title">Notification Preferences</span>
-                  <span className="setting-desc">SMS, Email, queue updates</span>
+                  <span className="setting-title">{languageCode === 'en' ? 'Notification Preferences' : languageCode === 'hi' ? 'सूचना प्राथमिकताएँ' : languageCode === 'kn' ? 'ಅಧಿಸೂಚನೆ ಆಯ್ಕೆಗಳು' : languageCode === 'mr' ? 'सूचना प्राधान्ये' : languageCode === 'ta' ? 'அறிவிப்பு விருப்பங்கள்' : 'నోటిఫికేషన్ ప్రాధాన్యతలు'}</span>
+                  <span className="setting-desc">{languageCode === 'en' ? 'SMS, Email, queue updates' : languageCode === 'hi' ? 'SMS, ईमेल, क्यू अपडेट' : languageCode === 'kn' ? 'SMS, ಇಮೇಲ್, ಕ್ಯೂ ನವೀಕರಣಗಳು' : languageCode === 'mr' ? 'SMS, ईमेल, क्यू अपडेट्स' : languageCode === 'ta' ? 'SMS, மின்னஞ்சல், வரிசை புதுப்பிப்புகள்' : 'SMS, ఇమెయిల్, క్యూను అప్‌డేట్‌లు'}</span>
                 </div>
                 <ChevronRight size={17} className="setting-arrow" />
               </button>
@@ -507,8 +518,8 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                   <Lock size={17} className="text-purple" />
                 </div>
                 <div className="setting-item-text">
-                  <span className="setting-title">Privacy & Security</span>
-                  <span className="setting-desc">2-Factor auth, ABDM consent locks</span>
+                  <span className="setting-title">{languageCode === 'en' ? 'Privacy & Security' : languageCode === 'hi' ? 'गोपनीयता और सुरक्षा' : languageCode === 'kn' ? 'ಗೌಪ್ಯತೆ ಮತ್ತು ಭದ್ರತೆ' : languageCode === 'mr' ? 'गोपनियता आणि सुरक्षितता' : languageCode === 'ta' ? 'தனியுரிமை மற்றும் பாதுகாப்பு' : 'గోప్యత మరియు భద్రత'}</span>
+                  <span className="setting-desc">{languageCode === 'en' ? '2-Factor auth, ABDM consent locks' : languageCode === 'hi' ? '2-फैक्टर ऑथ, ABDM सहमति लॉक' : languageCode === 'kn' ? '2-ಫ್ಯಾಕ್ಟರ್ 인증, ABDM ಸಮ್ಮತಿ ಲಾಕ್‌ಗಳು' : languageCode === 'mr' ? '2-फॅक्टर ऑथ, ABDM संमती लॉक' : languageCode === 'ta' ? '2-ஃபேக்டர் அங்கீகாரம், ABDM ஒப்புதல் பூட்டுகள்' : '2-ఫ్యాక్టర్ অথ్, ABDM సమ్మతి లాక్‌లు'}</span>
                 </div>
                 <ChevronRight size={17} className="setting-arrow" />
               </button>
@@ -518,12 +529,12 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
           {/* Account Logout Card */}
           <div className="logout-action-card">
             <div className="logout-text-col">
-              <h4>Account Session</h4>
-              <p>Logged in as {currentProfile.abhaNumber}</p>
+              <h4>{languageCode === 'en' ? 'Account Session' : languageCode === 'hi' ? 'अकाउंट सेशन' : languageCode === 'kn' ? 'ಖಾತೆ ಸೆಷನ್' : languageCode === 'mr' ? 'खातेचे सेशन' : languageCode === 'ta' ? 'கணக்கு அமர்வு' : 'ఖాతా సెషన్'}</h4>
+              <p>{languageCode === 'en' ? `Logged in as ${currentProfile.abhaNumber}` : languageCode === 'hi' ? `${currentProfile.abhaNumber} के रूप में लॉग इन किया` : languageCode === 'kn' ? `${currentProfile.abhaNumber} ಆಗಿ ಲಾಗಿನ್ ಮಾಡಲಾಗಿದೆ` : languageCode === 'mr' ? `${currentProfile.abhaNumber} म्हणून लॉग इन केले` : languageCode === 'ta' ? `${currentProfile.abhaNumber} ஆக உள்நுழைந்துள்ளீர்கள்` : `${currentProfile.abhaNumber}గా లాగిన్ చేశారు`}</p>
             </div>
             <button onClick={onLogout} className="btn btn-logout">
               <LogOut size={16} />
-              <span>Log Out</span>
+              <span>{languageCode === 'en' ? 'Log Out' : languageCode === 'hi' ? 'लॉग आउट' : languageCode === 'kn' ? 'ಲಾಗ್ ಔಟ್' : languageCode === 'mr' ? 'लॉग आउट' : languageCode === 'ta' ? 'லாக்அவுட்' : 'లాగ్‌అవుట్'}</span>
             </button>
           </div>
         </div>
@@ -537,7 +548,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
             <div className="modal-header">
               <div className="modal-title-group">
                 <Edit3 size={18} className="icon-teal" />
-                <h3>Edit Profile Information</h3>
+                <h3>{languageCode === 'en' ? 'Edit Profile Information' : languageCode === 'hi' ? 'प्रोफ़ाइल जानकारी संपादित करें' : languageCode === 'kn' ? 'ಪ್ರೊಫೈಲ್ ಮಾಹಿತಿ ಸಂಪಾದಿಸಿ' : languageCode === 'mr' ? 'प्रोफाइल माहिती संपादित करा' : languageCode === 'ta' ? 'சுயவிவர தகவலை திருத்தவும்' : 'ప్రొఫైల్ సమాచారాన్ని సవరించండి'}</h3>
               </div>
               <button onClick={() => setIsEditModalOpen(false)} className="btn-close">
                 <X size={18} />
@@ -547,7 +558,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
             <form onSubmit={handleSaveProfile} className="modal-form-body">
               <div className="form-group-grid">
                 <div className="form-field">
-                  <label>Full Name</label>
+                  <label>{profileCopy[languageCode].fullName}</label>
                   <input
                     type="text"
                     value={editName}
@@ -557,7 +568,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                 </div>
 
                 <div className="form-field">
-                  <label>Email Address</label>
+                  <label>{profileCopy[languageCode].email}</label>
                   <input
                     type="email"
                     value={editEmail}
@@ -567,7 +578,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                 </div>
 
                 <div className="form-field">
-                  <label>Mobile Number</label>
+                  <label>{profileCopy[languageCode].mobile}</label>
                   <input
                     type="tel"
                     value={editMobile}
@@ -577,7 +588,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                 </div>
 
                 <div className="form-field">
-                  <label>Emergency Contact Name</label>
+                  <label>{languageCode === 'en' ? 'Emergency Contact Name' : languageCode === 'hi' ? 'आपातकालीन संपर्क का नाम' : languageCode === 'kn' ? 'ಅಪಘಾತ ಸಂಪರ್ಕದ ಹೆಸರು' : languageCode === 'mr' ? 'आपत्कालीन संपर्क नाव' : languageCode === 'ta' ? 'அவசர தொடர்பு பெயர்' : 'అత్యవసర సంప్రదింపు పేరు'}</label>
                   <input
                     type="text"
                     value={editEmergencyName}
@@ -587,7 +598,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                 </div>
 
                 <div className="form-field">
-                  <label>Emergency Relation</label>
+                  <label>{languageCode === 'en' ? 'Emergency Relation' : languageCode === 'hi' ? 'आपातकालीन संबंध' : languageCode === 'kn' ? 'ಅಪಘಾತ ಸಂಬಂಧ' : languageCode === 'mr' ? 'आपत्कालीन नाते' : languageCode === 'ta' ? 'அவசர உறவு' : 'అత్యవసర సంబంధం'}</label>
                   <input
                     type="text"
                     value={editEmergencyRelation}
@@ -597,7 +608,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                 </div>
 
                 <div className="form-field">
-                  <label>Emergency Phone</label>
+                  <label>{languageCode === 'en' ? 'Emergency Phone' : languageCode === 'hi' ? 'आपातकालीन फोन' : languageCode === 'kn' ? 'ಅಪಘಾತ ಫೋನ್' : languageCode === 'mr' ? 'आपत्कालीन फोन' : languageCode === 'ta' ? 'அவசர தொலைபேசி' : 'అత్యవసర ఫోన్'}</label>
                   <input
                     type="tel"
                     value={editEmergencyPhone}
@@ -607,7 +618,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                 </div>
 
                 <div className="form-field col-span-2">
-                  <label>Address Line</label>
+                  <label>{languageCode === 'en' ? 'Address Line' : languageCode === 'hi' ? 'पता पंक्ति' : languageCode === 'kn' ? 'ವಿಳಾಸ ಸಾಲು' : languageCode === 'mr' ? 'पत्ता ओळ' : languageCode === 'ta' ? 'முகவரி வரி' : 'చిరునామా లైన్'}</label>
                   <input
                     type="text"
                     value={editAddressLine}

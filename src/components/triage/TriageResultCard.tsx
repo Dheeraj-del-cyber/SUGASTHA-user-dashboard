@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   AlertOctagon,
   AlertTriangle,
@@ -22,6 +23,7 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
   onProceedRecommendation,
   onReevaluate,
 }) => {
+  const { t } = useTranslation();
   const [showWhy, setShowWhy] = React.useState(false);
 
   const getLevelConfig = (lvl: TriageLevel) => {
@@ -31,8 +33,8 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
           icon: <AlertOctagon size={32} />,
           badgeClass: 'badge-red',
           borderClass: 'border-red-glow',
-          title: 'You need urgent medical care',
-          badgeText: 'Urgent — go now',
+          title: t('triage.urgentCare'),
+          badgeText: t('triage.urgentBadge'),
           accentColor: '#ef4444',
           bgBanner: 'linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(15, 23, 42, 0.9) 100%)',
         };
@@ -41,8 +43,8 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
           icon: <AlertTriangle size={32} />,
           badgeClass: 'badge-yellow',
           borderClass: 'border-yellow-glow',
-          title: 'Please see a doctor soon',
-          badgeText: 'See a doctor today',
+          title: t('triage.doctorSoon'),
+          badgeText: t('triage.doctorToday'),
           accentColor: '#f59e0b',
           bgBanner: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(15, 23, 42, 0.9) 100%)',
         };
@@ -52,8 +54,8 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
           icon: <CheckCircle size={32} />,
           badgeClass: 'badge-green',
           borderClass: 'border-green-glow',
-          title: 'You can visit a doctor normally',
-          badgeText: 'Not an emergency',
+          title: t('triage.normalVisit'),
+          badgeText: t('triage.notEmergency'),
           accentColor: '#10b981',
           bgBanner: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(15, 23, 42, 0.9) 100%)',
         };
@@ -71,7 +73,7 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
             {config.icon}
           </div>
           <div className="triage-title-group">
-            <div className="triage-level-label">YOUR HEALTH PRIORITY</div>
+            <div className="triage-level-label">{t('triage.priority')}</div>
             <h2 className="triage-main-title" style={{ color: config.accentColor }}>
               {config.title}
             </h2>
@@ -84,15 +86,15 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
         <div className="triage-vitals-strip">
           <div className="vital-item">
             <Clock size={15} className="text-muted" />
-            <span className="vital-label">See a doctor:</span>
+            <span className="vital-label">{t('triage.seeDoctor')}</span>
             <strong className="vital-value">{triage.urgencyWindow}</strong>
           </div>
 
           <div className="vital-item">
             <ShieldCheck size={15} className="text-teal" />
-            <span className="vital-label">Suggested care:</span>
+            <span className="vital-label">{t('triage.suggestedCare')}</span>
             <strong className="vital-value text-teal">
-              {triage.recommendedRoute === 'HOSPITAL_VISIT' ? 'Go to a hospital' : 'Doctor on video call'}
+              {triage.recommendedRoute === 'HOSPITAL_VISIT' ? t('triage.careHospital') : t('triage.careVideo')}
             </strong>
           </div>
         </div>
@@ -102,7 +104,7 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
       <div className="factors-section">
         <button type="button" className="why-toggle-btn" onClick={() => setShowWhy(!showWhy)}>
           <Activity size={16} className="text-teal" />
-          <span>Why this priority?</span>
+          <span>{t('triage.whyPriority')}</span>
           <span className="why-chevron">{showWhy ? '▲' : '▼'}</span>
         </button>
         {showWhy && (
@@ -117,10 +119,10 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
                     }`}
                   >
                     {factor.source === 'ABHA_CHRONIC_HISTORY'
-                      ? 'Your health history'
+                      ? t('triage.sourceHistory')
                       : factor.source === 'PAST_RECORDS'
-                      ? 'Past records'
-                      : 'Your symptoms'}
+                      ? t('triage.sourceRecords')
+                      : t('triage.sourceSymptoms')}
                   </span>
                 </div>
                 <p className="factor-desc">{factor.description}</p>
@@ -133,7 +135,7 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
       {/* Recommended Specialities */}
       {triage.suggestedSpecialties.length > 0 && (
         <div className="specialties-row">
-          <span className="spec-label">Doctor type you may need:</span>
+          <span className="spec-label">{t('triage.specialtyLabel')}</span>
           <div className="spec-tags">
             {triage.suggestedSpecialties.slice(0, 3).map((spec, i) => (
               <span key={i} className="spec-badge">
@@ -148,11 +150,11 @@ export const TriageResultCard: React.FC<TriageResultCardProps> = ({
       <div className="triage-action-footer">
         <button onClick={onReevaluate} className="btn btn-secondary btn-sm">
           <RotateCcw size={15} />
-          <span>Change Symptoms</span>
+          <span>{t('triage.changeSymptoms')}</span>
         </button>
 
         <button onClick={onProceedRecommendation} className="btn btn-primary btn-lg proceed-btn">
-          <span>{triage.recommendedRoute === 'HOSPITAL_VISIT' ? 'See Hospitals' : 'Get Doctor Call'}</span>
+          <span>{triage.recommendedRoute === 'HOSPITAL_VISIT' ? t('triage.seeHospitals') : t('triage.getDoctorCall')}</span>
           <ArrowRight size={18} />
         </button>
       </div>

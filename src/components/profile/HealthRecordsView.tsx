@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import {
   Search,
@@ -206,6 +207,38 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
   allergies,
   onAddRecord,
 }) => {
+  const { t, i18n } = useTranslation();
+  const languageCode = i18n.language.startsWith('hi') ? 'hi' : i18n.language.startsWith('kn') ? 'kn' : i18n.language.startsWith('mr') ? 'mr' : i18n.language.startsWith('ta') ? 'ta' : i18n.language.startsWith('te') ? 'te' : 'en';
+  const hospitalNameMap: Record<string, string> = {
+    'AIIMS (All India Institute of Medical Sciences)': { en: 'AIIMS (All India Institute of Medical Sciences)', hi: 'एम्स (ऑल इंडिया इंस्टीट्यूट ऑफ मेडिकल साइंसेज)', kn: 'AIIMS (ಎಲ್ಲ ಭಾರತ ವೈದ್ಯಕೀಯ ವಿಜ್ಞಾನಗಳ ಸಂಸ್ಥೆ)', mr: 'एम्स (ऑल इंडिया इन्स्टिट्यूट ऑफ मेडिकल सायन्सेस)', ta: 'AIIMS (அனைத்திந்திய மருத்துவ அறிவியல் நிறுவனம்)', te: 'AIIMS (అన్ని భారత వైద్య శాస్త్రాల సంస్థ)' }[languageCode],
+    'VMMMC & Safdarjung Hospital': { en: 'VMMMC & Safdarjung Hospital', hi: 'वीएमएमएमसी एंड सफदरजंग अस्पताल', kn: 'VMMMC & ಸಫ್ದರ್ಜಂಗ ಆಸ್ಪತ್ರೆ', mr: 'VMMMC & सफदरजंग रुग्णालय', ta: 'VMMMC & சஃப்தர்ஜங் மருத்துவமனை', te: 'VMMMC & సఫ్దర్జంగ్ ఆసుపత్రి' }[languageCode],
+    'Max Super Speciality Hospital': { en: 'Max Super Speciality Hospital', hi: 'मैक्स सुपर स्पेशियलिटी अस्पताल', kn: 'ಮ್ಯಾಕ್ಸ್ ಸೂಪರ್ ಸ್ಪೆಷಾಲಿಟಿ ಆಸ್ಪತ್ರೆ', mr: 'मॅक्स सुपर स्पेशालिटी रुग्णालय', ta: 'மக்ஸ் சூப்பர் ஸ்பெஷாலிட்டி மருத்துவமனை', te: 'మ్యాక్స్ సూపర్ స్పెషాలిటీ ఆసుపత్రి' }[languageCode],
+    'Indraprastha Apollo Hospital': { en: 'Indraprastha Apollo Hospital', hi: 'इंद्रप्रस्थ अपोलो अस्पताल', kn: 'ಇಂದ್ರಪ್ರಸ್ಥ ಅಪೋಲೋ ಆಸ್ಪತ್ರೆ', mr: 'इंद्रप्रस्थ अपोलो रुग्णालय', ta: 'இந்திரபிரஸ்தா அப்பல்லோ மருத்துவமனை', te: 'ఇంద్రప్రస్థ అపోలో ఆసుపత్రి' }[languageCode],
+    'Acharya Shree Bhikshu District Hospital': { en: 'Acharya Shree Bhikshu District Hospital', hi: 'आचार्य श्री भिक्षु जिला अस्पताल', kn: 'ಅಚಾರ्य ಶ್ರೀ ಭಿಕ್ಷು ಜಿಲ್ಲೆ ಆಸ್ಪತ್ರೆ', mr: 'आचार्य श्री भिक्षु जिल्हा रुग्णालय', ta: 'ஆச்சார்யா ஸ்ரீ பிக்ஷு மாவட்ட மருத்துவமனை', te: 'ఆచార్య శ్రీ భిక్షు జిల్లా ఆసుపత్రి' }[languageCode],
+  };
+  const recordText: Record<string, Record<string, string>> = {
+    en: { title: 'My Record', subtitle: 'Your complete health journey, all in one place', search: 'Search records...', noMedicalAlerts: 'No medical alerts recorded', healthOverview: 'Health Overview', overviewDesc: 'A quick look at your current status', keepUpdated: 'Keep your records updated', care: 'for better care', addRecord: 'Add Record', verified: 'Verified ABDM record (FHIR R4)', noMatching: 'No matching events', noRecords: 'No records yet', reports: 'Reports', prescriptions: 'Prescriptions', appointments: 'Appointments', history: 'Medical History', hospitalVisits: 'Hospital Visits', alert: 'Medical Alert', upcomingNotes: 'Your consultations, medicines, tests and visits will appear here once added.' },
+    hi: { title: 'मेरा रिकॉर्ड', subtitle: 'आपकी पूरी स्वास्थ्य यात्रा, सब एक ही जगह', search: 'रिकॉर्ड खोजें...', noMedicalAlerts: 'कोई मेडिकल अलर्ट नहीं', healthOverview: 'स्वास्थ्य अवलोकन', overviewDesc: 'आपकी वर्तमान स्थिति की त्वरित जानकारी', keepUpdated: 'अपने रिकॉर्ड को अपडेट रखें', care: 'बेहतर देखभाल के लिए', addRecord: 'रिकॉर्ड जोड़ें', verified: 'सत्यापित ABDM रिकॉर्ड (FHIR R4)', noMatching: 'कोई मिलान नहीं', noRecords: 'अभी कोई रिकॉर्ड नहीं', reports: 'रिपोर्ट्स', prescriptions: 'प्रिस्क्रिप्शन', appointments: 'अपॉइंटमेंट', history: 'मेडिकल इतिहास', hospitalVisits: 'अस्पताल विज़िट', alert: 'मेडिकल अलर्ट', upcomingNotes: 'आपके परामर्श, दवाएँ, परीक्षण और विज़िट यहाँ दिखाई देंगे।' },
+    kn: { title: 'ನನ್ನ ದಾಖಲೆ', subtitle: 'ನಿಮ್ಮ ಆರೋಗ್ಯ ಪ್ರಯಾಣದ ಸಂಪೂರ್ಣ ವಿವರ, ಎಲ್ಲವೂ ಒಂದು ಸ್ಥಳದಲ್ಲಿ', search: 'ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಿ...', noMedicalAlerts: 'ಮೆಡಿಕಲ್ ಅಲರ್ಟ್‌ಗಳಿಲ್ಲ', healthOverview: 'ಆರೋಗ್ಯ ಅವಲೋಕನ', overviewDesc: 'ನಿಮ್ಮ ನ್ಯೂನ ತನ್ಮೂಲವನ್ನು ತ್ವರಿತವಾಗಿ ನೋಡಿರಿ', keepUpdated: 'ನಿಮ್ಮ ದಾಖಲೆಗಳನ್ನು ನವೀಕರಿಸಿ', care: 'ಉತ್ತಮ ಆರೈಕೆಗೆ', addRecord: 'ದಾಖಲೆ ಸೇರಿಸಿ', verified: 'ಪರಿಶೀಲಿತ ABDM ದಾಖಲೆ (FHIR R4)', noMatching: 'ಹೊಂದಾಣಿಕೆಯ ದಾಖಲೆಗಳಿಲ್ಲ', noRecords: 'ಇನ್ನೂ ದಾಖಲೆಗಳಿಲ್ಲ', reports: 'ವರದಿಗಳು', prescriptions: 'ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ಗಳು', appointments: 'ಆಪಾಯಿಂಟ್ಮೆಂಟ್ಗಳು', history: 'ಮೆಡಿಕಲ್ ಇತಿಹಾಸ', hospitalVisits: 'ಆಸ್ಪತ್ರೆ ಭೇಟಿಗಳು', alert: 'ಮೆಡಿಕಲ್ ಅಲರ್ಟ್', upcomingNotes: 'ನಿಮ್ಮ ಸಲಹೆಗಳು, medicines, ಪರೀಕ್ಷೆಗಳು ಮತ್ತು ಭೇಟಿಗಳು ಇಲ್ಲಿ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ.' },
+    mr: { title: 'माझे रेकॉर्ड', subtitle: 'तुमचा संपूर्ण आरोग्य प्रवास, सर्व एकाच ठिकाणी', search: 'रेकॉर्ड शोधा...', noMedicalAlerts: 'कोणतेही मेडिकल अलर्ट नाहीत', healthOverview: 'आरोग्य आढावा', overviewDesc: 'तुमच्या सद्य स्थितीचा जलद आढावा', keepUpdated: 'तुमचे रेकॉर्ड अपडेट ठेवा', care: 'चांगल्या काळजीसाठी', addRecord: 'रेकॉर्ड जोडा', verified: 'सत्यापित ABDM रेकॉर्ड (FHIR R4)', noMatching: 'जुळणारे परिणाम नाहीत', noRecords: 'अद्याप कोणतेही रेकॉर्ड नाही', reports: 'रिपोर्ट्स', prescriptions: 'प्रिस्क्रिप्शन', appointments: 'अपॉइंटमेंट्स', history: 'मेडिकल इतिहास', hospitalVisits: 'रुग्णालय भेट', alert: 'मेडिकल अलर्ट', upcomingNotes: 'तुमचे सल्लामसलत, औषधे, तपासण्या आणि भेटी येथे दिसतील.' },
+    ta: { title: 'என் பதிவுகள்', subtitle: 'உங்கள் முழு சுகாதார பயணம், அனைத்தும் ஒரே இடத்தில்', search: 'பதிவுகளை தேடுங்கள்...', noMedicalAlerts: 'மருத்துவ எச்சரிக்கைகள் எதுவும் இல்லை', healthOverview: 'சுகாதார நிலை', overviewDesc: 'உங்கள் தற்போதைய நிலையை விரைவாகப் பார்க்கவும்', keepUpdated: 'உங்கள் பதிவுகளை புதுப்பித்த நிலையில் வைத்திருங்கள்', care: 'சிறந்த பராமரிப்புக்கு', addRecord: 'பதிவை சேர்', verified: 'சரிபார்க்கப்பட்ட ABDM பதிவு (FHIR R4)', noMatching: 'பொருத்தமான பதிவுகள் இல்லை', noRecords: 'இதுவரை பதிவுகள் இல்லை', reports: 'அறிக்கைகள்', prescriptions: 'மருந்துகள்', appointments: 'நியமனங்கள்', history: 'மருத்துவ வரலாறு', hospitalVisits: 'மருத்துவமனை வருகைகள்', alert: 'மருத்துவ எச்சரிக்கை', upcomingNotes: 'உங்கள் ஆலோசனைகள், மருந்துகள், சோதனைகள் மற்றும் வருகைகள் இங்கே தோன்றும்.' },
+    te: { title: 'నా రికార్డ్స్', subtitle: 'మీ పూర్తి ఆరోగ్య ప్రయాణం, అన్నీ ఒకే చోట', search: 'రికార్డ్స్‌ను శోధించండి...', noMedicalAlerts: 'మెడికల్ అలర్ట్స్ లేవు', healthOverview: 'ఆరోగ్య అవలోకనం', overviewDesc: 'మీ ప్రస్తుత స్థితిని త్వరగా చూడండి', keepUpdated: 'మీ రికార్డ్స్‌ను అప్‌డేట్ చేసుకోండి', care: 'మంచి సంరక్షణ కోసం', addRecord: 'రికార్డ్ జోడించండి', verified: 'ధృవీకరించబడిన ABDM రికార్డ్ (FHIR R4)', noMatching: 'సరిపోలేదన్న రికార్డ్స్ లేవు', noRecords: 'ఇంకా రికార్డ్స్ లేవు', reports: 'రిపోర్ట్స్', prescriptions: 'ప్ర escr్‌షన్స్', appointments: 'అపాయింట్‌మెంట్స్', history: 'మెడికల్ హిస్టరీ', hospitalVisits: 'ఆసుపత్రి సందర్శనలు', alert: 'మెడికల్ అలర్ట్', upcomingNotes: 'మీ చర్చలు, మందులు, పరీక్షలు మరియు సందర్శనలు ఇక్కడ కనిపిస్తాయి.' },
+  };
+  const formatLocalizedHospital = (value?: string) => value ? (hospitalNameMap[value] ?? value) : value;
+  const localizedRecordTypeLabel = (key: string) => {
+    const map: Record<string, Record<string, string>> = {
+      DIAGNOSIS: { en: 'Symptoms', hi: 'लक्षण', kn: 'ಲಕ್ಷಣಗಳು', mr: 'लक्षणे', ta: 'அறிகுறிகள்', te: 'లక్షణాలు' },
+      PRESCRIPTION: { en: 'Medicine', hi: 'दवा', kn: 'ಮದ್ದು', mr: 'औषध', ta: 'மருந்து', te: 'మందు' },
+      LAB_REPORT: { en: 'Test', hi: 'परीक्षण', kn: 'ಪರೀಕ್ಷೆ', mr: 'तपासणी', ta: 'சோதனை', te: 'పరీక్ష' },
+      IMMUNIZATION: { en: 'Vaccination', hi: 'टीकाकरण', kn: 'ಟಿಕಾಕरण', mr: 'लसीकरण', ta: 'தடுப்பூசி', te: 'టీకా' },
+      SCAN: { en: 'Scan', hi: 'स्कैन', kn: 'ಸ್ಕ್ಯಾನ್', mr: 'स्कॅन', ta: 'ஸ்கேன்', te: 'స్కాన్' },
+      HOSPITAL_VISIT: { en: 'Hospital Visit', hi: 'अस्पताल विज़िट', kn: 'ಆಸ್ಪತ್ರೆ ಭೇಟ', mr: 'रुग्णालय भेट', ta: 'மருத்துவமனை வருகை', te: 'ఆసుపత్రి సందర్శన' },
+      DOCUMENT: { en: 'Document', hi: 'दस्तावेज़', kn: 'ಡಾಕ್ಯುಮೆಂಟ್', mr: 'दस्तऐवज', ta: 'ஆவணம்', te: 'డాక్యుమెంట్' },
+      SURGERY: { en: 'Procedure', hi: 'प्रक्रिया', kn: 'ಪ್ರಕ್ರಿಯೆ', mr: 'प्रक्रिया', ta: 'செயல்முறை', te: ' procedure' },
+      APPOINTMENT: { en: 'Appointment', hi: 'अपॉइंटमेंट', kn: 'ಅಪಾಯಿಂಟ್ಮೆಂಟ್', mr: 'अपॉइंटमेंट', ta: 'நியமனம்', te: 'అపాయింట్‌మెంట్' },
+    };
+    return map[key]?.[languageCode] ?? RECORD_TYPE_META[key]?.label ?? key;
+  };
   const [searchQuery, setSearchQuery] = useState('');
   const [timelineFilter, setTimelineFilter] = useState<'ALL' | string>('ALL');
   const [detailRecord, setDetailRecord] = useState<UiRecord | null>(null);
@@ -278,25 +311,25 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
   const categoryCards = useMemo(() => {
     const countBy = (fn: (r: UiRecord) => boolean) => allRecords.filter(fn).length;
     return [
-      { key: 'ALL', label: 'Health Events', icon: <Calendar size={17} />, tile: 'hrv-tile-violet', bg: 'hrv-cat-violet', count: allRecords.length },
-      { key: 'PRESCRIPTION', label: 'Medicines & Supplements', icon: <Pill size={17} />, tile: 'hrv-tile-blue', bg: 'hrv-cat-blue', count: countBy((r) => effCategory(r) === 'PRESCRIPTION') },
-      { key: 'LAB_REPORT', label: 'Tests & Reports', icon: <FlaskConical size={17} />, tile: 'hrv-tile-amber', bg: 'hrv-cat-amber', count: countBy((r) => effCategory(r) === 'LAB_REPORT') },
-      { key: 'SCAN', label: 'Scans & Imaging', icon: <ScanLine size={17} />, tile: 'hrv-tile-green', bg: 'hrv-cat-green', count: countBy((r) => effCategory(r) === 'SCAN' || effCategory(r) === 'SURGERY') },
-      { key: 'HOSPITAL_VISIT', label: 'Medical Visits', icon: <Hospital size={17} />, tile: 'hrv-tile-rose', bg: 'hrv-cat-rose', count: countBy((r) => effCategory(r) === 'HOSPITAL_VISIT' || r.isAppointment === true) },
-      { key: 'IMMUNIZATION', label: 'Vaccinations', icon: <Syringe size={17} />, tile: 'hrv-tile-teal', bg: 'hrv-cat-teal', count: countBy((r) => effCategory(r) === 'IMMUNIZATION') },
-      { key: 'DOCUMENT', label: 'Documents', icon: <FileImage size={17} />, tile: 'hrv-tile-slate', bg: 'hrv-cat-slate', count: countBy((r) => effCategory(r) === 'DOCUMENT') },
-      { key: 'DIAGNOSIS', label: 'Consultations', icon: <Stethoscope size={17} />, tile: 'hrv-tile-violet', bg: 'hrv-cat-lav', count: countBy((r) => effCategory(r) === 'DIAGNOSIS' && !r.isAppointment) },
+      { key: 'ALL', label: t('records.healthEvents'), icon: <Calendar size={17} />, tile: 'hrv-tile-violet', bg: 'hrv-cat-violet', count: allRecords.length },
+      { key: 'PRESCRIPTION', label: t('records.medicines'), icon: <Pill size={17} />, tile: 'hrv-tile-blue', bg: 'hrv-cat-blue', count: countBy((r) => effCategory(r) === 'PRESCRIPTION') },
+      { key: 'LAB_REPORT', label: t('records.tests'), icon: <FlaskConical size={17} />, tile: 'hrv-tile-amber', bg: 'hrv-cat-amber', count: countBy((r) => effCategory(r) === 'LAB_REPORT') },
+      { key: 'SCAN', label: t('records.scans'), icon: <ScanLine size={17} />, tile: 'hrv-tile-green', bg: 'hrv-cat-green', count: countBy((r) => effCategory(r) === 'SCAN' || effCategory(r) === 'SURGERY') },
+      { key: 'HOSPITAL_VISIT', label: t('records.medicalVisits'), icon: <Hospital size={17} />, tile: 'hrv-tile-rose', bg: 'hrv-cat-rose', count: countBy((r) => effCategory(r) === 'HOSPITAL_VISIT' || r.isAppointment === true) },
+      { key: 'IMMUNIZATION', label: t('records.vaccinations'), icon: <Syringe size={17} />, tile: 'hrv-tile-teal', bg: 'hrv-cat-teal', count: countBy((r) => effCategory(r) === 'IMMUNIZATION') },
+      { key: 'DOCUMENT', label: t('records.documents'), icon: <FileImage size={17} />, tile: 'hrv-tile-slate', bg: 'hrv-cat-slate', count: countBy((r) => effCategory(r) === 'DOCUMENT') },
+      { key: 'DIAGNOSIS', label: t('records.consultations'), icon: <Stethoscope size={17} />, tile: 'hrv-tile-violet', bg: 'hrv-cat-lav', count: countBy((r) => effCategory(r) === 'DIAGNOSIS' && !r.isAppointment) },
     ];
   }, [allRecords]);
 
   // ── Timeline filter options from categories present ──
   const filterOptions = useMemo(() => {
     const present = new Set(allRecords.map((r) => effCategory(r)));
-    const opts: { key: string; label: string }[] = [{ key: 'ALL', label: 'All' }];
+    const opts: { key: string; label: string }[] = [{ key: 'ALL', label: t('records.all') }];
     RECORD_TYPE_META_ORDER.forEach((key) => {
-      if (present.has(key)) opts.push({ key, label: RECORD_TYPE_META[key].label });
+      if (present.has(key)) opts.push({ key, label: localizedRecordTypeLabel(key) });
     });
-    if (allRecords.some((r) => r.isAppointment)) opts.push({ key: 'APPOINTMENT', label: 'Appointments' });
+    if (allRecords.some((r) => r.isAppointment)) opts.push({ key: 'APPOINTMENT', label: t('records.appointments') });
     return opts;
   }, [allRecords]);
 
@@ -337,8 +370,8 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
         Date.now() - parseDate(r.date) < 365 * 86400000
     ).length;
     return [
-      { id: 'ov-alerts', icon: <HeartPulse size={16} />, label: 'Medical Alerts', value: activeAlertsCount(allRecords) > 0 ? `${activeAlertsCount(allRecords)} flagged` : 'Clear', cls: abnormalLabs > 0 || activeAlertsCount(allRecords) > 0 ? 'hrv-ov-rose' : 'hrv-ov-green', record: null },
-      { id: 'ov-meds', icon: <Pill size={16} />, label: 'Active Medicines', value: activeMeds > 0 ? `${activeMeds} ongoing` : 'None', cls: 'hrv-ov-blue', record: null },
+      { id: 'ov-alerts', icon: <HeartPulse size={16} />, label: t('records.medicalAlert'), value: activeAlertsCount(allRecords) > 0 ? `${activeAlertsCount(allRecords)} flagged` : 'Clear', cls: abnormalLabs > 0 || activeAlertsCount(allRecords) > 0 ? 'hrv-ov-rose' : 'hrv-ov-green', record: null },
+      { id: 'ov-meds', icon: <Pill size={16} />, label: t('records.medicines'), value: activeMeds > 0 ? `${activeMeds} ongoing` : 'None', cls: 'hrv-ov-blue', record: null },
       { id: 'ov-labs', icon: <FlaskConical size={16} />, label: 'Recent Labs', value: abnormalLabs > 0 ? `${abnormalLabs} need review` : 'All normal', cls: abnormalLabs > 0 ? 'hrv-ov-amber' : 'hrv-ov-green', record: null },
       { id: 'ov-visits', icon: <Hospital size={16} />, label: 'Visits (1 yr)', value: String(recentVisits), cls: 'hrv-ov-lav', record: null },
     ];
@@ -407,8 +440,8 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
             <ClipboardList size={22} />
           </div>
           <div>
-            <h1 className="hrv-page-title">My Record</h1>
-            <p className="hrv-page-sub">Your complete health journey, all in one place</p>
+            <h1 className="hrv-page-title">{recordText[languageCode].title}</h1>
+            <p className="hrv-page-sub">{recordText[languageCode].subtitle}</p>
           </div>
         </div>
         <div className="hrv-page-actions">
@@ -418,8 +451,8 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search records..."
-              aria-label="Search records"
+              placeholder={recordText[languageCode].search}
+              aria-label={recordText[languageCode].search}
             />
             {searchQuery && (
               <button type="button" className="hrv-clear-search" onClick={() => setSearchQuery('')} aria-label="Clear search">
@@ -430,9 +463,9 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
           <div className="hrv-safety-pill">
             <ShieldCheck size={15} />
             <span>
-              Your health data
+              {languageCode === 'en' ? 'Your health data' : languageCode === 'hi' ? 'आपका स्वास्थ्य डेटा' : languageCode === 'kn' ? 'ನಿಮ್ಮ ಆರೋಗ್ಯ ಡೇಟಾ' : languageCode === 'mr' ? 'तुमचा आरोग्य डेटा' : languageCode === 'ta' ? 'உங்கள் சுகாதார தரவு' : 'మీ ఆరోగ్య డేటా'}
               <br />
-              is safe with us
+              {languageCode === 'en' ? 'is safe with us' : languageCode === 'hi' ? 'हमारे साथ सुरक्षित है' : languageCode === 'kn' ? 'ನಮ್ಮೊಂದಿಗೆ ಸುರಕ್ಷಿತವಾಗಿದೆ' : languageCode === 'mr' ? 'आमच्याबरोबर सुरक्षित आहे' : languageCode === 'ta' ? 'எங்களுடன் பாதுகாப்பாக உள்ளது' : 'మాతో 안전ంగా ఉంది'}
             </span>
           </div>
         </div>
@@ -445,7 +478,7 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
       >
         <span className="hrv-med-alert-head">
           <AlertTriangle size={13} strokeWidth={2.4} />
-          Medical Alert
+          {recordText[languageCode].alert}
         </span>
         {doctorAlertList.length > 0 ? (
           <div className="hrv-med-alert-chips no-scrollbar">
@@ -490,7 +523,7 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
         ) : (
           <span className="hrv-med-alert-clear">
             <ShieldCheck size={12} />
-            No medical alerts recorded
+            {recordText[languageCode].noMedicalAlerts}
           </span>
         )}
       </section>
@@ -532,8 +565,8 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
                 <Calendar size={16} />
               </span>
               <div>
-                <h2>Health Timeline</h2>
-                <p>Your past and current health events</p>
+                <h2>{languageCode === 'en' ? 'Health Timeline' : languageCode === 'hi' ? 'स्वास्थ्य टाइमलाइन' : languageCode === 'kn' ? 'ಆರೋಗ್ಯ ಸಮಯರೇಖೆ' : languageCode === 'mr' ? 'आरोग्य टाइमलाइन' : languageCode === 'ta' ? 'சுகாதார நேரவரிசை' : 'ఆరోగ్య టైమ్‌లైన్'}</h2>
+                <p>{languageCode === 'en' ? 'Your past and current health events' : languageCode === 'hi' ? 'आपकी पिछली और वर्तमान स्वास्थ्य घटनाएँ' : languageCode === 'kn' ? 'ನಿಮ್ಮ ಹಿಂದಿನ ಮತ್ತು ಪ್ರಸ್ತುತ ಆರೋಗ್ಯ ಘಟನೆಗಳು' : languageCode === 'mr' ? 'तुमच्या मागील आणि सध्याच्या आरोग्य घटनांचा आढावा' : languageCode === 'ta' ? 'உங்கள் கடந்த மற்றும் தற்போதைய சுகாதார நிகழ்வுகள்' : 'మీ прошл మరియు ప్రస్తుత ఆరోగ్య సంఘటనలు'}</p>
               </div>
             </div>
             <div className="hrv-tl-filter">
@@ -554,17 +587,17 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
 
           {filteredRecords.length === 0 ? (
             <EmptyState
-              title={searchQuery || timelineFilter !== 'ALL' ? 'No matching events' : 'No records yet'}
+              title={searchQuery || timelineFilter !== 'ALL' ? (languageCode === 'en' ? 'No matching events' : languageCode === 'hi' ? 'कोई मिलान नहीं' : languageCode === 'kn' ? 'ಹೊಂದಾಣಿಕೆಯ ಘಟನೆಗಳಿಲ್ಲ' : languageCode === 'mr' ? 'जुळणारे परिणाम नाहीत' : languageCode === 'ta' ? 'பொருத்தமான நிகழ்வுகள் இல்லை' : 'సరిపోలే ఘటనలు లేవు') : (languageCode === 'en' ? 'No records yet' : languageCode === 'hi' ? 'अभी कोई रिकॉर्ड नहीं' : languageCode === 'kn' ? 'ಇನ್ನೂ ದಾಖಲೆಗಳಿಲ್ಲ' : languageCode === 'mr' ? 'अद्याप कोणतेही रेकॉर्ड नाही' : languageCode === 'ta' ? 'இன்னும் பதிவுகள் இல்லை' : 'ఇంకా రికార్డ్లు లేవు')}
               message={
                 searchQuery || timelineFilter !== 'ALL'
-                  ? 'Try a different search or filter to see your health events.'
-                  : 'Your consultations, medicines, tests and visits will appear here once added.'
+                  ? (languageCode === 'en' ? 'Try a different search or filter to see your health events.' : languageCode === 'hi' ? 'अपने स्वास्थ्य इवेंट देखने के लिए अलग खोज या फ़िल्टर आज़माएँ।' : languageCode === 'kn' ? 'ನಿಮ್ಮ ಆರೋಗ್ಯ ಘಟನೆಗಳನ್ನು ನೋಡಲು ಬೇರೆ ಹುಡುಕಾಟ ಅಥವಾ ಫಿಲ್ಟರ್ ಬಳಸಿ.' : languageCode === 'mr' ? 'तुमच्या आरोग्य घटन पाहण्यासाठी वेगळा शोध किंवा फिल्टर वापरा.' : languageCode === 'ta' ? 'உங்கள் சுகாதார நிகழ்வுகளைக் காண வேறு தேடல் அல்லது வடிப்பானை முயற்சிக்கவும்.' : 'మీ ఆరోగ్య ఘటనలను చూడటానికి వేరే విడత/ఫిల్టర్ ప్రయత్నించండి.')
+                  : (languageCode === 'en' ? 'Your consultations, medicines, tests and visits will appear here once added.' : languageCode === 'hi' ? 'आपके परामर्श, दवाएँ, परीक्षण और विज़िट यहाँ दिखाई देंगे।' : languageCode === 'kn' ? 'ನಿಮ್ಮ ಸಲಹೆಗಳು, medicines, ಪರೀಕ್ಷೆಗಳು ಮತ್ತು ಭೇಟಿ ಇಲ್ಲಿ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ.' : languageCode === 'mr' ? 'तुमचे सल्लामसलत, औषधे, तपासण्या आणि भेटी येथे दिसतील.' : languageCode === 'ta' ? 'உங்கள் ஆலோசனைகள், மருந்துகள், சோதனைகள் மற்றும் வருகைகள் இங்கே தோன்றும்.' : 'మీ సంప్రదింపులు, మందులు, పరీక్షలు మరియు సందర్శనలు ఇక్కడ కనిపిస్తాయి.')
               }
             />
           ) : (
             <div className="hrv-timeline">
               {filteredRecords.map((record) => {
-                const meta = RECORD_TYPE_META[effCategory(record)] ?? RECORD_TYPE_META.SURGERY;
+                const meta = { ...(RECORD_TYPE_META[effCategory(record)] ?? RECORD_TYPE_META.SURGERY), label: localizedRecordTypeLabel(effCategory(record)) };
                 const badge = deriveBadge(record);
                 const parts = record.details.split('. ').map((s) => s.trim()).filter(Boolean);
                 const primaryLine = parts[0] ?? '';
@@ -603,11 +636,11 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
           {/* BOTTOM QUICK LINKS BAR */}
           <div className="hrv-quick-links no-scrollbar">
             {[
-              { icon: <FileBarChart size={15} />, label: 'Reports', action: () => goToTimeline('LAB_REPORT') },
-              { icon: <Pill size={15} />, label: 'Prescriptions', action: () => goToTimeline('PRESCRIPTION') },
-              { icon: <CalendarPlus size={15} />, label: 'Appointments', action: () => goToTimeline('APPOINTMENT') },
-              { icon: <Clock4 size={15} />, label: 'Medical History', action: () => goToTimeline('DIAGNOSIS') },
-              { icon: <Building2 size={15} />, label: 'Hospital Visits', action: () => goToTimeline('HOSPITAL_VISIT') },
+              { icon: <FileBarChart size={15} />, label: languageCode === 'en' ? 'Reports' : languageCode === 'hi' ? 'रिपोर्ट्स' : languageCode === 'kn' ? 'ವರದಿಗಳು' : languageCode === 'mr' ? 'रिपोर्ट्स' : languageCode === 'ta' ? 'அறிக்கைகள்' : 'రిపోర్ట్స్', action: () => goToTimeline('LAB_REPORT') },
+              { icon: <Pill size={15} />, label: languageCode === 'en' ? 'Prescriptions' : languageCode === 'hi' ? 'प्रिस्क्रिप्शन' : languageCode === 'kn' ? 'ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ಗಳು' : languageCode === 'mr' ? 'प्रिस्क्रिप्शन' : languageCode === 'ta' ? 'மருந்துகள்' : 'ప్రిస్క్రిప్షన్స్', action: () => goToTimeline('PRESCRIPTION') },
+              { icon: <CalendarPlus size={15} />, label: languageCode === 'en' ? 'Appointments' : languageCode === 'hi' ? 'अपॉइंटमेंट' : languageCode === 'kn' ? 'ಆಪಾಯಿಂಟ್ಮೆಂಟ್' : languageCode === 'mr' ? 'अपॉइंटमेंट्स' : languageCode === 'ta' ? 'நியமனங்கள்' : 'అపాయింట్‌మెంట్స్', action: () => goToTimeline('APPOINTMENT') },
+              { icon: <Clock4 size={15} />, label: languageCode === 'en' ? 'Medical History' : languageCode === 'hi' ? 'मेडिकल इतिहास' : languageCode === 'kn' ? 'ಮೆಡಿಕಲ್ ಇತಿಹಾಸ' : languageCode === 'mr' ? 'मेडिकल इतिहास' : languageCode === 'ta' ? 'மருத்துவ வரலாறு' : 'మెడికల్ హిస్టరీ', action: () => goToTimeline('DIAGNOSIS') },
+              { icon: <Building2 size={15} />, label: languageCode === 'en' ? 'Hospital Visits' : languageCode === 'hi' ? 'अस्पताल विज़िट' : languageCode === 'kn' ? 'ಆಸ್ಪತ್ರೆ ಭೇಟಿ' : languageCode === 'mr' ? 'रुग्णालय भेट' : languageCode === 'ta' ? 'மருத்துவமனை வருகைகள்' : 'ఆసుపత్రి సందర్శనలు', action: () => goToTimeline('HOSPITAL_VISIT') },
             ].map((link) => (
               <button key={link.label} type="button" className="hrv-quick-link" onClick={link.action}>
                 {link.icon}
@@ -626,8 +659,8 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
                 <Activity size={16} />
               </span>
               <div>
-                <h3>Health Overview</h3>
-                <p>A quick look at your current status</p>
+                <h3>{recordText[languageCode].healthOverview}</h3>
+                <p>{recordText[languageCode].overviewDesc}</p>
               </div>
             </div>
             <div className="hrv-ov-grid">
@@ -649,12 +682,12 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
               <ClipboardList size={20} />
             </span>
             <span className="hrv-add-banner-text">
-              Keep your records updated
+              {recordText[languageCode].keepUpdated}
               <br />
-              for better care <span className="hrv-heart">♥</span>
+              {recordText[languageCode].care} <span className="hrv-heart">♥</span>
             </span>
             <span className="hrv-add-banner-btn">
-              <Plus size={14} /> Add Record
+              <Plus size={14} /> {recordText[languageCode].addRecord}
             </span>
           </button>
 
@@ -686,7 +719,7 @@ export const HealthRecordsView: React.FC<HealthRecordsViewProps> = ({
                 <p className="hrv-drawer-meta">
                   <User size={13} /> {detailRecord.doctorName}
                   <span className="hrv-meta-sep">•</span>
-                  <Building2 size={13} /> {detailRecord.facilityName}
+                  <Building2 size={13} /> {formatLocalizedHospital(detailRecord.facilityName) || detailRecord.facilityName}
                   <span className="hrv-meta-sep">•</span>
                   <Clock size={13} /> {formatDate(detailRecord.date)}
                 </p>

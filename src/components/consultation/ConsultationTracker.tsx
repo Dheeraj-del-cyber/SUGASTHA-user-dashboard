@@ -9,6 +9,7 @@ import {
   RefreshCw,
   FileCheck,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ConsultationRequest, HealthcareJourneySummary } from '../../types';
 import { consultationService } from '../../services/consultationService';
 import { QrCodeDisplay } from './QrCodeDisplay';
@@ -25,15 +26,16 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
   onConsultationUpdated,
   onJourneyCompleted,
 }) => {
+  const { t } = useTranslation();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showDevTools, setShowDevTools] = useState(false);
 
   // Status timeline steps (patient-friendly wording; internal state keys unchanged)
   const steps = [
-    { key: 'REQUEST_CREATED', label: 'Visit booked', desc: 'Your request was sent' },
-    { key: 'PENDING', label: 'Waiting for hospital', desc: 'The hospital is checking' },
-    { key: 'CONFIRMED', label: 'Visit confirmed', desc: 'Get your hospital pass' },
-    { key: 'COMPLETED', label: 'Visit completed', desc: 'Summary saved to records' },
+    { key: 'REQUEST_CREATED', label: t('tracker.statusSteps.REQUEST_CREATED'), desc: t('tracker.statusDesc.REQUEST_CREATED') },
+    { key: 'PENDING', label: t('tracker.statusSteps.PENDING'), desc: t('tracker.statusDesc.PENDING') },
+    { key: 'CONFIRMED', label: t('tracker.statusSteps.CONFIRMED'), desc: t('tracker.statusDesc.CONFIRMED') },
+    { key: 'COMPLETED', label: t('tracker.statusSteps.COMPLETED'), desc: t('tracker.statusDesc.COMPLETED') },
   ];
 
   const getStepIndex = (status: string) => {
@@ -95,7 +97,7 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
       <div className="card tracker-top-card">
         <div className="tracker-id-row">
           <div className="id-col">
-            <span className="label">YOUR VISIT</span>
+            <span className="label">{t('tracker.yourVisit')}</span>
             <h2 className="consult-id">{consultation.selectedHospital.name}</h2>
           </div>
 
@@ -103,15 +105,15 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
 
         <div className="visit-details-row">
           <div>
-            <span>Hospital</span>
+            <span>{t('tracker.hospital')}</span>
             <strong>{consultation.selectedHospital.name}</strong>
           </div>
           <div>
-            <span>Doctor</span>
+            <span>{t('tracker.doctor')}</span>
             <strong>{consultation.selectedDoctor.name}</strong>
           </div>
           <div>
-            <span>Time</span>
+            <span>{t('tracker.time')}</span>
             <strong>{consultation.appointmentSlot}</strong>
           </div>
         </div>
@@ -134,13 +136,13 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
           <div className="callout-text">
             <h4>
               {consultation.status === 'CONFIRMED'
-                ? 'Visit confirmed!'
-                : `Waiting for ${selectedHospital.name}`}
+                ? t('tracker.visitConfirmed')
+                : t('tracker.waitingForHospital', { hospital: selectedHospital.name })}
             </h4>
             <p>
               {consultation.status === 'CONFIRMED'
-                ? `Go to ${selectedHospital.name} at your appointment time. Show your QR pass or PIN #${consultation.consultationNumber} at the desk.`
-                : `The hospital is checking your request. If they are full, we will try the next nearby hospital for you.`}
+                ? t('tracker.goToHospital', { hospital: selectedHospital.name, pin: consultation.consultationNumber })
+                : t('tracker.hospitalChecking')}
             </p>
           </div>
         </div>
@@ -148,7 +150,7 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
 
       {/* Progress Timeline Tracker */}
       <div className="card timeline-card">
-        <h3 className="section-title">What is happening</h3>
+        <h3 className="section-title">{t('tracker.whatHappening')}</h3>
         <div className="tracker-steps-line">
           {steps.map((step, idx) => {
             const isCompleted = idx < currentStepIdx;
@@ -179,7 +181,7 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
         <div className="queue-card-top">
           <div className="flex-row items-center gap-2">
             <Layers size={18} className="text-teal" />
-            <h3 className="section-title">Hospitals we are trying</h3>
+            <h3 className="section-title">{t('tracker.hospitalsTrying')}</h3>
           </div>
         </div>
 
@@ -210,7 +212,7 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
             className="btn btn-primary btn-sm btn-finish"
           >
             <FileCheck size={16} />
-            <span>Visit done — View Summary</span>
+            <span>{t('tracker.visitDoneSummary')}</span>
             <ArrowRight size={16} />
           </button>
         </div>
@@ -224,13 +226,13 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
           onClick={() => setShowDevTools(!showDevTools)}
         >
           <Sparkles size={14} className="text-amber" />
-          <span>{showDevTools ? 'Hide developer tools' : 'Developer tools (demo)'}</span>
+          <span>{showDevTools ? t('tracker.hideDeveloperTools') : t('tracker.developerTools')}</span>
         </button>
 
         {showDevTools && (
           <>
             <p className="toolbar-desc">
-              Simulates incoming hospital webhook events to test the user-side tracker (the hospital system is a separate build):
+              {t('tracker.devDescription')}
             </p>
 
             <div className="toolbar-actions">
@@ -243,7 +245,7 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
                     className="btn btn-primary btn-sm"
                   >
                     <CheckCircle2 size={15} />
-                    <span>Simulate: Hospital Accepts Request (Confirm)</span>
+                    <span>{t('tracker.simulateAccept')}</span>
                   </button>
 
                   <button
@@ -253,7 +255,7 @@ export const ConsultationTracker: React.FC<ConsultationTrackerProps> = ({
                     className="btn btn-secondary btn-sm"
                   >
                     <RefreshCw size={14} />
-                    <span>Simulate: Hospital Busy → Failover to Backup</span>
+                    <span>{t('tracker.simulateFailover')}</span>
                   </button>
                 </>
               )}

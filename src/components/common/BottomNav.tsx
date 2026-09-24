@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Home, FileText, User, Stethoscope, ShieldCheck } from 'lucide-react';
 
 export type ActiveTab = 'dashboard' | 'appointments' | 'doctors' | 'records' | 'profile' | 'triage' | 'tracking' | 'consents';
@@ -14,6 +15,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   onSelectTab,
   hasActiveConsultation,
 }) => {
+  const { t } = useTranslation();
   const navRef = useRef<HTMLElement>(null);
   const [navWidth, setNavWidth] = useState<number>(() => (typeof window !== 'undefined' ? window.innerWidth : 390));
 
@@ -100,7 +102,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         <div className="icon-box">
           <Home size={20} className="nav-icon" />
         </div>
-        <span className="nav-label">Home</span>
+        <span className="nav-label">{t('nav.home')}</span>
       </button>
 
       <button
@@ -110,7 +112,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         <div className="icon-box">
           <FileText size={20} className="nav-icon" />
         </div>
-        <span className="nav-label">My Records</span>
+        <span className="nav-label">{t('nav.myRecords')}</span>
       </button>
 
       {/* Center placeholder slot to maintain equal distribution between tabs */}
@@ -120,7 +122,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       <button
         onClick={handleCenterAction}
         className={`nav-center-btn ${activeTab === 'appointments' ? 'active' : ''}`}
-        aria-label="Hospital passes"
+        aria-label={t('nav.hospitalPasses')}
       >
         <div className="doctor-inner-circle">
           <Stethoscope size={24} strokeWidth={2.4} color="#ffffff" />
@@ -135,7 +137,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         <div className="icon-box">
           <ShieldCheck size={20} className="nav-icon" />
         </div>
-        <span className="nav-label">My Consents</span>
+        <span className="nav-label">{t('nav.myConsents')}</span>
       </button>
 
       <button
@@ -145,7 +147,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         <div className="icon-box">
           <User size={20} className="nav-icon" />
         </div>
-        <span className="nav-label">My Profile</span>
+        <span className="nav-label">{t('nav.profile')}</span>
       </button>
 
       <style>{`

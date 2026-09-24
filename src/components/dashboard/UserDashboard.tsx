@@ -1,5 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Video, Building2, FileText, Sparkles, Check, ShieldCheck, Clock3, Route, ArrowRight, Mic, Square } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import {
+  Video,
+  Building2,
+  FileText,
+  Sparkles,
+  Check,
+  ShieldCheck,
+  Clock3,
+  Route,
+  ArrowRight,
+} from 'lucide-react';
 import {
   AbhaProfile,
   HealthRecord,
@@ -25,7 +36,6 @@ interface UserDashboardProps {
   onSelectOption?: (symptomText: string, route: 'TELECONSULTATION' | 'HOSPITAL_VISIT') => void;
 }
 
-const COMMON_SYMPTOMS = ['Fever', 'Cough', 'Headache', 'Fatigue'];
 const DASHBOARD_STATE_KEY = 'sugastha_dashboard_state';
 
 const FEATURE_SLIDES = [
@@ -71,6 +81,22 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
   onStartNewConsultation,
   onSelectOption,
 }) => {
+  const { t, i18n } = useTranslation();
+  const languageCode = i18n.language.startsWith('hi') ? 'hi' : i18n.language.startsWith('kn') ? 'kn' : i18n.language.startsWith('mr') ? 'mr' : i18n.language.startsWith('ta') ? 'ta' : i18n.language.startsWith('te') ? 'te' : 'en';
+  const symptomDictionary: Record<string, Record<string, string>> = {
+    en: { fever: 'Fever', cough: 'Cough', headache: 'Headache', fatigue: 'Fatigue' },
+    hi: { fever: 'बुखार', cough: 'खाँसी', headache: 'सिरदर्द', fatigue: 'थकान' },
+    kn: { fever: 'ಜ್ವರ', cough: 'ಸೈನ್ಸ್', headache: 'ತಲೆನೋವು', fatigue: 'ಆಯಾಸ' },
+    mr: { fever: 'ताप', cough: 'खोकला', headache: 'डोकेदुख', fatigue: 'थकवा' },
+    ta: { fever: 'காய்ச்சல்', cough: 'இருமல்', headache: 'தலைவலி', fatigue: 'சோர்வு' },
+    te: { fever: 'జ్వరం', cough: 'దగ్గు', headache: 'తలనొప్పి', fatigue: 'అలసట' },
+  };
+  const COMMON_SYMPTOMS = [
+    symptomDictionary[languageCode].fever,
+    symptomDictionary[languageCode].cough,
+    symptomDictionary[languageCode].headache,
+    symptomDictionary[languageCode].fatigue,
+  ];
   const [symptomInput, setSymptomInput] = useState('');
   const [symptomError, setSymptomError] = useState('');
   const [isGenerated, setIsGenerated] = useState(false);
@@ -206,6 +232,42 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
     ));
   };
 
+  const featureSlides = [
+    {
+      eyebrow: t('dashboard.startHere'),
+      title: t('dashboard.understandSymptoms'),
+      description: t('dashboard.symptomCheckHelp'),
+      action: t('dashboard.aiSymptomCheck'),
+      icon: Sparkles,
+      image: sideImage,
+      theme: 'feature-slide-blue',
+    },
+    {
+      eyebrow: t('dashboard.careWhenNeeded'),
+      title: t('dashboard.talkDoctorOnline'),
+      description: t('dashboard.teleconsultHelp'),
+      action: t('dashboard.teleconsultation'),
+      icon: Video,
+      theme: 'feature-slide-mint',
+    },
+    {
+      eyebrow: t('dashboard.healthTogether'),
+      title: t('dashboard.keepRecords'),
+      description: t('dashboard.recordsHelp'),
+      action: t('dashboard.healthRecords'),
+      icon: FileText,
+      theme: 'feature-slide-yellow',
+    },
+    {
+      eyebrow: t('dashboard.findCare'),
+      title: t('dashboard.discoverDoctors'),
+      description: t('dashboard.careNetworkHelp'),
+      action: t('dashboard.careNetwork'),
+      icon: Building2,
+      theme: 'feature-slide-lilac',
+    },
+  ];
+
   const handleAddSymptom = (symptom: string) => {
     setSymptomError('');
     if (!symptomInput.trim()) {
@@ -273,7 +335,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           className="feature-slide-track"
           style={{ transform: `translateX(-${activeFeature * 100}%)` }}
         >
-          {FEATURE_SLIDES.map((slide) => {
+          {featureSlides.map((slide) => {
             const SlideIcon = slide.icon;
             return (
               <article key={slide.title} className={`feature-slide ${slide.theme}`}>
@@ -299,7 +361,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         </div>
         <div className="feature-carousel-controls">
           <div className="feature-slide-dots">
-            {FEATURE_SLIDES.map((slide, index) => (
+            {featureSlides.map((slide, index) => (
               <button
                 key={slide.title}
                 type="button"
@@ -321,25 +383,26 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
             <img src={sideImage} alt="AI health check" className="symptom-intro-image" />
           </div>
           <div className="symptom-intro-copy">
-            <span className="eyebrow-label">AI HEALTH CHECK</span>
-            <span className="intro-time"><Clock3 size={13} /> Takes about 1 minute</span>
+            <span className="eyebrow-label">{t('dashboard.healthCheck')}</span>
+            <span className="intro-time"><Clock3 size={13} /> {t('dashboard.takesAbout')}</span>
           </div>
         </div>
 
         <div className="symptom-heading-group">
-          <h2 className="symptom-heading">How are you feeling today?</h2>
+          <h2 className="symptom-heading">{t('dashboard.question')}</h2>
         </div>
 
         <div className="health-context-strip">
           <ShieldCheck size={18} />
           <div>
-            <strong>Your health context is ready</strong>
-            <span>{records.length} records · {conditions.length} conditions · {allergies.length} allergies checked</span>
+            <strong>{t('dashboard.healthContext')}</strong>
+            <span>{t('dashboard.recordsSummary', { count: records.length, conditions: conditions.length, allergies: allergies.length })}</span>
           </div>
         </div>
 
         {/* Input Form */}
         <form onSubmit={handleGenerate} className="symptom-input-group">
+<<<<<<< HEAD
           <label htmlFor="symptom-input" className="input-label">Describe your symptoms</label>
           <div className="dashboard-symptom-input-row">
             <input
@@ -369,6 +432,20 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
               {voiceError || 'Transcribing your symptoms...'}
             </span>
           )}
+=======
+          <label htmlFor="symptom-input" className="input-label">{t('dashboard.describeSymptoms')}</label>
+          <input
+            id="symptom-input"
+            type="text"
+            className="form-input symptom-input-field"
+            placeholder={t('dashboard.symptomPlaceholder')}
+            value={symptomInput}
+            onChange={(e) => {
+              setSymptomInput(e.target.value);
+              if (e.target.value.trim()) setSymptomError('');
+            }}
+          />
+>>>>>>> 09c53f5 (madhura's work)
           {symptomError && (
             <span className="symptom-error" role="alert">{symptomError}</span>
           )}
@@ -396,7 +473,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 
           {/* Generate Button */}
           <button type="submit" className="btn btn-primary btn-lg generate-btn">
-            <span>Continue</span>
+            <span>{t('dashboard.continue')}</span>
           </button>
         </form>
 
@@ -412,15 +489,15 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
               </div>
               <div className="option-content">
                 <div className="option-title-row">
-                  <h3 className="option-title">eSanjeevani</h3>
+                  <h3 className="option-title">{t('dashboard.esanjeevani')}</h3>
                   {symptomRecommendation?.recommendedRoute === 'TELECONSULTATION' && (
-                    <span className="recommendation-badge">Recommended</span>
+                    <span className="recommendation-badge">{t('dashboard.recommendation')}</span>
                   )}
                 </div>
                 <p className="option-description">
                   {symptomRecommendation?.recommendedRoute === 'TELECONSULTATION'
-                    ? `Best suited for ${symptomRecommendation.suggestedSpecialties[0] || 'your symptoms'}.`
-                    : 'Remote consultation for stable symptoms.'}
+                    ? t('dashboard.bestSuitedFor', { specialty: symptomRecommendation.suggestedSpecialties[0] || t('dashboard.generalConsultation') })
+                    : t('dashboard.remoteConsultation')}
                 </p>
               </div>
             </div>
@@ -434,15 +511,15 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
               </div>
               <div className="option-content">
                 <div className="option-title-row">
-                  <h3 className="option-title">Hospital visit</h3>
+                  <h3 className="option-title">{t('dashboard.hospitalVisit')}</h3>
                   {symptomRecommendation?.recommendedRoute === 'HOSPITAL_VISIT' && (
-                    <span className="recommendation-badge">Recommended</span>
+                    <span className="recommendation-badge">{t('dashboard.recommendation')}</span>
                   )}
                 </div>
                 <p className="option-description">
                   {symptomRecommendation?.recommendedRoute === 'HOSPITAL_VISIT'
-                    ? `See ${symptomRecommendation.suggestedSpecialties[0] || 'a doctor'} in person.`
-                    : 'In-person care when an examination is needed.'}
+                    ? t('dashboard.seeDoctorInPerson', { specialty: symptomRecommendation.suggestedSpecialties[0] || t('dashboard.generalConsultation') })
+                    : t('dashboard.inPersonConsultation')}
                 </p>
               </div>
             </div>
@@ -451,28 +528,28 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
       </div>
 
       {!isGenerated && (
-        <section className="next-steps-panel" aria-label="What happens next">
+        <section className="next-steps-panel" aria-label={t('dashboard.whatNext')}>
           <div className="next-steps-heading">
             <div>
-              <span className="eyebrow-label">YOUR CARE PATH</span>
-              <h3>What happens next?</h3>
+              <span className="eyebrow-label">{t('dashboard.whatNext').toUpperCase()}</span>
+              <h3>{t('dashboard.whatNext')}</h3>
             </div>
             <Route size={22} />
           </div>
           <div className="next-steps-list">
             <div className="next-step-item">
               <span className="step-number">01</span>
-              <div><strong>Share symptoms</strong></div>
+              <div><strong>{t('dashboard.shareSymptoms')}</strong></div>
               <ArrowRight size={16} />
             </div>
             <div className="next-step-item">
               <span className="step-number">02</span>
-              <div><strong>Get guidance</strong></div>
+              <div><strong>{t('dashboard.getGuidance')}</strong></div>
               <ArrowRight size={16} />
             </div>
             <div className="next-step-item">
               <span className="step-number">03</span>
-              <div><strong>Choose what suits you</strong></div>
+              <div><strong>{t('dashboard.chooseCare')}</strong></div>
             </div>
           </div>
         </section>

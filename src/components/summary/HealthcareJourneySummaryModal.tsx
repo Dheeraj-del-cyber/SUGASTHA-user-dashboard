@@ -7,6 +7,7 @@ import {
   Activity,
   FileText,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../common/Modal';
 import { HealthcareJourneySummary } from '../../types';
 
@@ -23,6 +24,7 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
   summary,
   onSynced,
 }) => {
+  const { t } = useTranslation();
   const [synced, setSynced] = useState(false);
 
   if (!summary) return null;
@@ -39,19 +41,19 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Visit Summary"
-      subtitle="Your visit details"
+      title={t('summary.title')}
+      subtitle={t('summary.subtitle')}
       maxWidth="560px"
     >
       <div className="journey-modal-body animate-fade-in">
         {/* PIN & date */}
         <div className="summary-token-strip">
           <div>
-            <span className="summary-label">PIN</span>
+            <span className="summary-label">{t('summary.pin')}</span>
             <strong className="token-display">{summary.consultationNumber}</strong>
           </div>
           <div className="text-right">
-            <span className="text-xs text-muted">DATE</span>
+            <span className="text-xs text-muted">{t('recommendations.date')}</span>
             <div className="flex-row items-center gap-1">
               <Calendar size={13} className="text-muted" />
               <strong>{summary.date}</strong>
@@ -62,7 +64,7 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
         {/* Section 1: Your symptoms */}
         <div className="summary-section-box">
           <h4 className="section-title-sm">
-            <Activity size={15} className="text-teal" /> Your symptoms
+            <Activity size={15} className="text-teal" /> {t('summary.yourSymptoms')}
           </h4>
           <div className="symptoms-tags-row">
             {summary.reportedSymptoms.map((sym, i) => (
@@ -76,7 +78,7 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
         {/* Care priority */}
         <div className="summary-section-box">
           <h4 className="section-title-sm">
-            <ShieldCheck size={15} className="text-teal" /> Your health priority
+            <ShieldCheck size={15} className="text-teal" /> {t('summary.healthPriority')}
           </h4>
           <div className="triage-pill-row">
             <span
@@ -89,13 +91,13 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
               }`}
             >
               {summary.triageOutcome.level === 'RED'
-                ? 'Urgent — go now'
+                ? t('summary.statusUrgent')
                 : summary.triageOutcome.level === 'YELLOW'
-                ? 'See a doctor soon'
-                : 'Normal visit'}
+                ? t('summary.statusSoon')
+                : t('summary.statusNormal')}
             </span>
             <span className="rec-path">
-              Care: <strong>{summary.recommendationType === 'TELECONSULTATION' ? 'Doctor video call' : 'Hospital visit'}</strong>
+              {t('summary.care')} <strong>{summary.recommendationType === 'TELECONSULTATION' ? t('summary.videoCall') : t('summary.hospitalVisit')}</strong>
             </span>
           </div>
         </div>
@@ -104,15 +106,15 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
         {summary.hospitalDetails && (
           <div className="summary-section-box">
             <h4 className="section-title-sm">
-              <Building2 size={15} className="text-teal" /> Visit details
+              <Building2 size={15} className="text-teal" /> {t('summary.visitDetails')}
             </h4>
             <div className="provider-details-grid">
               <div>
-                <span className="text-muted text-xs">Hospital:</span>
+                <span className="text-muted text-xs">{t('summary.hospital')}</span>
                 <p className="font-semibold summary-dark-text">{summary.hospitalDetails.hospitalName}</p>
               </div>
               <div>
-                <span className="text-muted text-xs">Doctor:</span>
+                <span className="text-muted text-xs">{t('summary.doctor')}</span>
                 <p className="font-semibold text-teal">{summary.hospitalDetails.doctorName}</p>
               </div>
             </div>
@@ -124,7 +126,7 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
           <div className="flex-row items-center gap-2">
             <FileText size={20} className="text-teal" />
             <div>
-              <strong className="summary-dark-text">Save this visit</strong>
+              <strong className="summary-dark-text">{t('summary.saveVisit')}</strong>
             </div>
           </div>
 
@@ -136,12 +138,12 @@ export const HealthcareJourneySummaryModal: React.FC<HealthcareJourneySummaryMod
             {synced ? (
               <>
                 <CheckCircle2 size={15} className="text-emerald" />
-                <span>Saved!</span>
+                <span>{t('summary.saved')}</span>
               </>
             ) : (
               <>
                 <ShieldCheck size={15} />
-                <span>Save visit</span>
+                <span>{t('summary.saveVisitBtn')}</span>
               </>
             )}
           </button>

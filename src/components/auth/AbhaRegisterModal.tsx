@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldPlus, CheckCircle2, UserCheck, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../common/Modal';
 import { abhaService } from '../../services/abhaService';
 import { AbhaProfile } from '../../types';
@@ -17,6 +18,7 @@ export const AbhaRegisterModal: React.FC<AbhaRegisterModalProps> = ({
   onSuccess,
   onBackToLogin,
 }) => {
+  const { t } = useTranslation();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [aadhaar, setAadhaar] = useState('5421 8902 4312');
   const [mobile, setMobile] = useState('+91 98711 00223');
@@ -68,8 +70,8 @@ export const AbhaRegisterModal: React.FC<AbhaRegisterModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Create your ABHA number"
-      subtitle="It is free. Your details stay private."
+      title={t('auth.register.title')}
+      subtitle={t('auth.register.subtitle')}
       maxWidth="500px"
     >
       <div className="register-container">
@@ -242,7 +244,7 @@ export const AbhaRegisterModal: React.FC<AbhaRegisterModalProps> = ({
         {step < 3 && (
           <div className="back-row">
             <button type="button" className="btn-back" onClick={onBackToLogin}>
-              Back to login
+              {t('auth.register.back')}
             </button>
           </div>
         )}

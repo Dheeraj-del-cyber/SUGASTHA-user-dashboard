@@ -5,6 +5,7 @@ import {
   UserCheck,
   Calendar,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ConsultationRequest } from '../../types';
 
 interface ConsultationHistoryProps {
@@ -12,22 +13,23 @@ interface ConsultationHistoryProps {
 }
 
 export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ history }) => {
+  const { t } = useTranslation();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
     <div className="history-view-container animate-fade-in">
       <div className="history-header">
         <div>
-          <h3 className="section-title">Your Hospital Passes</h3>
+          <h3 className="section-title">{t('history.passesTitle')}</h3>
         </div>
       </div>
 
       {history.length === 0 ? (
         <div className="card empty-history-card">
           <Clock size={36} className="text-muted" />
-          <h4>No passes yet</h4>
+          <h4>{t('history.noPasses')}</h4>
           <p className="text-secondary text-sm">
-            When you book a visit, your pass will appear here.
+            {t('history.noPassesDesc')}
           </p>
         </div>
       ) : (
@@ -51,19 +53,19 @@ export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ histor
                     }`}
                   >
                     {item.triageLevel === 'RED'
-                      ? 'Urgent'
+                      ? t('history.urgent')
                       : item.triageLevel === 'YELLOW'
-                      ? 'Soon'
-                      : 'Normal'}
+                      ? t('history.soon')
+                      : t('history.normal')}
                   </span>
                   <span className="badge badge-green">
                     {item.status === 'CONFIRMED'
-                      ? 'Visit confirmed'
+                      ? t('history.visitConfirmed')
                       : item.status === 'PENDING'
-                      ? 'Waiting for hospital'
+                      ? t('history.waitingHospital')
                       : item.status === 'COMPLETED'
-                      ? 'Visit completed'
-                      : 'Visit updated'}
+                      ? t('history.visitCompleted')
+                      : t('history.visitUpdated')}
                   </span>
                 </div>
               </div>
@@ -75,7 +77,7 @@ export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ histor
                   className="history-more-btn"
                   aria-expanded={expandedId === item.id}
                 >
-                  {expandedId === item.id ? 'Hide details' : 'More'}
+                  {expandedId === item.id ? t('history.hideDetails') : t('history.more')}
                 </button>
               </div>
 
@@ -113,7 +115,7 @@ export const ConsultationHistory: React.FC<ConsultationHistoryProps> = ({ histor
                   </div>
 
                   <span className="symptoms-hint">
-                    Symptoms: {item.primarySymptoms.slice(0, 2).join(', ')}
+                    {t('history.symptoms')}: {item.primarySymptoms.slice(0, 2).join(', ')}
                   </span>
                 </div>
               )}
