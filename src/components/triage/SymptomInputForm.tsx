@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Stethoscope,
   AlertCircle,
@@ -21,6 +22,7 @@ interface SymptomInputFormProps {
   isAnalyzing: boolean;
 }
 
+<<<<<<< HEAD
 const SUPPORTED_LANGUAGES = [
   { code: 'en-IN', label: 'English' },
   { code: 'hi-IN', label: 'Hindi (हिंदी)' },
@@ -67,22 +69,133 @@ const BODY_REGION_LABELS: Record<string, string> = {
   'Whole Body / General': 'Whole body / general',
 };
 
+=======
+>>>>>>> 09c53f5 (madhura's work)
 export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
   onSubmit,
   isAnalyzing,
 }) => {
+  const { t, i18n } = useTranslation();
+  const languageCode = i18n.language.startsWith('hi') ? 'hi' : i18n.language.startsWith('kn') ? 'kn' : i18n.language.startsWith('mr') ? 'mr' : i18n.language.startsWith('ta') ? 'ta' : i18n.language.startsWith('te') ? 'te' : 'en';
+  const symptomDictionary: Record<string, Record<string, string>> = {
+    en: {
+      chestPain: 'Chest Pain / Discomfort',
+      shortnessOfBreath: 'Shortness of Breath',
+      highFever: 'High Fever with Chills',
+      severeHeadache: 'Severe Headache',
+      stomachPain: 'Stomach Pain / Vomiting',
+      dizziness: 'Dizziness / Fainting',
+      skinRash: 'Skin Rash / Itching',
+      coughSoreThroat: 'Dry Cough & Sore Throat',
+      extremeFatigue: 'Extreme Fatigue',
+      backPain: 'Back / Joint Pain',
+    },
+    hi: {
+      chestPain: 'सीने में दर्द / असुविधा',
+      shortnessOfBreath: 'साँस की तकलीफ',
+      highFever: 'तेज़ बुखार के साथ ठंड लगना',
+      severeHeadache: 'तीव्र सिरदर्द',
+      stomachPain: 'पेट में दर्द / उल्टी',
+      dizziness: 'चक्कर / बेहोशी',
+      skinRash: 'त्वचा पर दाने / खुजली',
+      coughSoreThroat: 'सूखी खाँसी और गले में खराश',
+      extremeFatigue: 'अत्यधिक थकान',
+      backPain: 'पीठ / जोड़ों में दर्द',
+    },
+    kn: {
+      chestPain: 'ಮೂಗಿನ दर्द / ಅಸ್ವಸ್ಥತೆ',
+      shortnessOfBreath: 'ಉಸಿರಾಟದ ತೊಂದರೆ',
+      highFever: 'ಅಧಿಕ ಜ್ವರ ಮತ್ತು ಶೀತ',
+      severeHeadache: 'ತೀವ್ರ ತಲೆಗೆ ನೋವು',
+      stomachPain: 'ಕೆನ್ನೆ / ವಾಂತಿ',
+      dizziness: 'ತಲೆತಿರುಗುವಿಕೆ / ಮೂರ್ಛೆ',
+      skinRash: 'ಚರ್ಮದ ಹುಣ್ಣು / ಕಣ್ಣು',
+      coughSoreThroat: 'ಒಣ ಸೈನ್ಸ್ ಮತ್ತು ಗಂಟಲು ನೋವು',
+      extremeFatigue: 'ಅತ್ಯಂತ ಆಯಾಸ',
+      backPain: 'ಮೇಲಿನ ಬೆನ್ನು / ಮೂಳೆ ನೋವು',
+    },
+    mr: {
+      chestPain: 'छातीत दुखणे / अस्वस्थता',
+      shortnessOfBreath: 'श्वास घेण्यास त्रास',
+      highFever: 'उच्च ताप + थंडी',
+      severeHeadache: 'तीव्र डोकेदुख',
+      stomachPain: 'पोटदुख / उलटी',
+      dizziness: 'चकवा / मळमळ',
+      skinRash: 'त्वचेवर पुरळ / खाज',
+      coughSoreThroat: 'कोरडी खोकला आणि गळा दुखणे',
+      extremeFatigue: 'अत्यंत थकवा',
+      backPain: 'पाठीचा / सांधे दुखणे',
+    },
+    ta: {
+      chestPain: 'நெஞ்சுவலி / அசௌகரியம்',
+      shortnessOfBreath: 'சுவாசக் கஷ்டம்',
+      highFever: 'உயர் காய்ச்சல் + குளிர்',
+      severeHeadache: 'கடுமையான தலைவலி',
+      stomachPain: 'வயிற்று வலி / வாந்தி',
+      dizziness: 'தலைசுற்றல் / மயக்கம்',
+      skinRash: 'தோல் சொறி / அரிப்பு',
+      coughSoreThroat: 'உலர்ந்த இருமல் & தொண்டை வலி',
+      extremeFatigue: 'மிகுந்த சோர்வு',
+      backPain: 'முதுகு / மூட்டு வலி',
+    },
+    te: {
+      chestPain: 'చెయ్యు నొప్పి / అసౌకర్యం',
+      shortnessOfBreath: 'శ్వాస ఆడకం',
+      highFever: 'అధిక జ్వరం + చలి',
+      severeHeadache: 'తీవ్ర తలనొప్పి',
+      stomachPain: 'కడుపు నొప్పి / వాంతి',
+      dizziness: 'తలనొప్పి / మూర్ఛ',
+      skinRash: 'చర్మ పసుపు / కుట్టు',
+      coughSoreThroat: 'పొడి దగ్గు & గొంతు నొప్పి',
+      extremeFatigue: 'చాలా అలసట',
+      backPain: 'వెన్ను / మోచేతి నొప్పి',
+    },
+  };
+  const COMMON_SYMPTOMS = [
+    symptomDictionary[languageCode].chestPain,
+    symptomDictionary[languageCode].shortnessOfBreath,
+    symptomDictionary[languageCode].highFever,
+    symptomDictionary[languageCode].severeHeadache,
+    symptomDictionary[languageCode].stomachPain,
+    symptomDictionary[languageCode].dizziness,
+    symptomDictionary[languageCode].skinRash,
+    symptomDictionary[languageCode].coughSoreThroat,
+    symptomDictionary[languageCode].extremeFatigue,
+    symptomDictionary[languageCode].backPain,
+  ];
+
+  const BODY_REGIONS = [
+    'Chest / Thorax',
+    'Head, Neck & Brain',
+    'Abdomen & Gastrointestinal',
+    'Respiratory & Throat',
+    'Musculoskeletal & Limbs',
+    'Dermatological / Skin',
+    'Whole Body / General',
+  ];
+
+  // Patient-friendly display names for body regions (values stay unchanged for triage data)
+  const BODY_REGION_LABELS: Record<string, string> = {
+    'Chest / Thorax': t('symptomRegions.chest'),
+    'Head, Neck & Brain': t('symptomRegions.head'),
+    'Abdomen & Gastrointestinal': t('symptomRegions.abdomen'),
+    'Respiratory & Throat': t('symptomRegions.respiratory'),
+    'Musculoskeletal & Limbs': t('symptomRegions.musculoskeletal'),
+    'Dermatological / Skin': t('symptomRegions.skin'),
+    'Whole Body / General': t('symptomRegions.general'),
+  };
   // `profile` prop retained for interface compatibility; no longer displayed
   void ({} as SymptomInputFormProps['profile']);
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([
-    'Chest Pain / Discomfort',
-    'Shortness of Breath',
+    symptomDictionary[languageCode].chestPain,
+    symptomDictionary[languageCode].shortnessOfBreath,
   ]);
   const [customSymptom, setCustomSymptom] = useState('');
   const [durationDays, setDurationDays] = useState<number>(2);
   const [painScale, setPainScale] = useState<number>(7);
   const [bodyRegion, setBodyRegion] = useState<string>('Chest / Thorax');
   const [additionalNotes, setAdditionalNotes] = useState(
-    'Experiencing heavy retrosternal pressure radiating slightly to left arm for the past 2 hours. Feels worse on exertion.'
+    t('symptomLabels.sampleNote')
   );
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -185,7 +298,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedSymptoms.length === 0) {
-      alert('Please tap at least one symptom first.');
+      alert(t('dashboard.symptomError'));
       return;
     }
     onSubmit({
@@ -206,9 +319,9 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
           <Stethoscope size={24} className="text-teal" />
         </div>
         <div>
-          <h2 className="form-title">Tell us what is wrong</h2>
+          <h2 className="form-title">{t('dashboard.describeSymptoms')}</h2>
           <p className="form-subtitle">
-            Pick your problems below. We will check them with your health records and suggest the right care.
+            {t('dashboard.symptomCheckHelp')}
           </p>
         </div>
       </div>
@@ -217,9 +330,9 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
       <div className="cross-ref-banner">
         <ShieldCheck size={18} className="text-teal flex-shrink-0" />
         <div>
-          <span className="banner-title">We remember your health history:</span>
+          <span className="banner-title">{t('triage.sourceHistory')}:</span>
           <span className="banner-text">
-            {' '}Your past conditions and allergies are checked automatically. You do not need to type them again.
+            {' '}{t('dashboard.healthContext')}
           </span>
         </div>
       </div>
@@ -248,8 +361,13 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
         <div className="custom-symptom-row">
           <input
             type="text"
+<<<<<<< HEAD
             className="form-input flex-grow"
             placeholder="Not listed? Type it here..."
+=======
+            className="form-input"
+            placeholder={t('dashboard.notListed')}
+>>>>>>> 09c53f5 (madhura's work)
             value={customSymptom}
             onChange={(e) => setCustomSymptom(e.target.value)}
           />
@@ -278,14 +396,14 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
           </button>
           <button type="button" onClick={addCustomSymptom} className="btn btn-secondary btn-sm">
             <Plus size={16} />
-            <span>Add</span>
+            <span>{t('dashboard.add')}</span>
           </button>
         </div>
 
         {/* Active Selected List */}
         {selectedSymptoms.length > 0 && (
           <div className="selected-summary">
-            <span className="summary-label">You selected:</span>
+            <span className="summary-label">{t('dashboard.youSelected')}</span>
             <div className="selected-tags-row">
               {selectedSymptoms.map((sym) => (
                 <span key={sym} className="active-tag">
@@ -308,7 +426,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
       <div className="grid-2-col">
         <div className="section-block">
           <label className="section-label">
-            <MapPin size={14} className="text-teal" /> 2. Where is the problem?
+            <MapPin size={14} className="text-teal" /> 2. {t('dashboard.whereProblem')}
           </label>
           <select
             className="form-input"
@@ -325,7 +443,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
 
         <div className="section-block">
           <label className="section-label">
-            <Clock size={14} className="text-teal" /> 3. Since when?
+            <Clock size={14} className="text-teal" /> 3. {t('dashboard.sinceWhen')}
           </label>
           <div className="duration-picker">
             {[1, 2, 4, 7, 14].map((d) => (
@@ -335,7 +453,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
                 onClick={() => setDurationDays(d)}
                 className={`duration-btn ${durationDays === d ? 'active' : ''}`}
               >
-                {d === 1 ? 'Today' : `${d} days`}
+                {d === 1 ? t('dashboard.today') : t('dashboard.days', { count: d })}
               </button>
             ))}
           </div>
@@ -346,19 +464,19 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
       <div className="section-block">
         <div className="pain-label-row">
           <label className="section-label">
-            <Flame size={15} className="text-amber" /> 4. How much pain?
+            <Flame size={15} className="text-amber" /> 4. {t('dashboard.painScale')}
           </label>
           <span className={`pain-score-pill score-${painScale}`}>
             {painScale} / 10 -{' '}
             {painScale === 0
-              ? 'No pain'
+              ? t('dashboard.painLevels.noPain')
               : painScale <= 3
-              ? 'Mild'
+              ? t('dashboard.painLevels.mild')
               : painScale <= 6
-              ? 'Moderate'
+              ? t('dashboard.painLevels.moderate')
               : painScale <= 8
-              ? 'Severe'
-              : 'Worst possible'}
+              ? t('dashboard.painLevels.severe')
+              : t('dashboard.painLevels.worst')}
           </span>
         </div>
         <input

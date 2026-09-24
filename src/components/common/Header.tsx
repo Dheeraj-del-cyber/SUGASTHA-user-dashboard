@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ShieldCheck, User, LogOut, Bell, CheckCircle2, Home, FileText, Ticket } from 'lucide-react';
 import { AbhaProfile, ConsultationRequest } from '../../types';
 import { ActiveTab } from './BottomNav';
@@ -31,13 +32,14 @@ export const Header: React.FC<HeaderProps> = ({
   recordsCount,
   historyCount,
 }) => {
+  const { t, i18n } = useTranslation();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(2);
 
   const notifications = [
     {
       id: 'notif-1',
-      title: 'ABHA Health Card Active',
+      title: t('nav.abhaConnected'),
       time: '10 mins ago',
       desc: 'Your health records are synced with ABDM registry.',
       type: 'ABHA',
@@ -50,6 +52,11 @@ export const Header: React.FC<HeaderProps> = ({
       type: 'QUEUE',
     },
   ];
+
+  const changeLanguage = (language: string) => {
+    void i18n.changeLanguage(language);
+    localStorage.setItem('sugastha-language', language);
+  };
 
   return (
     <header className="swasthya-header">
@@ -75,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <Home size={17} className="desktop-nav-icon" />
-            <span>Home</span>
+            <span>{t('nav.home')}</span>
           </button>
 
           <button
@@ -85,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <FileText size={17} className="desktop-nav-icon" />
-            <span>Records</span>
+            <span>{t('nav.records')}</span>
             {typeof recordsCount === 'number' && recordsCount > 0 && (
               <span className="desktop-nav-count">{recordsCount}</span>
             )}
@@ -103,7 +110,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <Ticket size={17} className="desktop-nav-icon" />
-            <span>Hospital Passes</span>
+            <span>{t('nav.hospitalPasses')}</span>
             {activeConsultation ? (
               <span className="desktop-nav-active-dot" title="Active Visit Token Live" />
             ) : typeof historyCount === 'number' && historyCount > 0 ? (
@@ -114,6 +121,24 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Action Controls & Patient Status */}
         <div className="header-actions">
+          <div className="language-selector-wrap">
+            <label className="language-label" htmlFor="language-selector-header">{t('nav.language')}</label>
+            <select
+              id="language-selector-header"
+              className="language-selector"
+              value={i18n.language || 'en'}
+              onChange={(event) => changeLanguage(event.target.value)}
+              aria-label={t('nav.language')}
+            >
+              <option value="en">{t('language.english')}</option>
+              <option value="kn">{t('language.kannada')}</option>
+              <option value="hi">{t('language.hindi')}</option>
+              <option value="mr">{t('language.marathi')}</option>
+              <option value="ta">{t('language.tamil')}</option>
+              <option value="te">{t('language.telugu')}</option>
+            </select>
+          </div>
+
           {/* Notifications Dropdown */}
           <div className="notification-wrapper">
             <button
@@ -122,7 +147,7 @@ export const Header: React.FC<HeaderProps> = ({
                 setUnreadCount(0);
               }}
               className="btn-icon-head"
-              title="Notifications"
+              title={t('nav.notifications')}
             >
               <Bell size={18} />
               {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
@@ -131,7 +156,7 @@ export const Header: React.FC<HeaderProps> = ({
             {isNotificationsOpen && (
               <div className="notifications-popover">
                 <div className="popover-header">
-                  <h4>Notifications</h4>
+                  <h4>{t('nav.notifications')}</h4>
                   <span className="popover-count">2 New</span>
                 </div>
                 <div className="popover-body">
@@ -158,7 +183,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div
                 className="profile-info-trigger"
                 onClick={onOpenProfile}
-                title="View ABHA Profile"
+                title={t('nav.viewProfile')}
               >
                 <div className="avatar-mini">
                   {profile.fullName.substring(0, 1)}
@@ -168,7 +193,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <span className="user-name-text">{profile.fullName.split(' ')[0]}</span>
                     <span className="abha-status-badge">
                       <ShieldCheck size={12} className="text-green" />
-                      <span>ABHA Connected</span>
+                      <span>{t('nav.abhaConnected')}</span>
                     </span>
                   </div>
                   <span className="abha-number-text">{profile.abhaNumber}</span>
@@ -178,7 +203,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={onLogout}
                 className="btn-icon-head logout-btn"
-                title="Log Out"
+                title={t('nav.logout')}
               >
                 <LogOut size={16} />
               </button>
@@ -186,7 +211,7 @@ export const Header: React.FC<HeaderProps> = ({
           ) : (
             <button onClick={onOpenLogin} className="btn btn-primary btn-sm">
               <User size={16} />
-              <span>Log in ABHA</span>
+              <span>{t('nav.loginAbha')}</span>
             </button>
           )}
         </div>

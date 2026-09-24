@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Video, ExternalLink, Code2, CheckCircle2 } from 'lucide-react';
 import { TriageResult, AbhaProfile } from '../../types';
 
@@ -15,6 +16,7 @@ export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
   onBookTeleconsultation,
   onSwitchToHospitalVisit,
 }) => {
+  const { t } = useTranslation();
   const [showApiInspect, setShowApiInspect] = useState(false);
 
   const apiPayload = {
@@ -52,14 +54,14 @@ export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
           </div>
           <div className="header-meta">
             <div className="tag-row">
-              <span className="gov-tele-tag">DOCTOR ON VIDEO CALL</span>
+              <span className="gov-tele-tag">{t('dashboard.teleconsultation').toUpperCase()}</span>
             </div>
-            <h2 className="tele-title">Talk to a doctor from home</h2>
+            <h2 className="tele-title">{t('dashboard.teleconsultation')}</h2>
           </div>
         </div>
 
         <p className="tele-desc">
-          No need to travel. A government doctor will call you and give advice and medicine.
+          {t('recommendations.shortWaitText')}
         </p>
       </div>
 
@@ -68,22 +70,22 @@ export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
         <div className="benefit-item">
           <CheckCircle2 size={18} className="text-emerald" />
           <div>
-            <strong>Short wait</strong>
-            <p>Talk to a doctor in about 10-15 minutes.</p>
+            <strong>{t('recommendations.shortWait')}</strong>
+            <p>{t('recommendations.shortWaitText')}</p>
           </div>
         </div>
         <div className="benefit-item">
           <CheckCircle2 size={18} className="text-emerald" />
           <div>
-            <strong>Free</strong>
-            <p>The government video consultation costs nothing.</p>
+            <strong>{t('recommendations.free')}</strong>
+            <p>{t('recommendations.freeText')}</p>
           </div>
         </div>
         <div className="benefit-item">
           <CheckCircle2 size={18} className="text-emerald" />
           <div>
-            <strong>Prescription saved</strong>
-            <p>Your prescription is saved to your health records.</p>
+            <strong>{t('recommendations.prescriptionSaved')}</strong>
+            <p>{t('recommendations.prescriptionText')}</p>
           </div>
         </div>
       </div>
@@ -96,13 +98,13 @@ export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
           onClick={() => setShowApiInspect(!showApiInspect)}
         >
           <Code2 size={14} />
-          <span>{showApiInspect ? 'Hide developer details' : 'Developer details'}</span>
+          <span>{showApiInspect ? t('recommendations.hideDetails') : t('recommendations.showDetails')}</span>
         </button>
 
         {showApiInspect && (
           <>
             <p className="api-ready-text">
-              eSanjeevani referral API contract (for development/demo only):
+              {t('recommendations.apiNotice')}
             </p>
             <pre className="api-code-block animate-fade-in">
               {JSON.stringify(apiPayload, null, 2)}
@@ -117,14 +119,14 @@ export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
           onClick={onSwitchToHospitalVisit}
           className="btn btn-secondary btn-sm"
         >
-          <span>I prefer to go to a hospital</span>
+          <span>{t('recommendations.preferHospital')}</span>
         </button>
 
         <button
           onClick={onBookTeleconsultation}
           className="btn btn-primary btn-lg connect-tele-btn"
         >
-          <span>Book Doctor Call</span>
+          <span>{t('recommendations.doctorCall')}</span>
           <ExternalLink size={18} />
         </button>
       </div>

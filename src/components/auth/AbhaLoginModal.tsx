@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldCheck, KeyRound, Smartphone, ArrowRight, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../common/Modal';
 import { abhaService } from '../../services/abhaService';
 import { AbhaProfile, HealthRecord, ChronicCondition, Allergy } from '../../types';
@@ -24,6 +25,7 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
   onOpenRegister,
   onOpenRecover,
 }) => {
+  const { t } = useTranslation();
   const [identifier, setIdentifier] = useState('91-4523-8901-2345');
   const [authMode, setAuthMode] = useState<'OTP' | 'PASSWORD'>('OTP');
   const [otpValue, setOtpValue] = useState('482910');
@@ -33,7 +35,7 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
 
   const handleSendOtp = () => {
     if (!identifier.trim()) {
-      setErrorMsg('Please enter your ABHA number first.');
+      setErrorMsg(t('auth.login.errorEmpty'));
       return;
     }
     setErrorMsg('');
@@ -55,7 +57,7 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
       onClose();
     } catch {
       setLoading(false);
-      setErrorMsg('We could not log you in. Please check your details and try again.');
+      setErrorMsg(t('auth.login.errorFailed'));
     }
   };
 
@@ -68,8 +70,8 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Log in with your ABHA number"
-      subtitle="Your health records are accessed only with your permission."
+      title={t('auth.loginModal.title')}
+      subtitle={t('auth.loginModal.subtitle')}
       maxWidth="480px"
     >
       <form onSubmit={handleLoginSubmit} className="abha-login-form">
@@ -77,7 +79,7 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
         <div className="demo-accounts-pill">
           <div className="demo-pill-header">
             <Sparkles size={14} className="text-amber" />
-            <span>Try a demo account:</span>
+            <span>{t('auth.loginModal.demoTitle')}</span>
           </div>
           <div className="demo-btns-row">
             <button
@@ -100,14 +102,14 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
         {/* Input Identifier */}
         <div className="form-group">
           <label className="form-label">
-            Enter your ABHA number
+            {t('auth.loginModal.enterAbha')}
           </label>
           <div className="input-with-icon">
             <ShieldCheck size={18} className="input-icon" />
             <input
               type="text"
               className="form-input"
-              placeholder="14 digits, like 91-4523-8901-2345"
+              placeholder={t('auth.loginModal.abhaPlaceholder')}
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               required
@@ -123,7 +125,7 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
             onClick={() => setAuthMode('OTP')}
           >
             <Smartphone size={16} />
-            <span>Send me a code (OTP)</span>
+            <span>{t('auth.loginModal.otpMethod')}</span>
           </button>
           <button
             type="button"
@@ -131,7 +133,7 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
             onClick={() => setAuthMode('PASSWORD')}
           >
             <KeyRound size={16} />
-            <span>Use my password</span>
+            <span>{t('auth.loginModal.passwordMethod')}</span>
           </button>
         </div>
 
@@ -145,11 +147,11 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
                 onClick={handleSendOtp}
                 disabled={loading}
               >
-                {loading ? 'Sending code to your phone...' : 'Send code to my phone'}
+                {loading ? t('auth.loginModal.sendingCode') : t('auth.loginModal.sendCode')}
               </button>
             ) : (
               <div className="otp-container animate-fade-in">
-                <label className="form-label">Enter the 6-digit code on your phone</label>
+                <label className="form-label">{t('auth.loginModal.otpLabel')}</label>
                 <input
                   type="text"
                   maxLength={6}
@@ -160,14 +162,14 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
                   required
                 />
                 <span className="otp-hint text-teal">
-                  Demo code is already filled. Just press Continue below.
+                  {t('auth.loginModal.otpHint')}
                 </span>
               </div>
             )}
           </div>
         ) : (
           <div className="form-group">
-            <label className="form-label">Enter your ABHA password</label>
+            <label className="form-label">{t('auth.loginModal.passwordLabel')}</label>
             <input
               type="password"
               className="form-input"
@@ -185,7 +187,7 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
           className="btn btn-primary btn-lg w-full"
           disabled={loading || (authMode === 'OTP' && !otpSent)}
         >
-          {loading ? 'Checking your details...' : 'Verify & Continue'}
+          {loading ? t('auth.loginModal.verifying') : t('auth.loginModal.verifyContinue')}
           <ArrowRight size={18} />
         </button>
 
@@ -199,7 +201,7 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
               onOpenRegister();
             }}
           >
-            No ABHA number? <strong>Create one</strong>
+            {t('auth.loginModal.registerPrompt')} <strong>{t('auth.loginModal.registerAction')}</strong>
           </button>
           <span className="aux-divider">•</span>
           <button
@@ -210,7 +212,7 @@ export const AbhaLoginModal: React.FC<AbhaLoginModalProps> = ({
               onOpenRecover();
             }}
           >
-            Forgot your ABHA number? <strong>Find it</strong>
+            {t('auth.loginModal.recoverPrompt')} <strong>{t('auth.loginModal.recoverAction')}</strong>
           </button>
         </div>
       </form>

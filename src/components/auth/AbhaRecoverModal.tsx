@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, ShieldAlert, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../common/Modal';
 import { abhaService } from '../../services/abhaService';
 
@@ -16,6 +17,7 @@ export const AbhaRecoverModal: React.FC<AbhaRecoverModalProps> = ({
   onSelectRecovered,
   onBackToLogin,
 }) => {
+  const { t } = useTranslation();
   const [mobileOrAadhaar, setMobileOrAadhaar] = useState('9876543210');
   const [loading, setLoading] = useState(false);
   const [recoveredData, setRecoveredData] = useState<{
@@ -40,8 +42,8 @@ export const AbhaRecoverModal: React.FC<AbhaRecoverModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Find your ABHA number"
-      subtitle="We can find it using your mobile number or Aadhaar"
+      title={t('auth.recover.title')}
+      subtitle={t('auth.recover.subtitle')}
       maxWidth="460px"
     >
       <div className="recover-container">
@@ -50,16 +52,16 @@ export const AbhaRecoverModal: React.FC<AbhaRecoverModalProps> = ({
             <div className="info-box">
               <ShieldAlert size={18} className="text-amber" />
               <span>
-                Enter the mobile number linked to your Aadhaar. We will find your ABHA number for you.
+                {t('auth.recover.info')}
               </span>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Your mobile number or Aadhaar number</label>
+              <label className="form-label">{t('auth.recover.label')}</label>
               <input
                 type="text"
                 className="form-input"
-                placeholder="10-digit mobile or 12-digit Aadhaar"
+                placeholder={t('auth.recover.placeholder')}
                 value={mobileOrAadhaar}
                 onChange={(e) => setMobileOrAadhaar(e.target.value)}
                 required
@@ -67,7 +69,7 @@ export const AbhaRecoverModal: React.FC<AbhaRecoverModalProps> = ({
             </div>
 
             <button type="submit" className="btn btn-primary btn-lg w-full" disabled={loading}>
-              {loading ? 'Looking for your ABHA number...' : 'Find My ABHA Number'}
+              {loading ? t('auth.recover.loading') : t('auth.recover.action')}
               <Search size={18} />
             </button>
           </form>
@@ -76,18 +78,18 @@ export const AbhaRecoverModal: React.FC<AbhaRecoverModalProps> = ({
             <div className="icon-circle">
               <CheckCircle2 size={40} className="text-emerald" />
             </div>
-            <h4 className="recovered-title">We found your ABHA number!</h4>
+            <h4 className="recovered-title">{t('auth.recover.resultTitle')}</h4>
             <p className="recovered-desc">
-              It is linked to {recoveredData.maskedMobile}.
+              {t('auth.recover.resultDesc', { mobile: recoveredData.maskedMobile })}
             </p>
 
             <div className="card details-card">
               <div className="field-row">
-                <span className="text-muted">ABHA Number:</span>
+                <span className="text-muted">{t('auth.recover.numberLabel')}</span>
                 <strong className="text-teal font-mono">{recoveredData.abhaNumber}</strong>
               </div>
               <div className="field-row">
-                <span className="text-muted">ABHA Address:</span>
+                <span className="text-muted">{t('auth.recover.addressLabel')}</span>
                 <strong className="text-primary">{recoveredData.abhaAddress}</strong>
               </div>
             </div>
@@ -99,14 +101,14 @@ export const AbhaRecoverModal: React.FC<AbhaRecoverModalProps> = ({
               }}
               className="btn btn-primary btn-lg w-full"
             >
-              Sign in with this number
+              {t('auth.recover.signIn')} 
               <ArrowRight size={18} />
             </button>
           </div>
         )}
 
         <div className="back-row">            <button type="button" className="btn-back" onClick={onBackToLogin}>
-              Back to login
+              {t('auth.recover.back')}
             </button>
         </div>
       </div>

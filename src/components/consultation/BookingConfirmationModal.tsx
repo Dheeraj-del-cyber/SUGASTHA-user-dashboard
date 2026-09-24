@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Clock,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../common/Modal';
 import { Hospital, Doctor, TriageResult, AbhaProfile } from '../../types';
 import { hospitalQueueService } from '../../services/hospitalQueueService';
@@ -35,6 +36,7 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
   onConfirmBooking,
   isBooking,
 }) => {
+  const { t } = useTranslation();
   const queueNodes = hospitalQueueService.build3TierHospitalQueue(
     hospital,
     doctor,
@@ -47,8 +49,8 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Confirm Your Visit"
-      subtitle="Check details"
+      title={t('recommendations.confirmVisit')}
+      subtitle={t('recommendations.checkDetails')}
       maxWidth="540px"
     >
       <div className="booking-confirm-body">
@@ -85,16 +87,18 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
         <div className="queue-buffer-section">
           <div className="queue-section-header">
             <Layers size={16} className="text-teal" />
-            <h4 className="queue-title">Backup hospitals</h4>
+            <h4 className="queue-title">{t('recommendations.backupHospitals')}</h4>
           </div>
 
-          <p className="queue-desc">Backup hospitals if needed</p>
+          <p className="queue-desc">{t('recommendations.backupHospitalsDesc')}</p>
 
           <div className="queue-tiers-list">
             {queueNodes.map((node) => (
               <div key={node.priorityOrder} className={`tier-node-card tier-${node.priorityOrder}`}>
                 <div className="tier-rank">
-                  {node.priorityOrder === 1 ? 'Selected' : `Backup ${node.priorityOrder - 1}`}
+                  {node.priorityOrder === 1
+                    ? t('recommendations.selected')
+                    : `${t('recommendations.backup')} ${node.priorityOrder - 1}`}
                 </div>
                 <div className="tier-content">
                   <strong>{node.hospitalName}</strong>
@@ -108,7 +112,7 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
         {/* Action Button */}
         <div className="booking-modal-actions">
           <button type="button" onClick={onClose} className="btn btn-secondary">
-            Cancel
+            {t('recommendations.cancel')}
           </button>
           <button
             type="button"
@@ -117,11 +121,11 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
             className="btn btn-primary btn-lg book-btn"
           >
             {isBooking ? (
-              <span>Booking your visit...</span>
+              <span>{t('recommendations.bookingYourVisit')}</span>
             ) : (
               <>
                 <ShieldCheck size={18} />
-                <span>Book Visit</span>
+                <span>{t('recommendations.bookVisit')}</span>
                 <ArrowRight size={18} />
               </>
             )}
