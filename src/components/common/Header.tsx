@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ShieldCheck, User, LogOut, Bell, CheckCircle2, Home, FileText, Ticket } from 'lucide-react';
+import { User, Bell, Check, CheckCircle2, ChevronDown, Home, FileText, Ticket } from 'lucide-react';
 import { AbhaProfile, ConsultationRequest } from '../../types';
 import { ActiveTab } from './BottomNav';
 import logoImage from '../../../images/logo.png';
@@ -23,8 +23,6 @@ export const Header: React.FC<HeaderProps> = ({
   profile,
   activeConsultation,
   onOpenLogin,
-  onLogout,
-  onOpenProfile,
   onGoHome,
   activeTab,
   activeSubView,
@@ -34,7 +32,17 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(2);
+  const languages = [
+    { code: 'en', label: t('language.english') },
+    { code: 'kn', label: t('language.kannada') },
+    { code: 'hi', label: t('language.hindi') },
+    { code: 'mr', label: t('language.marathi') },
+    { code: 'ta', label: t('language.tamil') },
+    { code: 'te', label: t('language.telugu') },
+  ];
+  const currentLanguage = languages.find((language) => i18n.language.startsWith(language.code)) ?? languages[0];
 
   const notifications = [
     {
@@ -56,7 +64,17 @@ export const Header: React.FC<HeaderProps> = ({
   const changeLanguage = (language: string) => {
     void i18n.changeLanguage(language);
     localStorage.setItem('sugastha-language', language);
+    setIsLanguageMenuOpen(false);
   };
+
+  useEffect(() => {
+    const closeLanguageMenu = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.language-selector-wrap')) setIsLanguageMenuOpen(false);
+    };
+    document.addEventListener('click', closeLanguageMenu);
+    return () => document.removeEventListener('click', closeLanguageMenu);
+  }, []);
 
   return (
     <header className="swasthya-header">
@@ -122,21 +140,37 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Action Controls & Patient Status */}
         <div className="header-actions">
           <div className="language-selector-wrap">
-            <label className="language-label" htmlFor="language-selector-header">{t('nav.language')}</label>
-            <select
-              id="language-selector-header"
+            <button
+              type="button"
               className="language-selector"
-              value={i18n.language || 'en'}
-              onChange={(event) => changeLanguage(event.target.value)}
+              aria-haspopup="listbox"
+              aria-expanded={isLanguageMenuOpen}
               aria-label={t('nav.language')}
+              onClick={(event) => {
+                event.stopPropagation();
+                setIsLanguageMenuOpen((open) => !open);
+              }}
             >
-              <option value="en">{t('language.english')}</option>
-              <option value="kn">{t('language.kannada')}</option>
-              <option value="hi">{t('language.hindi')}</option>
-              <option value="mr">{t('language.marathi')}</option>
-              <option value="ta">{t('language.tamil')}</option>
-              <option value="te">{t('language.telugu')}</option>
-            </select>
+              <span>{currentLanguage.label}</span>
+              <ChevronDown size={15} aria-hidden="true" />
+            </button>
+            {isLanguageMenuOpen && (
+              <div className="language-menu" role="listbox" aria-label={t('nav.language')}>
+                {languages.map((language) => (
+                  <button
+                    key={language.code}
+                    type="button"
+                    role="option"
+                    aria-selected={currentLanguage.code === language.code}
+                    className={`language-option ${currentLanguage.code === language.code ? 'active' : ''}`}
+                    onClick={() => changeLanguage(language.code)}
+                  >
+                    <span>{language.label}</span>
+                    {currentLanguage.code === language.code && <Check size={15} aria-hidden="true" />}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Notifications Dropdown */}
@@ -177,38 +211,7 @@ export const Header: React.FC<HeaderProps> = ({
           
           <div id="google_translate_element" className="translate-widget"></div>
 
-          {/* Profile & ABHA Connected Status */}
-          {profile ? (
-            <div className="user-profile-chip">
-              <div
-                className="profile-info-trigger"
-                onClick={onOpenProfile}
-                title={t('nav.viewProfile')}
-              >
-                <div className="avatar-mini">
-                  {profile.fullName.substring(0, 1)}
-                </div>
-                <div className="profile-text-group">
-                  <div className="name-status-row">
-                    <span className="user-name-text">{profile.fullName.split(' ')[0]}</span>
-                    <span className="abha-status-badge">
-                      <ShieldCheck size={12} className="text-green" />
-                      <span>{t('nav.abhaConnected')}</span>
-                    </span>
-                  </div>
-                  <span className="abha-number-text">{profile.abhaNumber}</span>
-                </div>
-              </div>
-
-              <button
-                onClick={onLogout}
-                className="btn-icon-head logout-btn"
-                title={t('nav.logout')}
-              >
-                <LogOut size={16} />
-              </button>
-            </div>
-          ) : (
+          {!profile && (
             <button onClick={onOpenLogin} className="btn btn-primary btn-sm">
               <User size={16} />
               <span>{t('nav.loginAbha')}</span>
@@ -297,6 +300,72 @@ export const Header: React.FC<HeaderProps> = ({
           align-items: center;
           gap: 0.65rem;
           flex-shrink: 0;
+        }
+        .language-selector-wrap {
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+        }
+        .language-selector {
+          display: inline-flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.45rem;
+          min-width: 112px;
+          max-width: 132px;
+          height: 34px;
+          padding: 0 0.65rem 0 0.75rem;
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-full);
+          background: var(--bg-app);
+          color: var(--dark-navy-text);
+          font-size: 0.78rem;
+          font-weight: 600;
+          line-height: 1;
+          outline: none;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+        }
+        .language-selector:hover,
+        .language-selector:focus-visible {
+          border-color: var(--brand-primary);
+          box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.14);
+        }
+        .language-menu {
+          position: absolute;
+          top: calc(100% + 0.5rem);
+          right: 0;
+          z-index: 130;
+          display: flex;
+          flex-direction: column;
+          width: 178px;
+          padding: 0.35rem;
+          background: var(--white);
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-md);
+          box-shadow: var(--shadow-lg);
+        }
+        .language-option {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.5rem;
+          min-height: 36px;
+          padding: 0.55rem 0.65rem;
+          border: 0;
+          border-radius: var(--radius-sm);
+          background: transparent;
+          color: var(--dark-navy-text);
+          font-size: 0.78rem;
+          text-align: left;
+          cursor: pointer;
+        }
+        .language-option:hover,
+        .language-option.active {
+          background: var(--pastel-light-blue);
+          color: var(--brand-primary-hover);
         }
         .active-token-chip {
           display: flex;
@@ -642,21 +711,19 @@ export const Header: React.FC<HeaderProps> = ({
           .abha-number-text {
             display: none;
           }
-          .user-profile-chip {
-            padding: 3px;
-            background: transparent;
-            border: 0;
-          }
-          .profile-text-group {
-            display: none;
-          }
-          .logout-btn {
+          .language-selector-wrap {
             display: flex;
-            width: 34px;
-            height: 34px;
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid var(--border-light);
-            box-shadow: 0 2px 8px rgba(17, 24, 39, 0.06);
+            order: -2;
+          }
+          .language-selector {
+            min-width: 104px;
+            max-width: 118px;
+            height: 32px;
+            font-size: 0.74rem;
+          }
+          .language-menu {
+            right: -0.25rem;
+            width: 168px;
           }
           .notification-wrapper {
             order: -1;
