@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Mic,
   Square,
+  Globe,
 } from 'lucide-react';
 import { SymptomInput, AbhaProfile } from '../../types';
 
@@ -19,6 +20,18 @@ interface SymptomInputFormProps {
   onSubmit: (symptoms: SymptomInput) => void;
   isAnalyzing: boolean;
 }
+
+const SUPPORTED_LANGUAGES = [
+  { code: 'en-IN', label: 'English' },
+  { code: 'hi-IN', label: 'Hindi (हिंदी)' },
+  { code: 'mr-IN', label: 'Marathi (मराठी)' },
+  { code: 'ta-IN', label: 'Tamil (தமிழ்)' },
+  { code: 'te-IN', label: 'Telugu (తెలుగు)' },
+  { code: 'bn-IN', label: 'Bengali (বাংলা)' },
+  { code: 'gu-IN', label: 'Gujarati (ગુજરાતી)' },
+  { code: 'kn-IN', label: 'Kannada (ಕನ್ನಡ)' },
+  { code: 'ml-IN', label: 'Malayalam (മലയാളം)' },
+];
 
 const COMMON_SYMPTOMS = [
   'Chest Pain / Discomfort',
@@ -74,6 +87,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [voiceError, setVoiceError] = useState('');
+  const [speechLang, setSpeechLang] = useState('en-IN');
   const mediaRecorderRef = useRef<any>(null);
   const recordingTimerRef = useRef<number | null>(null);
   const voiceTargetRef = useRef<'notes' | 'symptom'>('notes');
@@ -127,7 +141,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
     try {
       voiceTargetRef.current = target;
       const recognition = new SpeechRecognition();
-      recognition.lang = 'en-US';
+      recognition.lang = speechLang;
       recognition.interimResults = false;
       recognition.continuous = false;
 
@@ -234,11 +248,25 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
         <div className="custom-symptom-row">
           <input
             type="text"
-            className="form-input"
+            className="form-input flex-grow"
             placeholder="Not listed? Type it here..."
             value={customSymptom}
             onChange={(e) => setCustomSymptom(e.target.value)}
           />
+          <div className="voice-lang-selector-sm">
+            <Globe size={14} className="text-teal" />
+            <select
+              value={speechLang}
+              onChange={(e) => setSpeechLang(e.target.value)}
+              disabled={isRecording}
+              className="lang-select-sm"
+              title="Select speech language"
+            >
+              {SUPPORTED_LANGUAGES.map(lang => (
+                <option key={lang.code} value={lang.code}>{lang.label}</option>
+              ))}
+            </select>
+          </div>
           <button
             type="button"
             onClick={isRecording ? stopRecording : () => void startRecording('symptom')}
@@ -404,6 +432,19 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
           placeholder="Write in your own words if you want..."
         ></textarea>
         <div className="voice-input-row">
+          <div className="voice-lang-selector">
+            <Globe size={16} className="text-teal" />
+            <select
+              value={speechLang}
+              onChange={(e) => setSpeechLang(e.target.value)}
+              disabled={isRecording}
+              className="lang-select"
+            >
+              {SUPPORTED_LANGUAGES.map(lang => (
+                <option key={lang.code} value={lang.code}>{lang.label}</option>
+              ))}
+            </select>
+          </div>
           <button
             type="button"
             onClick={isRecording ? stopRecording : () => void startRecording('notes')}
@@ -411,9 +452,9 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
             disabled={isTranscribing || isAnalyzing}
           >
             {isRecording ? <Square size={16} /> : <Mic size={16} />}
-            <span>{isRecording ? 'Stop recording' : isTranscribing ? 'Converting speech...' : 'Speak symptoms'}</span>
+            <span>{isRecording ? 'Stop recording' : 'Speak symptoms'}</span>
           </button>
-          {isRecording && <span className="voice-recording-status">Listening for up to 25 seconds...</span>}
+          {isRecording && <span className="voice-recording-status">Listening...</span>}
         </div>
         {voiceError && <p className="voice-error" role="alert">{voiceError}</p>}
       </div>
@@ -704,6 +745,35 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
         }
         .voice-error {
           color: #dc2626;
+        }
+        .voice-lang-selector, .voice-lang-selector-sm {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          background: var(--bg-surface-2);
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-sm);
+          padding: 0 0.5rem;
+        }
+        .voice-lang-selector-sm {
+          padding: 0 0.4rem;
+        }
+        .lang-select, .lang-select-sm {
+          background: transparent;
+          border: none;
+          color: var(--text-primary);
+          font-size: 0.85rem;
+          padding: 0.5rem 0;
+          outline: none;
+          cursor: pointer;
+        }
+        .lang-select-sm {
+          font-size: 0.75rem;
+          padding: 0.4rem 0;
+          max-width: 90px;
+        }
+        .flex-grow {
+          flex-grow: 1;
         }
         .auto-triage-notice strong {
           color: var(--text-primary);
