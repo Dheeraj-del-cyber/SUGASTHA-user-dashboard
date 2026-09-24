@@ -149,6 +149,8 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             )}
           </div>
+          
+          <div id="google_translate_element" className="translate-widget"></div>
 
           {/* Profile & ABHA Connected Status */}
           {profile ? (

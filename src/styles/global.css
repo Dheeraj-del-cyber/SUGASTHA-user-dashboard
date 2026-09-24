@@ -326,3 +326,5 @@ input:focus, textarea:focus, select:focus {
     padding-right: 1.75rem;
   }
 }
+.goog-te-banner-frame { display: none !important; }
+body { top: 0 !important; }
