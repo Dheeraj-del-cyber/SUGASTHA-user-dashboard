@@ -33,7 +33,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
   useEffect(() => {
     if (!navigator.geolocation) {
       setLocationStatus('unsupported');
-      setHospitals(hospitalQueueService.getRecommendedHospitals(triage));
+      setHospitals([]);
       return;
     }
 
@@ -53,13 +53,13 @@ export const HospitalList: React.FC<HospitalListProps> = ({
       },
       () => {
         setLocationStatus('denied');
-        setHospitals(hospitalQueueService.getRecommendedHospitals(triage));
+        setHospitals([]);
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   }, [triage]);
 
-  const baseHospitals = hospitals.length ? hospitals : hospitalQueueService.getRecommendedHospitals(triage);
+  const baseHospitals = hospitals;
 
   // Selected hospital and doctor states
   const [selectedHospId, setSelectedHospId] = useState<string>(baseHospitals[0]?.id || '');
@@ -169,7 +169,8 @@ export const HospitalList: React.FC<HospitalListProps> = ({
           <div className="queue-tip-card location-tip-card">
             <MapPin size={18} className="text-teal flex-shrink-0" />
             <div className="queue-tip-text">
-              <strong>Location access was not shared, so the standard recommended list is shown.</strong>
+              <strong>Location access was not shared, so nearby hospitals cannot be verified.</strong>
+              <div>Allow location access in your browser settings and try again.</div>
             </div>
           </div>
         )}
@@ -178,7 +179,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
           <div className="queue-tip-card location-tip-card">
             <MapPin size={18} className="text-teal flex-shrink-0" />
             <div className="queue-tip-text">
-              <strong>This browser does not support location access, so standard nearby recommendations are shown.</strong>
+              <strong>This browser does not support location access, so nearby hospitals cannot be verified.</strong>
             </div>
           </div>
         )}
@@ -193,7 +194,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
       </div>
 
       {/* Hospital Cards Feed */}
-      {(!hospitals.length && locationStatus !== 'granted') && (
+      {(!hospitals.length && locationStatus === 'idle') && (
         <div className="queue-tip-card location-tip-card">
           <MapPin size={18} className="text-teal flex-shrink-0" />
           <div className="queue-tip-text">
@@ -318,7 +319,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
         </div>
       )}
 
-      {!hospitals.length && locationStatus !== 'granted' && (
+      {!hospitals.length && locationStatus === 'granted' && (
         <div className="queue-tip-card location-tip-card">
           <MapPin size={18} className="text-teal flex-shrink-0" />
           <div className="queue-tip-text">

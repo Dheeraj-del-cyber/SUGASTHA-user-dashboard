@@ -74,7 +74,7 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [voiceError, setVoiceError] = useState('');
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaRecorderRef = useRef<any>(null);
   const recordingTimerRef = useRef<number | null>(null);
   const voiceTargetRef = useRef<'notes' | 'symptom'>('notes');
 
@@ -108,86 +108,64 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
     setSelectedSymptoms(selectedSymptoms.filter((s) => s !== sym));
   };
 
-  const transcribeRecording = async (audio: Blob) => {
-    setIsTranscribing(true);
-    setVoiceError('');
-
-    try {
-      const response = await fetch('/api/sarvam/transcribe', {
-        method: 'POST',
-        headers: { 'Content-Type': audio.type || 'audio/webm' },
-        body: audio,
-      });
-      const result = (await response.json()) as { transcript?: string; error?: string };
-
-      if (!response.ok || !result.transcript) {
-        throw new Error(result.error || 'No speech was detected.');
-      }
-
-      const transcript = result.transcript;
-      if (voiceTargetRef.current === 'symptom') {
-        setCustomSymptom((current) => current.trim() ? `${current.trim()} ${transcript}` : transcript);
-      } else {
-        setAdditionalNotes((current) => current.trim() ? `${current.trim()}\n${transcript}` : transcript);
-      }
-    } catch (error) {
-      setVoiceError(error instanceof Error ? error.message : 'Speech transcription failed.');
-    } finally {
-      setIsTranscribing(false);
-    }
-  };
-
   const stopRecording = () => {
-    if (recordingTimerRef.current !== null) {
-      window.clearTimeout(recordingTimerRef.current);
-      recordingTimerRef.current = null;
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
     }
-    mediaRecorderRef.current?.stop();
+    setIsRecording(false);
   };
 
-  const startRecording = async (target: 'notes' | 'symptom') => {
-    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
-      setVoiceError('Voice recording is not supported in this browser.');
+  const startRecording = (target: 'notes' | 'symptom') => {
+    const win = window as any;
+    const SpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      setVoiceError('Voice recording is not supported in this browser. Try using Chrome or Edge.');
       return;
     }
 
     try {
       voiceTargetRef.current = target;
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const preferredMimeType = 'audio/webm;codecs=opus';
-      const options = MediaRecorder.isTypeSupported(preferredMimeType)
-        ? { mimeType: preferredMimeType }
-        : undefined;
-      const recorder = new MediaRecorder(stream, options);
-      const chunks: Blob[] = [];
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.continuous = false;
 
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) chunks.push(event.data);
-      };
-      recorder.onstop = () => {
-        stream.getTracks().forEach((track) => track.stop());
-        setIsRecording(false);
-        if (chunks.length) void transcribeRecording(new Blob(chunks, { type: recorder.mimeType }));
-      };
-      recorder.onerror = () => {
-        stream.getTracks().forEach((track) => track.stop());
-        setVoiceError('Recording failed. Please try again.');
-        setIsRecording(false);
+      recognition.onstart = () => {
+        setIsRecording(true);
+        setVoiceError('');
       };
 
-      mediaRecorderRef.current = recorder;
-      setVoiceError('');
-      setIsRecording(true);
-      recorder.start();
-      recordingTimerRef.current = window.setTimeout(stopRecording, 25000);
-    } catch {
-      setVoiceError('Microphone access was not granted.');
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        if (voiceTargetRef.current === 'symptom') {
+          setCustomSymptom((current) => current.trim() ? `${current.trim()} ${transcript}` : transcript);
+        } else {
+          setAdditionalNotes((current) => current.trim() ? `${current.trim()}\n${transcript}` : transcript);
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        setVoiceError(`Speech recognition error: ${event.error}`);
+        setIsRecording(false);
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
+
+      recognition.start();
+      mediaRecorderRef.current = recognition;
+    } catch (error) {
+      setVoiceError('Failed to start microphone. Check permissions.');
+      setIsRecording(false);
     }
   };
 
   useEffect(() => () => {
-    if (recordingTimerRef.current !== null) window.clearTimeout(recordingTimerRef.current);
-    mediaRecorderRef.current?.stream.getTracks().forEach((track) => track.stop());
+    if (mediaRecorderRef.current && typeof mediaRecorderRef.current.stop === 'function') {
+      mediaRecorderRef.current.stop();
+    }
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
