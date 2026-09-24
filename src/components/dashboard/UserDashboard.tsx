@@ -10,6 +10,8 @@ import {
   Clock3,
   Route,
   ArrowRight,
+  Mic,
+  Square,
 } from 'lucide-react';
 import {
   AbhaProfile,
@@ -402,14 +404,13 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 
         {/* Input Form */}
         <form onSubmit={handleGenerate} className="symptom-input-group">
-<<<<<<< HEAD
-          <label htmlFor="symptom-input" className="input-label">Describe your symptoms</label>
+          <label htmlFor="symptom-input" className="input-label">{t('dashboard.describeSymptoms')}</label>
           <div className="dashboard-symptom-input-row">
             <input
               id="symptom-input"
               type="text"
               className="form-input symptom-input-field"
-              placeholder="Type your symptoms here (e.g. Fever, Cough)"
+              placeholder={t('dashboard.symptomPlaceholder')}
               value={symptomInput}
               onChange={(e) => {
                 setSymptomInput(e.target.value);
@@ -432,20 +433,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
               {voiceError || 'Transcribing your symptoms...'}
             </span>
           )}
-=======
-          <label htmlFor="symptom-input" className="input-label">{t('dashboard.describeSymptoms')}</label>
-          <input
-            id="symptom-input"
-            type="text"
-            className="form-input symptom-input-field"
-            placeholder={t('dashboard.symptomPlaceholder')}
-            value={symptomInput}
-            onChange={(e) => {
-              setSymptomInput(e.target.value);
-              if (e.target.value.trim()) setSymptomError('');
-            }}
-          />
->>>>>>> 09c53f5 (madhura's work)
           {symptomError && (
             <span className="symptom-error" role="alert">{symptomError}</span>
           )}

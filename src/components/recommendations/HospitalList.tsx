@@ -27,10 +27,8 @@ export const HospitalList: React.FC<HospitalListProps> = ({
   triage,
   onSelectHospitalAndDoctor,
 }) => {
-<<<<<<< HEAD
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationStatus, setLocationStatus] = useState<'idle' | 'granted' | 'denied' | 'unsupported'>('idle');
-=======
   const { t, i18n } = useTranslation();
   const languageCode = i18n.language.startsWith('hi') ? 'hi' : i18n.language.startsWith('kn') ? 'kn' : i18n.language.startsWith('mr') ? 'mr' : i18n.language.startsWith('ta') ? 'ta' : i18n.language.startsWith('te') ? 'te' : 'en';
   const hospitalNameMap: Record<string, string> = {
@@ -56,7 +54,6 @@ export const HospitalList: React.FC<HospitalListProps> = ({
     'Dr. Meera Sharma': { en: 'Dr. Meera Sharma', hi: 'डॉ. मीरा शर्मा', kn: 'ಡಾ. ಮೀನಾ ಶರ್ಮಾ', mr: 'डॉ. मीरा शर्मा', ta: 'டாக்டர் மீரா ஷர்மா', te: 'డా. మీరా శర్మ' }[languageCode],
     'Dr. Rahul Menon': { en: 'Dr. Rahul Menon', hi: 'डॉ. राहुल मेनन', kn: 'ಡಾ. ರಾಹುಲ್ ಮೇನನ್', mr: 'डॉ. राहुल मेनन', ta: 'டாக்டர் ரஹுல் மேனன்', te: 'డా. రాహుల్ మేనన్' }[languageCode],
   };
->>>>>>> 09c53f5 (madhura's work)
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
 
   useEffect(() => {

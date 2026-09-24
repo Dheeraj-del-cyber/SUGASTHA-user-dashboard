@@ -22,7 +22,6 @@ interface SymptomInputFormProps {
   isAnalyzing: boolean;
 }
 
-<<<<<<< HEAD
 const SUPPORTED_LANGUAGES = [
   { code: 'en-IN', label: 'English' },
   { code: 'hi-IN', label: 'Hindi (हिंदी)' },
@@ -35,42 +34,6 @@ const SUPPORTED_LANGUAGES = [
   { code: 'ml-IN', label: 'Malayalam (മലയാളം)' },
 ];
 
-const COMMON_SYMPTOMS = [
-  'Chest Pain / Discomfort',
-  'Shortness of Breath',
-  'High Fever with Chills',
-  'Severe Headache',
-  'Stomach Pain / Vomiting',
-  'Dizziness / Fainting',
-  'Skin Rash / Itching',
-  'Dry Cough & Sore Throat',
-  'Extreme Fatigue',
-  'Back / Joint Pain',
-];
-
-const BODY_REGIONS = [
-  'Chest / Thorax',
-  'Head, Neck & Brain',
-  'Abdomen & Gastrointestinal',
-  'Respiratory & Throat',
-  'Musculoskeletal & Limbs',
-  'Dermatological / Skin',
-  'Whole Body / General',
-];
-
-// Patient-friendly display names for body regions (values stay unchanged for triage data)
-const BODY_REGION_LABELS: Record<string, string> = {
-  'Chest / Thorax': 'Chest',
-  'Head, Neck & Brain': 'Head, neck or head pain',
-  'Abdomen & Gastrointestinal': 'Stomach or digestion',
-  'Respiratory & Throat': 'Breathing or throat',
-  'Musculoskeletal & Limbs': 'Bones, joints, arms or legs',
-  'Dermatological / Skin': 'Skin',
-  'Whole Body / General': 'Whole body / general',
-};
-
-=======
->>>>>>> 09c53f5 (madhura's work)
 export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
   onSubmit,
   isAnalyzing,
@@ -198,11 +161,10 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
     t('symptomLabels.sampleNote')
   );
   const [isRecording, setIsRecording] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isTranscribing] = useState(false);
   const [voiceError, setVoiceError] = useState('');
   const [speechLang, setSpeechLang] = useState('en-IN');
   const mediaRecorderRef = useRef<any>(null);
-  const recordingTimerRef = useRef<number | null>(null);
   const voiceTargetRef = useRef<'notes' | 'symptom'>('notes');
 
   // Red flags
@@ -361,13 +323,8 @@ export const SymptomInputForm: React.FC<SymptomInputFormProps> = ({
         <div className="custom-symptom-row">
           <input
             type="text"
-<<<<<<< HEAD
             className="form-input flex-grow"
-            placeholder="Not listed? Type it here..."
-=======
-            className="form-input"
             placeholder={t('dashboard.notListed')}
->>>>>>> 09c53f5 (madhura's work)
             value={customSymptom}
             onChange={(e) => setCustomSymptom(e.target.value)}
           />
