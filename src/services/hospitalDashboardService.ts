@@ -4,6 +4,15 @@ const API_BASE_URL = (
   import.meta.env.VITE_HOSPITAL_API_BASE_URL || 'http://localhost:8000/api/v1'
 ).replace(/\/$/, '');
 
+export interface UserGeoLocation {
+  latitude: number;
+  longitude: number;
+}
+
+export interface GovtHospitalRecommendation extends BackendHospital {
+  name_hindi?: string | null;
+}
+
 interface BackendHospital {
   id: string;
   name: string;
@@ -18,6 +27,10 @@ interface BackendHospital {
   emergency_available: boolean;
   icu_beds_available: number;
   total_beds: number;
+  oxygen_beds_available: number;
+  opd_capacity: number;
+  opd_active_queue: number;
+  departments: string[];
   rating: number;
   phone: string;
 }
@@ -117,6 +130,38 @@ const calculateAge = (dateOfBirth: string): number => {
 };
 
 export const hospitalDashboardService = {
+  async isReachable(): Promise<boolean> {
+    try {
+      const rootUrl = API_BASE_URL.replace(/\/api\/v1$/, '');
+      const response = await fetch(`${rootUrl}/health`, { signal: AbortSignal.timeout(3000) });
+      return response.ok;
+    } catch {
+      return false;
+    }
+  },
+
+  async getNearbyGovtHospitals(
+    location: UserGeoLocation,
+    limit = 4
+  ): Promise<GovtHospitalRecommendation[]> {
+    try {
+      const params = new URLSearchParams({
+        lat: String(location.latitude),
+        lng: String(location.longitude),
+        limit: String(limit),
+      });
+      return await requestJson<GovtHospitalRecommendation[]>(
+        `${API_BASE_URL}/hospitals/nearby-govt?${params}`
+      );
+    } catch {
+      return [];
+    }
+  },
+
+  toLocalHospital(recommendation: GovtHospitalRecommendation): Hospital {
+    return mapHospital(recommendation, []);
+  },
+
   async getNearbyHospitals(location: { latitude: number; longitude: number }): Promise<Hospital[]> {
     const params = new URLSearchParams({
       lat: String(location.latitude),
@@ -158,7 +203,7 @@ export const hospitalDashboardService = {
         patient_name: profile.fullName,
         patient_phone: profile.mobileNumber,
         age: calculateAge(profile.dateOfBirth),
-        gender: profile.gender,
+        gender: profile.gender === 'MALE' ? 'M' : profile.gender === 'FEMALE' ? 'F' : 'O',
         hospital_id: hospital.id,
         hospital_name: hospital.name,
         department: doctor.specialization,

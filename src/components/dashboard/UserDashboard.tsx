@@ -1,18 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  Video,
-  Building2,
-  FileText,
-  Sparkles,
-  Check,
-  ShieldCheck,
-  Clock3,
-  Route,
-  ArrowRight,
-  Mic,
-  Square,
-} from 'lucide-react';
+import { Video, Building2, FileText, Sparkles, Check, ShieldCheck, Clock3, Route, ArrowRight } from 'lucide-react';
 import {
   AbhaProfile,
   HealthRecord,
@@ -24,6 +11,8 @@ import {
   TriageResult,
 } from '../../types';
 import { triageEngine } from '../../services/triageEngine';
+import { UserGeoLocation } from '../../services/hospitalDashboardService';
+import { NearestGovtHospitals } from './NearestGovtHospitals';
 import sideImage from '../../../images/side.png';
 
 interface UserDashboardProps {
@@ -36,8 +25,12 @@ interface UserDashboardProps {
   onOpenHistory?: () => void;
   onSelectHospitalAndDoctor?: (hosp: Hospital, doc: Doctor) => void;
   onSelectOption?: (symptomText: string, route: 'TELECONSULTATION' | 'HOSPITAL_VISIT') => void;
+  userLocation?: UserGeoLocation | null;
+  onRequestLocation?: () => void;
+  onBookAtGovtHospital?: (hospital: Hospital) => void;
 }
 
+const COMMON_SYMPTOMS = ['Fever', 'Cough', 'Headache', 'Fatigue'];
 const DASHBOARD_STATE_KEY = 'sugastha_dashboard_state';
 
 const FEATURE_SLIDES = [
@@ -82,35 +75,17 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
   allergies = [],
   onStartNewConsultation,
   onSelectOption,
+  userLocation = null,
+  onRequestLocation,
+  onBookAtGovtHospital,
 }) => {
-  const { t, i18n } = useTranslation();
-  const languageCode = i18n.language.startsWith('hi') ? 'hi' : i18n.language.startsWith('kn') ? 'kn' : i18n.language.startsWith('mr') ? 'mr' : i18n.language.startsWith('ta') ? 'ta' : i18n.language.startsWith('te') ? 'te' : 'en';
-  const symptomDictionary: Record<string, Record<string, string>> = {
-    en: { fever: 'Fever', cough: 'Cough', headache: 'Headache', fatigue: 'Fatigue' },
-    hi: { fever: 'बुखार', cough: 'खाँसी', headache: 'सिरदर्द', fatigue: 'थकान' },
-    kn: { fever: 'ಜ್ವರ', cough: 'ಸೈನ್ಸ್', headache: 'ತಲೆನೋವು', fatigue: 'ಆಯಾಸ' },
-    mr: { fever: 'ताप', cough: 'खोकला', headache: 'डोकेदुख', fatigue: 'थकवा' },
-    ta: { fever: 'காய்ச்சல்', cough: 'இருமல்', headache: 'தலைவலி', fatigue: 'சோர்வு' },
-    te: { fever: 'జ్వరం', cough: 'దగ్గు', headache: 'తలనొప్పి', fatigue: 'అలసట' },
-  };
-  const COMMON_SYMPTOMS = [
-    symptomDictionary[languageCode].fever,
-    symptomDictionary[languageCode].cough,
-    symptomDictionary[languageCode].headache,
-    symptomDictionary[languageCode].fatigue,
-  ];
   const [symptomInput, setSymptomInput] = useState('');
   const [symptomError, setSymptomError] = useState('');
   const [isGenerated, setIsGenerated] = useState(false);
   const [symptomRecommendation, setSymptomRecommendation] = useState<TriageResult | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
-  const [voiceError, setVoiceError] = useState('');
   const [activeFeature, setActiveFeature] = useState(0);
   const [isFeaturePaused, setIsFeaturePaused] = useState(false);
   const featureTouchStart = useRef<number | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const recordingTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     try {
@@ -145,76 +120,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
     return () => window.clearInterval(featureTimer);
   }, [isFeaturePaused]);
 
-  const stopRecording = () => {
-    if (recordingTimerRef.current !== null) {
-      window.clearTimeout(recordingTimerRef.current);
-      recordingTimerRef.current = null;
-    }
-    mediaRecorderRef.current?.stop();
-  };
-
-  const startRecording = async () => {
-    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
-      setVoiceError('Voice recording is not supported in this browser.');
-      return;
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const preferredMimeType = 'audio/webm;codecs=opus';
-      const options = MediaRecorder.isTypeSupported(preferredMimeType)
-        ? { mimeType: preferredMimeType }
-        : undefined;
-      const recorder = new MediaRecorder(stream, options);
-      const chunks: Blob[] = [];
-
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) chunks.push(event.data);
-      };
-      recorder.onstop = () => {
-        stream.getTracks().forEach((track) => track.stop());
-        setIsRecording(false);
-        if (!chunks.length) return;
-        setIsTranscribing(true);
-        void fetch('/api/sarvam/transcribe', {
-          method: 'POST',
-          headers: { 'Content-Type': recorder.mimeType || 'audio/webm' },
-          body: new Blob(chunks, { type: recorder.mimeType || 'audio/webm' }),
-        })
-          .then(async (response) => {
-            const result = (await response.json()) as { transcript?: string; error?: string };
-            if (!response.ok || !result.transcript) {
-              throw new Error(result.error || 'No speech was detected.');
-            }
-            setSymptomInput((current) => current.trim() ? `${current.trim()}, ${result.transcript}` : result.transcript!);
-            setSymptomError('');
-          })
-          .catch((error) => {
-            setVoiceError(error instanceof Error ? error.message : 'Speech transcription failed.');
-          })
-          .finally(() => setIsTranscribing(false));
-      };
-      recorder.onerror = () => {
-        stream.getTracks().forEach((track) => track.stop());
-        setVoiceError('Recording failed. Please try again.');
-        setIsRecording(false);
-      };
-
-      mediaRecorderRef.current = recorder;
-      setVoiceError('');
-      setIsRecording(true);
-      recorder.start();
-      recordingTimerRef.current = window.setTimeout(stopRecording, 25000);
-    } catch {
-      setVoiceError('Microphone access was not granted.');
-    }
-  };
-
-  useEffect(() => () => {
-    if (recordingTimerRef.current !== null) window.clearTimeout(recordingTimerRef.current);
-    mediaRecorderRef.current?.stream.getTracks().forEach((track) => track.stop());
-  }, []);
-
   const handleFeatureTouchStart = (event: React.TouchEvent<HTMLElement>) => {
     featureTouchStart.current = event.touches[0]?.clientX ?? null;
   };
@@ -233,42 +138,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         : (current - 1 + FEATURE_SLIDES.length) % FEATURE_SLIDES.length
     ));
   };
-
-  const featureSlides = [
-    {
-      eyebrow: t('dashboard.startHere'),
-      title: t('dashboard.understandSymptoms'),
-      description: t('dashboard.symptomCheckHelp'),
-      action: t('dashboard.aiSymptomCheck'),
-      icon: Sparkles,
-      image: sideImage,
-      theme: 'feature-slide-blue',
-    },
-    {
-      eyebrow: t('dashboard.careWhenNeeded'),
-      title: t('dashboard.talkDoctorOnline'),
-      description: t('dashboard.teleconsultHelp'),
-      action: t('dashboard.teleconsultation'),
-      icon: Video,
-      theme: 'feature-slide-mint',
-    },
-    {
-      eyebrow: t('dashboard.healthTogether'),
-      title: t('dashboard.keepRecords'),
-      description: t('dashboard.recordsHelp'),
-      action: t('dashboard.healthRecords'),
-      icon: FileText,
-      theme: 'feature-slide-yellow',
-    },
-    {
-      eyebrow: t('dashboard.findCare'),
-      title: t('dashboard.discoverDoctors'),
-      description: t('dashboard.careNetworkHelp'),
-      action: t('dashboard.careNetwork'),
-      icon: Building2,
-      theme: 'feature-slide-lilac',
-    },
-  ];
 
   const handleAddSymptom = (symptom: string) => {
     setSymptomError('');
@@ -337,7 +206,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           className="feature-slide-track"
           style={{ transform: `translateX(-${activeFeature * 100}%)` }}
         >
-          {featureSlides.map((slide) => {
+          {FEATURE_SLIDES.map((slide) => {
             const SlideIcon = slide.icon;
             return (
               <article key={slide.title} className={`feature-slide ${slide.theme}`}>
@@ -363,7 +232,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         </div>
         <div className="feature-carousel-controls">
           <div className="feature-slide-dots">
-            {featureSlides.map((slide, index) => (
+            {FEATURE_SLIDES.map((slide, index) => (
               <button
                 key={slide.title}
                 type="button"
@@ -378,6 +247,12 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         </div>
       </section>
 
+      <NearestGovtHospitals
+        userLocation={userLocation}
+        onRequestLocation={onRequestLocation || (() => {})}
+        onBookAtHospital={(hospital) => onBookAtGovtHospital?.(hospital)}
+      />
+
       {/* Main Minimal Home Card */}
       <div className="card symptom-home-card">
         <div className="symptom-intro-row">
@@ -385,54 +260,37 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
             <img src={sideImage} alt="AI health check" className="symptom-intro-image" />
           </div>
           <div className="symptom-intro-copy">
-            <span className="eyebrow-label">{t('dashboard.healthCheck')}</span>
-            <span className="intro-time"><Clock3 size={13} /> {t('dashboard.takesAbout')}</span>
+            <span className="eyebrow-label">AI HEALTH CHECK</span>
+            <span className="intro-time"><Clock3 size={13} /> Takes about 1 minute</span>
           </div>
         </div>
 
         <div className="symptom-heading-group">
-          <h2 className="symptom-heading">{t('dashboard.question')}</h2>
+          <h2 className="symptom-heading">How are you feeling today?</h2>
         </div>
 
         <div className="health-context-strip">
           <ShieldCheck size={18} />
           <div>
-            <strong>{t('dashboard.healthContext')}</strong>
-            <span>{t('dashboard.recordsSummary', { count: records.length, conditions: conditions.length, allergies: allergies.length })}</span>
+            <strong>Your health context is ready</strong>
+            <span>{records.length} records · {conditions.length} conditions · {allergies.length} allergies checked</span>
           </div>
         </div>
 
         {/* Input Form */}
         <form onSubmit={handleGenerate} className="symptom-input-group">
-          <label htmlFor="symptom-input" className="input-label">{t('dashboard.describeSymptoms')}</label>
-          <div className="dashboard-symptom-input-row">
-            <input
-              id="symptom-input"
-              type="text"
-              className="form-input symptom-input-field"
-              placeholder={t('dashboard.symptomPlaceholder')}
-              value={symptomInput}
-              onChange={(e) => {
-                setSymptomInput(e.target.value);
-                if (e.target.value.trim()) setSymptomError('');
-              }}
-            />
-            <button
-              type="button"
-              onClick={isRecording ? stopRecording : () => void startRecording()}
-              className={`btn ${isRecording ? 'btn-danger' : 'btn-secondary'} dashboard-voice-btn`}
-              disabled={isTranscribing}
-              aria-label={isRecording ? 'Stop recording symptoms' : 'Speak your symptoms'}
-              title={isRecording ? 'Stop recording' : 'Speak your symptoms'}
-            >
-              {isRecording ? <Square size={18} /> : <Mic size={18} />}
-            </button>
-          </div>
-          {(voiceError || isTranscribing) && (
-            <span className={voiceError ? 'symptom-error' : 'voice-status'} role={voiceError ? 'alert' : undefined}>
-              {voiceError || 'Transcribing your symptoms...'}
-            </span>
-          )}
+          <label htmlFor="symptom-input" className="input-label">Describe your symptoms</label>
+          <input
+            id="symptom-input"
+            type="text"
+            className="form-input symptom-input-field"
+            placeholder="Type your symptoms here (e.g. Fever, Cough)"
+            value={symptomInput}
+            onChange={(e) => {
+              setSymptomInput(e.target.value);
+              if (e.target.value.trim()) setSymptomError('');
+            }}
+          />
           {symptomError && (
             <span className="symptom-error" role="alert">{symptomError}</span>
           )}
@@ -460,7 +318,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
 
           {/* Generate Button */}
           <button type="submit" className="btn btn-primary btn-lg generate-btn">
-            <span>{t('dashboard.continue')}</span>
+            <span>Continue</span>
           </button>
         </form>
 
@@ -476,15 +334,15 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
               </div>
               <div className="option-content">
                 <div className="option-title-row">
-                  <h3 className="option-title">{t('dashboard.esanjeevani')}</h3>
+                  <h3 className="option-title">eSanjeevani</h3>
                   {symptomRecommendation?.recommendedRoute === 'TELECONSULTATION' && (
-                    <span className="recommendation-badge">{t('dashboard.recommendation')}</span>
+                    <span className="recommendation-badge">Recommended</span>
                   )}
                 </div>
                 <p className="option-description">
                   {symptomRecommendation?.recommendedRoute === 'TELECONSULTATION'
-                    ? t('dashboard.bestSuitedFor', { specialty: symptomRecommendation.suggestedSpecialties[0] || t('dashboard.generalConsultation') })
-                    : t('dashboard.remoteConsultation')}
+                    ? `Best suited for ${symptomRecommendation.suggestedSpecialties[0] || 'your symptoms'}.`
+                    : 'Remote consultation for stable symptoms.'}
                 </p>
               </div>
             </div>
@@ -498,15 +356,15 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
               </div>
               <div className="option-content">
                 <div className="option-title-row">
-                  <h3 className="option-title">{t('dashboard.hospitalVisit')}</h3>
+                  <h3 className="option-title">Hospital visit</h3>
                   {symptomRecommendation?.recommendedRoute === 'HOSPITAL_VISIT' && (
-                    <span className="recommendation-badge">{t('dashboard.recommendation')}</span>
+                    <span className="recommendation-badge">Recommended</span>
                   )}
                 </div>
                 <p className="option-description">
                   {symptomRecommendation?.recommendedRoute === 'HOSPITAL_VISIT'
-                    ? t('dashboard.seeDoctorInPerson', { specialty: symptomRecommendation.suggestedSpecialties[0] || t('dashboard.generalConsultation') })
-                    : t('dashboard.inPersonConsultation')}
+                    ? `See ${symptomRecommendation.suggestedSpecialties[0] || 'a doctor'} in person.`
+                    : 'In-person care when an examination is needed.'}
                 </p>
               </div>
             </div>
@@ -515,28 +373,28 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
       </div>
 
       {!isGenerated && (
-        <section className="next-steps-panel" aria-label={t('dashboard.whatNext')}>
+        <section className="next-steps-panel" aria-label="What happens next">
           <div className="next-steps-heading">
             <div>
-              <span className="eyebrow-label">{t('dashboard.whatNext').toUpperCase()}</span>
-              <h3>{t('dashboard.whatNext')}</h3>
+              <span className="eyebrow-label">YOUR CARE PATH</span>
+              <h3>What happens next?</h3>
             </div>
             <Route size={22} />
           </div>
           <div className="next-steps-list">
             <div className="next-step-item">
               <span className="step-number">01</span>
-              <div><strong>{t('dashboard.shareSymptoms')}</strong></div>
+              <div><strong>Share symptoms</strong></div>
               <ArrowRight size={16} />
             </div>
             <div className="next-step-item">
               <span className="step-number">02</span>
-              <div><strong>{t('dashboard.getGuidance')}</strong></div>
+              <div><strong>Get guidance</strong></div>
               <ArrowRight size={16} />
             </div>
             <div className="next-step-item">
               <span className="step-number">03</span>
-              <div><strong>{t('dashboard.chooseCare')}</strong></div>
+              <div><strong>Choose what suits you</strong></div>
             </div>
           </div>
         </section>
@@ -843,32 +701,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           border: 1.5px solid var(--border-light);
           background: var(--bg-surface-2);
           transition: all var(--transition-fast);
-        }
-
-        .dashboard-symptom-input-row {
-          display: flex;
-          align-items: stretch;
-          gap: 0.55rem;
-        }
-
-        .dashboard-symptom-input-row .symptom-input-field {
-          min-width: 0;
-        }
-
-        .dashboard-voice-btn {
-          flex: 0 0 3.25rem;
-          min-height: 3.25rem;
-          padding: 0;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .voice-status {
-          color: var(--brand-primary);
-          font-size: 0.75rem;
-          font-weight: 600;
-          margin-top: -0.9rem;
         }
 
         .symptom-input-field:focus {
