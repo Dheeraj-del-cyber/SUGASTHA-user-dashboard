@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Video, ExternalLink, Code2, CheckCircle2 } from 'lucide-react';
+import { Video, Code2, Clock3, ShieldCheck, Stethoscope, ArrowLeft, ArrowRight } from 'lucide-react';
 import { TriageResult, AbhaProfile } from '../../types';
 
 interface TeleconsultationCardProps {
@@ -17,7 +17,6 @@ export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
   onSwitchToHospitalVisit,
 }) => {
   const { t } = useTranslation();
-  const [showApiInspect, setShowApiInspect] = useState(false);
 
   const apiPayload = {
     endpoint: 'POST https://esanjeevani.mohfw.gov.in/api/v2/patient/teleconsult-referral',
@@ -47,190 +46,290 @@ export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
 
   return (
     <div className="card teleconsult-card animate-fade-in">
-      <div className="teleconsult-header">
-        <div className="esanjeevani-badge-wrap">
-          <div className="video-icon-circle">
-            <Video size={28} className="text-emerald" />
-          </div>
-          <div className="header-meta">
-            <div className="tag-row">
-              <span className="gov-tele-tag">{t('dashboard.teleconsultation').toUpperCase()}</span>
-            </div>
-            <h2 className="tele-title">{t('dashboard.teleconsultation')}</h2>
-          </div>
-        </div>
-
-        <p className="tele-desc">
-          {t('recommendations.shortWaitText')}
-        </p>
+      <div className="teleconsult-topline">
+        <span className="teleconsult-service-mark"><ShieldCheck size={15} /> ONLINE CARE OPTION</span>
+        <span className={`triage-indicator triage-${triage.level.toLowerCase()}`}>{triage.level} PRIORITY</span>
       </div>
 
-      {/* Value Pillars */}
-      <div className="tele-benefits-grid">
-        <div className="benefit-item">
-          <CheckCircle2 size={18} className="text-emerald" />
-          <div>
-            <strong>{t('recommendations.shortWait')}</strong>
-            <p>{t('recommendations.shortWaitText')}</p>
+      <div className="teleconsult-main">
+        <section className="teleconsult-intro">
+          <div className="teleconsult-brand-lockup">
+            <span className="video-icon-circle"><Video size={27} /></span>
+            <span className="teleconsult-wordmark">eSanjeevani</span>
           </div>
-        </div>
-        <div className="benefit-item">
-          <CheckCircle2 size={18} className="text-emerald" />
-          <div>
-            <strong>{t('recommendations.free')}</strong>
-            <p>{t('recommendations.freeText')}</p>
+
+          <h2 className="tele-title">Talk to a doctor from home</h2>
+          <p className="tele-desc">
+            Your assessment suggests online care may be suitable. Review your triage details and create a consultation request when you are ready.
+          </p>
+
+          <div className="teleconsult-facts">
+            <span><Clock3 size={16} /> No travel to a clinic</span>
+            <span><Stethoscope size={16} /> General online care</span>
           </div>
-        </div>
-        <div className="benefit-item">
-          <CheckCircle2 size={18} className="text-emerald" />
-          <div>
-            <strong>{t('recommendations.prescriptionSaved')}</strong>
-            <p>{t('recommendations.prescriptionText')}</p>
+        </section>
+
+        <aside className="teleconsult-assessment" aria-label="Your assessment summary">
+          <div className="assessment-label">YOUR ASSESSMENT</div>
+          <div className="assessment-category">{triage.category}</div>
+          <p className="assessment-summary">{triage.summary}</p>
+          <div className="assessment-divider" />
+          <div className="assessment-detail-row">
+            <span>Suggested specialty</span>
+            <strong>{triage.suggestedSpecialties[0] || 'General Medicine'}</strong>
           </div>
-        </div>
+          <div className="assessment-detail-row">
+            <span>Recommended timing</span>
+            <strong>{triage.urgencyWindow}</strong>
+          </div>
+        </aside>
       </div>
 
-      {/* Developer-only API inspector (collapsed by default) */}
-      <div className="api-ready-box">
+      <div className="teleconsult-safety-note">
+        <ShieldCheck size={17} />
+        <span>This demo records the request in SUGASTHA but is not connected to eSanjeevani yet. For emergencies, seek immediate in-person care.</span>
+      </div>
+
+      <div className="teleconsult-footer">
         <button
           type="button"
-          className="dev-toggle-btn"
-          onClick={() => setShowApiInspect(!showApiInspect)}
-        >
-          <Code2 size={14} />
-          <span>{showApiInspect ? t('recommendations.hideDetails') : t('recommendations.showDetails')}</span>
-        </button>
-
-        {showApiInspect && (
-          <>
-            <p className="api-ready-text">
-              {t('recommendations.apiNotice')}
-            </p>
-            <pre className="api-code-block animate-fade-in">
-              {JSON.stringify(apiPayload, null, 2)}
-            </pre>
-          </>
-        )}
-      </div>
-
-      {/* Action CTA Strip */}
-      <div className="tele-action-bar">
-        <button
+          className="teleconsult-back-btn"
           onClick={onSwitchToHospitalVisit}
-          className="btn btn-secondary btn-sm"
         >
+          <ArrowLeft size={16} />
           <span>{t('recommendations.preferHospital')}</span>
         </button>
 
         <button
+          type="button"
+          className="teleconsult-connect-btn"
           onClick={onBookTeleconsultation}
-          className="btn btn-primary btn-lg connect-tele-btn"
         >
+          <Video size={18} />
           <span>{t('recommendations.doctorCall')}</span>
-          <ExternalLink size={18} />
+          <ArrowRight size={18} />
         </button>
       </div>
 
+      <details className="teleconsult-api-details">
+        <summary>
+          <Code2 size={14} />
+          <span>{t('recommendations.showDetails')}</span>
+        </summary>
+        <div className="api-ready-box">
+          <p className="api-ready-text">{t('recommendations.apiNotice')}</p>
+          <pre className="api-code-block">{JSON.stringify(apiPayload, null, 2)}</pre>
+        </div>
+      </details>
+
       <style>{`
         .teleconsult-card {
-          border: 1px solid rgba(16, 185, 129, 0.4);
-          background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%);
+          --tele-ink: #17202a;
+          --tele-muted: #4a5568;
+          --tele-blue: #0284c7;
+          --tele-border: #bfe9f8;
+          position: relative;
+          overflow: hidden;
+          border: 1px solid var(--tele-border);
+          background: #f4faff;
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
-          padding: 2rem;
+          gap: 1.25rem;
+          padding: clamp(1rem, 3vw, 2rem);
+          box-shadow: 0 14px 34px rgba(2, 132, 199, 0.08);
         }
-        .teleconsult-header {
-          display: flex;
-          flex-direction: column;
-          gap: 0.85rem;
-        }
-        .esanjeevani-badge-wrap {
+        .teleconsult-topline,
+        .teleconsult-brand-lockup,
+        .teleconsult-facts,
+        .teleconsult-footer,
+        .teleconsult-service-mark,
+        .triage-indicator {
           display: flex;
           align-items: center;
-          gap: 1rem;
+        }
+        .teleconsult-topline {
+          justify-content: space-between;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+        }
+        .teleconsult-service-mark {
+          gap: 0.4rem;
+          color: var(--brand-primary);
+          font-size: 0.77rem;
+          font-weight: 700;
+        }
+        .triage-indicator {
+          min-height: 28px;
+          padding: 0.25rem 0.55rem;
+          border-radius: 4px;
+          font-size: 0.68rem;
+          font-weight: 800;
+        }
+        .triage-green { background: #dff3e8; color: #176b42; }
+        .triage-yellow { background: #fff1c9; color: #865c00; }
+        .triage-red { background: #fde2df; color: #a02c24; }
+        .teleconsult-main {
+          display: grid;
+          grid-template-columns: minmax(0, 1.25fr) minmax(250px, 0.75fr);
+          gap: clamp(1.25rem, 4vw, 3rem);
+          align-items: center;
+        }
+        .teleconsult-intro {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.8rem;
+        }
+        .teleconsult-brand-lockup { gap: 0.65rem; }
+        .teleconsult-wordmark {
+          color: var(--brand-primary-hover);
+          font-family: var(--font-display);
+          font-size: 1rem;
+          font-weight: 750;
         }
         .video-icon-circle {
-          width: 56px;
-          height: 56px;
-          border-radius: var(--radius-sm);
-          background: rgba(16, 185, 129, 0.15);
-          border: 1px solid rgba(16, 185, 129, 0.35);
-          display: flex;
+          display: inline-flex;
+          width: 42px;
+          height: 42px;
+          border-radius: 8px;
+          background: var(--pastel-light-blue);
+          border: 1px solid var(--pastel-sky-blue);
+          color: var(--brand-primary);
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
         }
-        .text-emerald {
-          color: #10b981;
-        }
-        .header-meta {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-        }
-        .tag-row {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          flex-wrap: wrap;
-        }
-        .gov-tele-tag {
-          font-size: 0.68rem;
-          font-weight: 700;
-          letter-spacing: 0.06em;
-          color: #94a3b8;
-        }
         .tele-title {
-          font-size: 1.5rem;
-          color: #ffffff;
+          max-width: 520px;
+          color: var(--tele-ink);
+          font-size: clamp(1.45rem, 3vw, 2rem);
+          line-height: 1.15;
         }
         .tele-desc {
+          max-width: 560px;
+          color: var(--tele-muted);
           font-size: 0.92rem;
-          color: var(--text-secondary);
-          line-height: 1.5;
+          line-height: 1.55;
         }
-        .tele-benefits-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 1rem;
-          background: rgba(0, 0, 0, 0.3);
-          padding: 1.25rem;
-          border-radius: var(--radius-sm);
-          border: 1px solid var(--border-subtle);
+        .teleconsult-facts {
+          flex-wrap: wrap;
+          gap: 0.55rem 1rem;
+          margin-top: 0.2rem;
         }
-        .benefit-item {
+        .teleconsult-facts span {
           display: flex;
-          align-items: flex-start;
-          gap: 0.65rem;
-          font-size: 0.82rem;
-        }
-        .benefit-item strong {
-          display: block;
-          color: #ffffff;
-          margin-bottom: 2px;
-        }
-        .benefit-item p {
-          color: var(--text-muted);
-          font-size: 0.78rem;
-          line-height: 1.35;
+          align-items: center;
+          gap: 0.35rem;
+          color: #36576a;
+          font-size: 0.77rem;
         }
         .api-ready-box {
-          background: rgba(14, 165, 233, 0.06);
-          border: 1px solid rgba(14, 165, 233, 0.2);
-          border-radius: var(--radius-sm);
-          padding: 1rem;
+          background: #f6fbfe;
+          border: 1px solid #d7eaf3;
+          border-radius: 6px;
+          padding: 0.8rem;
           display: flex;
           flex-direction: column;
           gap: 0.5rem;
         }
-        .api-ready-header {
+        .teleconsult-assessment {
+          padding: 1.1rem;
+          background: #ffffff;
+          border: 1px solid #d5e8f1;
+          border-left: 3px solid var(--brand-accent);
+          border-radius: 6px;
+        }
+        .assessment-label {
+          color: var(--text-muted);
+          font-size: 0.65rem;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+        }
+        .assessment-category {
+          margin-top: 0.45rem;
+          color: var(--tele-ink);
+          font-size: 0.95rem;
+          font-weight: 750;
+        }
+        .assessment-summary {
+          margin-top: 0.4rem;
+          color: var(--text-secondary);
+          font-size: 0.79rem;
+          line-height: 1.5;
+        }
+        .assessment-divider {
+          height: 1px;
+          margin: 0.8rem 0;
+          background: var(--border-light);
+        }
+        .assessment-detail-row {
           display: flex;
           justify-content: space-between;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 0.5rem;
+          align-items: baseline;
+          gap: 0.75rem;
+          padding: 0.28rem 0;
+          font-size: 0.72rem;
         }
+        .assessment-detail-row span { color: var(--text-muted); }
+        .assessment-detail-row strong {
+          color: var(--dark-navy-text);
+          text-align: right;
+        }
+        .teleconsult-safety-note {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.5rem;
+          color: var(--text-secondary);
+          font-size: 0.75rem;
+          line-height: 1.45;
+        }
+        .teleconsult-safety-note svg { color: var(--brand-primary); flex: 0 0 auto; }
+        .teleconsult-footer {
+          justify-content: space-between;
+          gap: 0.75rem;
+          padding-top: 0.25rem;
+          border-top: 1px solid #d5e8f1;
+        }
+        .teleconsult-back-btn,
+        .teleconsult-connect-btn {
+          display: inline-flex;
+          min-height: 46px;
+          align-items: center;
+          justify-content: center;
+          gap: 0.55rem;
+          padding: 0.65rem 1rem;
+          border-radius: 5px;
+          font-size: 0.85rem;
+          font-weight: 700;
+          transition: background-color 150ms ease, transform 150ms ease;
+        }
+        .teleconsult-back-btn {
+          color: var(--brand-primary-hover);
+          border: 1px solid #b9ddeb;
+          background: #fff;
+        }
+        .teleconsult-back-btn:hover { background: var(--pastel-light-blue); }
+        .teleconsult-connect-btn {
+          min-width: 230px;
+          color: #fff;
+          background: var(--brand-primary);
+          box-shadow: 0 5px 14px rgba(2, 132, 199, 0.2);
+        }
+        .teleconsult-connect-btn:hover {
+          background: var(--brand-primary-hover);
+          transform: translateY(-1px);
+        }
+        .teleconsult-api-details {
+          color: var(--text-muted);
+          font-size: 0.75rem;
+        }
+        .teleconsult-api-details summary {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          cursor: pointer;
+        }
+        .teleconsult-api-details .api-ready-box { margin-top: 0.6rem; }
         .dev-toggle-btn {
           display: flex;
           align-items: center;
@@ -242,50 +341,29 @@ export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
           padding: 4px 8px;
           border-radius: var(--radius-xs);
           width: fit-content;
-          transition: all var(--transition-fast);
         }
-        .dev-toggle-btn:hover {
-          color: var(--text-secondary);
-        }
-        .api-ready-text {
-          font-size: 0.8rem;
-          color: var(--text-muted);
-        }
+        .api-ready-text { font-size: 0.8rem; color: var(--text-muted); }
         .api-code-block {
-          background: #020617;
+          background: #17202a;
           border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: var(--radius-xs);
+          border-radius: 4px;
           padding: 0.75rem;
           font-size: 0.72rem;
-          color: #38bdf8;
+          color: #bfe9f8;
           overflow-x: auto;
           font-family: monospace;
           max-height: 200px;
         }
-        .tele-action-bar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 1rem;
-          padding-top: 0.5rem;
-        }
-        .connect-tele-btn {
-          padding: 0.85rem 2.25rem;
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-          box-shadow: 0 4px 18px rgba(16, 185, 129, 0.35);
-        }
-        .connect-tele-btn:hover {
-          background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        }
         @media (max-width: 768px) {
-          .tele-benefits-grid {
+          .teleconsult-main {
             grid-template-columns: 1fr;
           }
-          .tele-action-bar {
+          .teleconsult-footer {
+            align-items: stretch;
             flex-direction: column-reverse;
           }
-          .connect-tele-btn {
+          .teleconsult-connect-btn,
+          .teleconsult-back-btn {
             width: 100%;
           }
         }
