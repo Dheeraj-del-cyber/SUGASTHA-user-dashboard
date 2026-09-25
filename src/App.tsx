@@ -515,7 +515,6 @@ export const App: React.FC = () => {
             {triageResult.recommendedRoute === 'TELECONSULTATION' ? (
               <TeleconsultationCard
                 triage={triageResult}
-                profile={profile}
                 onBookTeleconsultation={handleBookTeleconsultation}
                 onSwitchToHospitalVisit={() => {
                   setTriageResult({

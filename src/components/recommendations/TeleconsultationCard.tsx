@@ -1,48 +1,20 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Video, Code2, Clock3, ShieldCheck, Stethoscope, ArrowLeft, ArrowRight } from 'lucide-react';
-import { TriageResult, AbhaProfile } from '../../types';
+import { Video, Clock3, ShieldCheck, Stethoscope, ArrowLeft, ArrowRight } from 'lucide-react';
+import { TriageResult } from '../../types';
 
 interface TeleconsultationCardProps {
   triage: TriageResult;
-  profile: AbhaProfile;
   onBookTeleconsultation: () => void;
   onSwitchToHospitalVisit: () => void;
 }
 
 export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
   triage,
-  profile,
   onBookTeleconsultation,
   onSwitchToHospitalVisit,
 }) => {
   const { t } = useTranslation();
-
-  const apiPayload = {
-    endpoint: 'POST https://esanjeevani.mohfw.gov.in/api/v2/patient/teleconsult-referral',
-    headers: {
-      Authorization: 'Bearer ABDM_GATEWAY_TOKEN_XXXXX',
-      'Content-Type': 'application/json',
-      'X-Origin-Platform': 'SUGASTHA-AI-TRIAGE',
-    },
-    body: {
-      abhaNumber: profile.abhaNumber,
-      abhaAddress: profile.abhaAddress,
-      patientDemographics: {
-        name: profile.fullName,
-        gender: profile.gender,
-        dob: profile.dateOfBirth,
-        pincode: profile.address.pincode,
-      },
-      clinicalTriage: {
-        tier: triage.level,
-        urgency: triage.urgencyWindow,
-        clinicalSummary: triage.summary,
-        suggestedSpecialty: triage.suggestedSpecialties[0] || 'General Medicine',
-      },
-      callbackWebhook: 'https://api.sugastha.gov.in/v1/teleconsult/webhook',
-    },
-  };
 
   return (
     <div className="card teleconsult-card animate-fade-in">
@@ -110,17 +82,6 @@ export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
           <ArrowRight size={18} />
         </button>
       </div>
-
-      <details className="teleconsult-api-details">
-        <summary>
-          <Code2 size={14} />
-          <span>{t('recommendations.showDetails')}</span>
-        </summary>
-        <div className="api-ready-box">
-          <p className="api-ready-text">{t('recommendations.apiNotice')}</p>
-          <pre className="api-code-block">{JSON.stringify(apiPayload, null, 2)}</pre>
-        </div>
-      </details>
 
       <style>{`
         .teleconsult-card {
@@ -223,15 +184,6 @@ export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
           color: #36576a;
           font-size: 0.77rem;
         }
-        .api-ready-box {
-          background: #f6fbfe;
-          border: 1px solid #d7eaf3;
-          border-radius: 6px;
-          padding: 0.8rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
         .teleconsult-assessment {
           padding: 1.1rem;
           background: #ffffff;
@@ -318,41 +270,6 @@ export const TeleconsultationCard: React.FC<TeleconsultationCardProps> = ({
         .teleconsult-connect-btn:hover {
           background: var(--brand-primary-hover);
           transform: translateY(-1px);
-        }
-        .teleconsult-api-details {
-          color: var(--text-muted);
-          font-size: 0.75rem;
-        }
-        .teleconsult-api-details summary {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.35rem;
-          cursor: pointer;
-        }
-        .teleconsult-api-details .api-ready-box { margin-top: 0.6rem; }
-        .dev-toggle-btn {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          font-size: 0.72rem;
-          color: var(--text-muted);
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px dashed var(--border-subtle);
-          padding: 4px 8px;
-          border-radius: var(--radius-xs);
-          width: fit-content;
-        }
-        .api-ready-text { font-size: 0.8rem; color: var(--text-muted); }
-        .api-code-block {
-          background: #17202a;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 4px;
-          padding: 0.75rem;
-          font-size: 0.72rem;
-          color: #bfe9f8;
-          overflow-x: auto;
-          font-family: monospace;
-          max-height: 200px;
         }
         @media (max-width: 768px) {
           .teleconsult-main {
