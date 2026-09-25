@@ -104,6 +104,7 @@ export interface Doctor {
   availableSlotToday: string;
   rating: number;
   languages: string[];
+  roomNo?: string;
 }
 
 export interface Hospital {
@@ -128,7 +129,7 @@ export interface Hospital {
   doctors: Doctor[];
   contactPhone: string;
   ambulanceHotline: string;
-  source?: 'MOCK' | 'LIVE_OSM';
+  source?: 'MOCK' | 'LIVE_OSM' | 'HOSPITAL_BACKEND';
   availabilityNote?: string;
 }
 
@@ -155,6 +156,7 @@ export interface HospitalQueueNode {
 
 export interface ConsultationRequest {
   id: string; // SUG-2026-XXXXX
+  hospitalBackendAppointmentId?: string;
   consultationNumber: string; // 5-digit number, e.g. "49201"
   qrDataPayload: string;
   abhaNumber: string;

@@ -379,39 +379,36 @@ SUGASTHA is designed with a **Clean Architecture** pattern to ensure easy extens
 
 ## API Contracts & Hospital Integration
 
-All hospital-side interactions are represented as clean, typed API contracts. The hospital system built separately by another team can connect via:
+The patient dashboard connects to the separate hospital dashboard through its FastAPI backend. Set `VITE_HOSPITAL_API_BASE_URL` to the backend API root; local development defaults to `http://localhost:8000/api/v1`.
 
-### Consultation Request Dispatch
-
-```
-POST https://api.sugastha.gov.in/v1/consultations/{consultationId}/dispatch
-```
-
-```json
-{
-  "protocolVersion": "ABDM-SUGASTHA-v1.0",
-  "event": "CONSULTATION_REQUEST_DISPATCH",
-  "consultationToken": "38291",
-  "targetHospitalId": "hosp-aiims-delhi",
-  "assignedPriorityTier": 1,
-  "patientAbhaId": "91-4523-8901-2345",
-  "callbackWebhookUrl": "https://api.sugastha.gov.in/v1/consultations/38291/webhook"
-}
-```
-
-### Acceptance Webhook (Hospital → SUGASTHA)
+The connected flow uses these endpoints:
 
 ```
-POST https://api.sugastha.gov.in/v1/consultations/{token}/webhook
+GET  /hospitals/nearby-govt?lat={latitude}&lng={longitude}&limit=8
+GET  /doctors?hospital_id={hospitalId}
+POST /appointments
+GET  /appointments?hospital_id={hospitalId}
+POST /appointments/{appointmentId}/accept
 ```
 
-```json
-{
-  "event": "CONSULTATION_ACCEPTED",
-  "hospitalId": "hosp-aiims-delhi",
-  "doctorAssigned": "Dr. Vivek Sharma",
-  "estimatedWaitTime": "15-20 minutes"
-}
+Registered backend hospitals and doctors are used for connected bookings. The patient dashboard submits the appointment to the backend, which makes it visible in the hospital inbox. The patient app polls the backend for acceptance updates every 15 seconds. OpenStreetMap/demo hospital results remain available when no registered hospital with doctors can be loaded; those bookings are local-only and are labelled as such before confirmation.
+
+### Local Development
+
+1. Start the hospital backend from `SUGASTHA-hospital-dashboard-main/backend` with `DATABASE_URL=sqlite:///./sugastha.db`, a local `JWT_SECRET_KEY`, and `uvicorn app.main:app --reload --port 8000`.
+2. Seed the bundled demo database once with `python -m app.db.seed` if it has not already been seeded.
+3. Start the hospital frontend from `SUGASTHA-hospital-dashboard-main/frontend` with `npm run dev -- --port 5174`.
+4. Start this patient frontend with `npm run dev` (normally port `5173`). It will use the local backend by default. For a different backend, set `VITE_HOSPITAL_API_BASE_URL` in `.env.local` to its `/api/v1` URL and restart Vite.
+
+This backend is a prototype integration, not production-ready for real patient records. Its appointment endpoints currently lack write authentication and the backend CORS policy is permissive; use synthetic data locally until authentication, authorization, and deployment CORS restrictions are configured.
+
+### Acceptance Flow
+
+The hospital dashboard changes the appointment status through its backend. The patient dashboard reads the appointment status from that same backend and updates the consultation tracker; no direct browser-to-browser connection or webhook is used.
+
+```http
+GET /api/v1/appointments?hospital_id={hospitalId}
+POST /api/v1/appointments/{appointmentId}/accept
 ```
 
 ### eSanjeevani Teleconsultation Referral
@@ -427,7 +424,7 @@ Full payload contract is visible within the app via the **"Inspect API Contract"
 ## Development Notes
 
 - **Mock ABHA Data:** All ABDM profiles are stored in `localStorage` via `mockAbhaData.ts`. The service layer is structured so real ABDM Gateway API calls can be substituted by replacing `abhaService.ts` method bodies.
-- **No Hospital Dashboard:** The `hospitalQueueService.ts` generates the 3-tier queue and API payloads, but no hospital-facing UI exists. The **"Hospital Backend Testing Suite"** panel in the tracker simulates webhook calls for user-side verification.
+- **Hospital Dashboard:** The separate hospital app and FastAPI backend are in `SUGASTHA-hospital-dashboard-main/`. Hospital booking and acceptance updates use the API described above; OpenStreetMap fallback bookings remain local-only.
 - **QR Code Payload:** Each QR encodes a JSON object with consultation ID, 5-digit token, ABHA number, patient name, hospital ID, triage level, and a cryptographic signature placeholder compliant with ABDM verification standards.
 - **FHIR Bundle:** The `HealthcareJourneySummary.fhirBundlePayload` field contains a starter FHIR R4-compatible `Encounter` resource structure ready for ABDM Health Locker submission.
 
@@ -435,7 +432,13 @@ Full payload contract is visible within the app via the **"Inspect API Contract"
 
 ## Environment Variables
 
-Currently the project runs fully on mock data — no environment variables are required for local development.
+For local development, the hospital API defaults to `http://localhost:8000/api/v1`. For deployment, configure `VITE_HOSPITAL_API_BASE_URL` in the patient frontend's hosting-provider environment settings to the deployed backend API root. For example:
+
+```env
+VITE_HOSPITAL_API_BASE_URL=https://your-hospital-api.example.com/api/v1
+```
+
+The deployed hospital dashboard website URL is not the API URL. Verify the backend first at `https://your-hospital-api.example.com/health`, then redeploy the patient frontend after setting the variable; Vite embeds it at build time.
 
 For production ABDM integration, create a `.env.local` file:
 
@@ -444,9 +447,6 @@ For production ABDM integration, create a `.env.local` file:
 VITE_ABDM_GATEWAY_URL=https://dev.abdm.gov.in
 VITE_ABDM_CLIENT_ID=your_client_id
 VITE_ABDM_CLIENT_SECRET=your_client_secret
-
-# SUGASTHA Backend API
-VITE_API_BASE_URL=https://api.sugastha.gov.in/v1
 
 # eSanjeevani
 VITE_ESANJEEVANI_URL=https://esanjeevani.mohfw.gov.in/api/v2

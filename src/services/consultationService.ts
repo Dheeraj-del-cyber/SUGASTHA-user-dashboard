@@ -36,6 +36,14 @@ export const consultationService = {
     }
   },
 
+  saveActiveConsultation(consultation: ConsultationRequest): void {
+    localStorage.setItem(ACTIVE_CONSULTATION_KEY, JSON.stringify(consultation));
+  },
+
+  clearActiveConsultation(): void {
+    localStorage.removeItem(ACTIVE_CONSULTATION_KEY);
+  },
+
   // Get past consultation history
   getConsultationHistory(): ConsultationRequest[] {
     try {

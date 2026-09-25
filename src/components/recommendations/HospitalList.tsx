@@ -12,6 +12,7 @@ import {
 import { Hospital, Doctor, TriageResult } from '../../types';
 import { hospitalQueueService } from '../../services/hospitalQueueService';
 import { hospitalSearchService } from '../../services/hospitalSearchService';
+import { hospitalDashboardService } from '../../services/hospitalDashboardService';
 
 interface HospitalListProps {
   triage: TriageResult;
@@ -71,6 +72,15 @@ export const HospitalList: React.FC<HospitalListProps> = ({
         };
         setUserLocation(nextLocation);
         setLocationStatus('granted');
+
+        const registeredHospitals = await hospitalDashboardService
+          .getNearbyHospitals(nextLocation)
+          .catch(() => []);
+        const connectedHospitals = registeredHospitals.filter((hospital) => hospital.doctors.length > 0);
+        if (connectedHospitals.length) {
+          setHospitals(connectedHospitals);
+          return;
+        }
 
         const nearby = await hospitalSearchService.searchNearbyHospitals(nextLocation, 8, 5);
         setHospitals(

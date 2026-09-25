@@ -23,6 +23,7 @@ interface BookingConfirmationModalProps {
   nearbyHospitals?: Hospital[];
   onConfirmBooking: () => void;
   isBooking: boolean;
+  bookingError?: string | null;
 }
 
 export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> = ({
@@ -35,6 +36,7 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
   nearbyHospitals,
   onConfirmBooking,
   isBooking,
+  bookingError,
 }) => {
   const { t } = useTranslation();
   const queueNodes = hospitalQueueService.build3TierHospitalQueue(
@@ -109,6 +111,13 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
           </div>
         </div>
 
+        {hospital.source !== 'HOSPITAL_BACKEND' && (
+          <p className="booking-integration-note" role="status">
+            This hospital is not connected to the live hospital dashboard. This demo booking will stay on this device.
+          </p>
+        )}
+        {bookingError && <p className="booking-error" role="alert">{bookingError}</p>}
+
         {/* Action Button */}
         <div className="booking-modal-actions">
           <button type="button" onClick={onClose} className="btn btn-secondary">
@@ -138,6 +147,23 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
           display: flex;
           flex-direction: column;
           gap: 0.8rem;
+        }
+        .booking-integration-note,
+        .booking-error {
+          margin: 0;
+          padding: 0.65rem 0.75rem;
+          border-radius: var(--radius-xs);
+          font-size: 0.82rem;
+        }
+        .booking-integration-note {
+          background: #fff8e6;
+          border: 1px solid #e7bd59;
+          color: #644b13;
+        }
+        .booking-error {
+          background: #fff0ee;
+          border: 1px solid #d77b70;
+          color: #782c24;
         }
         .primary-booking-box {
           background: var(--pastel-light-blue);

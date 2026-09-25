@@ -21,6 +21,7 @@ import logoImage from '../images/logo.png';
 import { abhaService } from './services/abhaService';
 import { triageEngine } from './services/triageEngine';
 import { consultationService } from './services/consultationService';
+import { hospitalDashboardService } from './services/hospitalDashboardService';
 
 import {
   AbhaProfile,
@@ -67,6 +68,7 @@ export const App: React.FC = () => {
   const [pendingNearbyHospitals, setPendingNearbyHospitals] = useState<Hospital[]>([]);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isBookingInProgress, setIsBookingInProgress] = useState(false);
+  const [bookingError, setBookingError] = useState<string | null>(null);
 
   // Active Consultation & History
   const [activeConsultation, setActiveConsultation] = useState<ConsultationRequest | null>(null);
@@ -98,6 +100,55 @@ export const App: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [activeTab, activeSubView]);
+
+  useEffect(() => {
+    const consultation = activeConsultation;
+    const backendAppointmentId = consultation?.hospitalBackendAppointmentId;
+    if (
+      consultation?.routeType !== 'HOSPITAL_VISIT' ||
+      consultation.selectedHospital.source !== 'HOSPITAL_BACKEND' ||
+      !backendAppointmentId
+    ) {
+      return;
+    }
+
+    let isMounted = true;
+    const syncHospitalStatus = async () => {
+      try {
+        const appointment = await hospitalDashboardService.getAppointmentStatus(
+          backendAppointmentId,
+          consultation.selectedHospital.id
+        );
+        if (!isMounted || !appointment) return;
+
+        if (
+          ['ACCEPTED', 'ARRIVED', 'IN_CONSULTATION'].includes(appointment.status) &&
+          consultation.status !== 'CONFIRMED'
+        ) {
+          const confirmed = {
+            ...consultationService.confirmConsultation(consultation),
+            confirmedHospitalId: appointment.hospital_id,
+            confirmedDoctorName: appointment.doctor_name,
+          };
+          consultationService.saveActiveConsultation(confirmed);
+          setActiveConsultation(confirmed);
+        } else if (appointment.status === 'CANCELLED' && consultation.status !== 'CANCELLED') {
+          const cancelled = { ...consultation, status: 'CANCELLED' as const };
+          consultationService.saveActiveConsultation(cancelled);
+          setActiveConsultation(cancelled);
+        }
+      } catch {
+        // Keep the last known patient status while the hospital API is unavailable.
+      }
+    };
+
+    void syncHospitalStatus();
+    const interval = window.setInterval(syncHospitalStatus, 15000);
+    return () => {
+      isMounted = false;
+      window.clearInterval(interval);
+    };
+  }, [activeConsultation]);
 
   // Handle Login Success
   const handleLoginSuccess = (data: {
@@ -193,6 +244,7 @@ export const App: React.FC = () => {
     userLocation?: { latitude: number; longitude: number },
     nearbyHospitals?: Hospital[]
   ) => {
+    setBookingError(null);
     setPendingHospital(hosp);
     setPendingDoctor(doc);
     setPendingUserLocation(userLocation ?? null);
@@ -228,7 +280,8 @@ export const App: React.FC = () => {
     };
 
     setIsBookingInProgress(true);
-    setTimeout(() => {
+    setBookingError(null);
+    window.setTimeout(async () => {
       const newConsultation = consultationService.createConsultation(
         profile,
         symptomsToUse,
@@ -236,11 +289,38 @@ export const App: React.FC = () => {
         pendingHospital,
         pendingDoctor
       );
-      setActiveConsultation(newConsultation);
-      setIsBookingInProgress(false);
-      setIsBookingModalOpen(false);
-      setActiveSubView('TRACKER');
-      setActiveTab('tracking');
+      try {
+        let consultationToTrack = newConsultation;
+        if (pendingHospital.source === 'HOSPITAL_BACKEND') {
+          const hospitalAppointment = await hospitalDashboardService.createAppointment(
+            profile,
+            symptomsToUse,
+            triageToUse,
+            pendingHospital,
+            pendingDoctor,
+            newConsultation,
+            pendingNearbyHospitals
+          );
+          consultationToTrack = {
+            ...newConsultation,
+            hospitalBackendAppointmentId: hospitalAppointment.id,
+          };
+          consultationService.saveActiveConsultation(consultationToTrack);
+        }
+        setActiveConsultation(consultationToTrack);
+        setIsBookingModalOpen(false);
+        setActiveSubView('TRACKER');
+        setActiveTab('tracking');
+      } catch (error) {
+        consultationService.clearActiveConsultation();
+        setBookingError(
+          error instanceof Error
+            ? `The hospital could not receive this booking. ${error.message}`
+            : 'The hospital could not receive this booking. Check that the hospital service is running and try again.'
+        );
+      } finally {
+        setIsBookingInProgress(false);
+      }
     }, 800);
   };
 
@@ -541,6 +621,7 @@ export const App: React.FC = () => {
           profile={profile}
           onConfirmBooking={handleConfirmHospitalBooking}
           isBooking={isBookingInProgress}
+          bookingError={bookingError}
         />
       )}
 
