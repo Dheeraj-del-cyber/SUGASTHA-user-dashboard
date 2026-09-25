@@ -11,8 +11,6 @@ import {
   TriageResult,
 } from '../../types';
 import { triageEngine } from '../../services/triageEngine';
-import { UserGeoLocation } from '../../services/hospitalDashboardService';
-import { NearestGovtHospitals } from './NearestGovtHospitals';
 import sideImage from '../../../images/side.png';
 
 interface UserDashboardProps {
@@ -25,9 +23,6 @@ interface UserDashboardProps {
   onOpenHistory?: () => void;
   onSelectHospitalAndDoctor?: (hosp: Hospital, doc: Doctor) => void;
   onSelectOption?: (symptomText: string, route: 'TELECONSULTATION' | 'HOSPITAL_VISIT') => void;
-  userLocation?: UserGeoLocation | null;
-  onRequestLocation?: () => void;
-  onBookAtGovtHospital?: (hospital: Hospital) => void;
 }
 
 const COMMON_SYMPTOMS = ['Fever', 'Cough', 'Headache', 'Fatigue'];
@@ -75,9 +70,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
   allergies = [],
   onStartNewConsultation,
   onSelectOption,
-  userLocation = null,
-  onRequestLocation,
-  onBookAtGovtHospital,
 }) => {
   const [symptomInput, setSymptomInput] = useState('');
   const [symptomError, setSymptomError] = useState('');
@@ -246,12 +238,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           <span className="feature-slide-count">{String(activeFeature + 1).padStart(2, '0')} / 04</span>
         </div>
       </section>
-
-      <NearestGovtHospitals
-        userLocation={userLocation}
-        onRequestLocation={onRequestLocation || (() => {})}
-        onBookAtHospital={(hospital) => onBookAtGovtHospital?.(hospital)}
-      />
 
       {/* Main Minimal Home Card */}
       <div className="card symptom-home-card">

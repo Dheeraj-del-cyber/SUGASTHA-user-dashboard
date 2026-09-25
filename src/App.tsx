@@ -16,13 +16,12 @@ import { UserProfileView } from './components/profile/UserProfileView';
 import { ConsultationHistory } from './components/history/ConsultationHistory';
 import { DoctorHistory } from './components/history/DoctorHistory';
 import { HealthcareJourneySummaryModal } from './components/summary/HealthcareJourneySummaryModal';
-import { LocationCaptureModal } from './components/auth/LocationCaptureModal';
 import logoImage from '../images/logo.png';
 
 import { abhaService } from './services/abhaService';
 import { triageEngine } from './services/triageEngine';
 import { consultationService } from './services/consultationService';
-import { hospitalDashboardService, type UserGeoLocation } from './services/hospitalDashboardService';
+import { hospitalDashboardService } from './services/hospitalDashboardService';
 
 import {
   AbhaProfile,
@@ -37,8 +36,6 @@ import {
   HealthcareJourneySummary,
 } from './types';
 
-const USER_LOCATION_KEY = 'sugastha_user_location';
-
 export const App: React.FC = () => {
   // ABHA Session State
   const [isInitializing, setIsInitializing] = useState(true);
@@ -50,18 +47,6 @@ export const App: React.FC = () => {
   // Auth Modals State
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isRecoverOpen, setIsRecoverOpen] = useState(false);
-
-  // Post-login location capture (used to find nearest government hospitals
-  // via the connected hospital dashboard backend)
-  const [showLocationCapture, setShowLocationCapture] = useState(false);
-  const [pendingLoginData, setPendingLoginData] = useState<{
-    profile: AbhaProfile;
-    records: HealthRecord[];
-    conditions: ChronicCondition[];
-    allergies: Allergy[];
-  } | null>(null);
-  const [userLocation, setUserLocation] = useState<UserGeoLocation | null>(null);
-
 
   // Active View State
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
@@ -107,15 +92,6 @@ export const App: React.FC = () => {
 
     const savedHistory = consultationService.getConsultationHistory();
     setConsultationHistory(savedHistory);
-
-    try {
-      const savedLocation = window.localStorage.getItem(USER_LOCATION_KEY);
-      if (savedLocation) {
-        setUserLocation(JSON.parse(savedLocation));
-      }
-    } catch {
-      // Ignore invalid stored location
-    }
 
     const loadingTimer = window.setTimeout(() => setIsInitializing(false), 3000);
     return () => window.clearTimeout(loadingTimer);
@@ -181,80 +157,12 @@ export const App: React.FC = () => {
     conditions: ChronicCondition[];
     allergies: Allergy[];
   }) => {
-    // Defer entering the dashboard until the user has shared (or skipped)
-    // their location, so we can immediately show nearest government
-    // hospitals from the connected hospital dashboard.
-    setPendingLoginData(data);
-    setShowLocationCapture(true);
-  };
-
-  // Finish login after the location step: apply the ABHA session, persist
-  // the location (if given), and enter the dashboard.
-  const finalizeLogin = (location: UserGeoLocation | null) => {
-    if (!pendingLoginData) return;
-    setProfile(pendingLoginData.profile);
-    setRecords(pendingLoginData.records);
-    setConditions(pendingLoginData.conditions);
-    setAllergies(pendingLoginData.allergies);
+    setProfile(data.profile);
+    setRecords(data.records);
+    setConditions(data.conditions);
+    setAllergies(data.allergies);
     setActiveTab('dashboard');
     setActiveSubView('DASHBOARD');
-    setShowLocationCapture(false);
-    setPendingLoginData(null);
-
-    if (location) {
-      setUserLocation(location);
-      try {
-        window.localStorage.setItem(USER_LOCATION_KEY, JSON.stringify(location));
-      } catch {
-        // Ignore storage errors (e.g. private browsing quota)
-      }
-    }
-  };
-
-  const handleLocationCaptured = (location: UserGeoLocation) => {
-    finalizeLogin(location);
-  };
-
-  const handleLocationSkipped = () => {
-    finalizeLogin(null);
-  };
-
-  // Re-open the location capture flow at any time (e.g. "Update location"
-  // button on the Nearest Government Hospitals card).
-  const handleRequestLocationUpdate = () => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const location = { latitude: position.coords.latitude, longitude: position.coords.longitude };
-        setUserLocation(location);
-        try {
-          window.localStorage.setItem(USER_LOCATION_KEY, JSON.stringify(location));
-        } catch {
-          // Ignore storage errors
-        }
-      },
-      () => {
-        // Silently ignore denial; the card keeps its existing state.
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
-
-  // Book directly at a hospital selected from the Nearest Government
-  // Hospitals card (skips manual doctor selection; a front-desk doctor
-  // assignment is used and refined once the hospital accepts the request).
-  const handleBookAtGovtHospital = (hospital: Hospital) => {
-    const placeholderDoctor: Doctor = {
-      id: 'unassigned',
-      name: 'To be assigned at hospital desk',
-      specialization: triageResult?.suggestedSpecialties?.[0] || 'General Medicine',
-      qualifications: 'Assigned on arrival',
-      experienceYears: 0,
-      availableSlotToday: "Today's OPD Queue",
-      rating: 0,
-      languages: ['English', 'Hindi'],
-    };
-    handleSelectHospitalAndDoctor(hospital, placeholderDoctor, userLocation ?? undefined, [hospital]);
   };
 
   // Handle Registration Success
@@ -269,12 +177,8 @@ export const App: React.FC = () => {
         }
       : { profile: newProfile, records: [], conditions: [], allergies: [] };
 
-    // Route through the same location-capture step as a normal login, so a
-    // freshly registered account also gets nearest-government-hospital
-    // recommendations from the first moment they land on the dashboard.
     setIsRegisterOpen(false);
-    setPendingLoginData(data);
-    setShowLocationCapture(true);
+    handleLoginSuccess(data);
   };
 
   // Handle Recovery Selection
@@ -533,14 +437,6 @@ export const App: React.FC = () => {
           onBackToLogin={() => setIsRecoverOpen(false)}
         />
 
-        {pendingLoginData && (
-          <LocationCaptureModal
-            isOpen={showLocationCapture}
-            patientName={pendingLoginData.profile.fullName}
-            onLocationCaptured={handleLocationCaptured}
-            onSkip={handleLocationSkipped}
-          />
-        )}
       </>
     );
   }
@@ -578,9 +474,6 @@ export const App: React.FC = () => {
             records={records}
             conditions={conditions}
             allergies={allergies}
-            userLocation={userLocation}
-            onRequestLocation={handleRequestLocationUpdate}
-            onBookAtGovtHospital={handleBookAtGovtHospital}
             onStartNewConsultation={() => {
               setActiveTab('triage');
               setActiveSubView('SYMPTOMS');

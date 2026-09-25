@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { Hospital, Doctor, TriageResult } from '../../types';
 import { hospitalQueueService } from '../../services/hospitalQueueService';
-import { hospitalSearchService } from '../../services/hospitalSearchService';
 import { hospitalDashboardService } from '../../services/hospitalDashboardService';
 
 interface HospitalListProps {
@@ -29,7 +28,9 @@ export const HospitalList: React.FC<HospitalListProps> = ({
   onSelectHospitalAndDoctor,
 }) => {
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [locationStatus, setLocationStatus] = useState<'idle' | 'granted' | 'denied' | 'unsupported'>('idle');
+  const [locationStatus, setLocationStatus] = useState<
+    'idle' | 'loading' | 'granted' | 'denied' | 'unsupported' | 'unreachable' | 'no-hospitals' | 'no-doctors'
+  >('idle');
   const { t, i18n } = useTranslation();
   const languageCode = i18n.language.startsWith('hi') ? 'hi' : i18n.language.startsWith('kn') ? 'kn' : i18n.language.startsWith('mr') ? 'mr' : i18n.language.startsWith('ta') ? 'ta' : i18n.language.startsWith('te') ? 'te' : 'en';
   const hospitalNameMap: Record<string, string> = {
@@ -64,6 +65,7 @@ export const HospitalList: React.FC<HospitalListProps> = ({
       return;
     }
 
+    setLocationStatus('loading');
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const nextLocation = {
@@ -73,19 +75,26 @@ export const HospitalList: React.FC<HospitalListProps> = ({
         setUserLocation(nextLocation);
         setLocationStatus('granted');
 
-        const registeredHospitals = await hospitalDashboardService
-          .getNearbyHospitals(nextLocation)
-          .catch(() => []);
-        const connectedHospitals = registeredHospitals.filter((hospital) => hospital.doctors.length > 0);
-        if (connectedHospitals.length) {
-          setHospitals(connectedHospitals);
+        let registeredHospitals: Hospital[];
+        try {
+          registeredHospitals = await hospitalDashboardService.getNearbyHospitals(nextLocation);
+        } catch {
+          setHospitals([]);
+          setLocationStatus('unreachable');
           return;
         }
 
-        const nearby = await hospitalSearchService.searchNearbyHospitals(nextLocation, 8, 5);
-        setHospitals(
-          nearby.length ? nearby : hospitalQueueService.getRecommendedHospitals(triage, nextLocation)
-        );
+        if (!registeredHospitals.length) {
+          setHospitals([]);
+          setLocationStatus('no-hospitals');
+          return;
+        }
+
+        const connectedHospitals = registeredHospitals.filter((hospital) => hospital.doctors.length > 0);
+        setHospitals(connectedHospitals);
+        if (!connectedHospitals.length) {
+          setLocationStatus('no-doctors');
+        }
       },
       () => {
         setLocationStatus('denied');
@@ -230,11 +239,41 @@ export const HospitalList: React.FC<HospitalListProps> = ({
       </div>
 
       {/* Hospital Cards Feed */}
-      {(!hospitals.length && locationStatus === 'idle') && (
+      {(!hospitals.length && locationStatus === 'loading') && (
         <div className="queue-tip-card location-tip-card">
           <MapPin size={18} className="text-teal flex-shrink-0" />
           <div className="queue-tip-text">
             <strong>Finding nearby hospitals from your current location…</strong>
+          </div>
+        </div>
+      )}
+
+      {locationStatus === 'no-hospitals' && (
+        <div className="queue-tip-card location-tip-card" role="status">
+          <MapPin size={18} className="text-teal flex-shrink-0" />
+          <div className="queue-tip-text">
+            <strong>No hospitals are registered in the connected hospital network yet.</strong>
+            <div>Please try again later or contact local emergency services if this is urgent.</div>
+          </div>
+        </div>
+      )}
+
+      {locationStatus === 'no-doctors' && (
+        <div className="queue-tip-card location-tip-card" role="status">
+          <UserCheck size={18} className="text-teal flex-shrink-0" />
+          <div className="queue-tip-text">
+            <strong>Hospitals were found, but no doctors are listed as available.</strong>
+            <div>Please try again later or contact the hospital directly.</div>
+          </div>
+        </div>
+      )}
+
+      {locationStatus === 'unreachable' && (
+        <div className="queue-tip-card location-tip-card" role="alert">
+          <MapPin size={18} className="text-teal flex-shrink-0" />
+          <div className="queue-tip-text">
+            <strong>Could not connect to the hospital network.</strong>
+            <div>Please try again later or use local emergency services if this is urgent.</div>
           </div>
         </div>
       )}
