@@ -570,7 +570,10 @@ export const App: React.FC = () => {
           <UserProfileView
             profile={profile}
             onLogout={handleLogout}
-            onUpdateProfile={(updated) => setProfile(updated)}
+            onUpdateProfile={(updated) => {
+              abhaService.updateProfile(updated);
+              setProfile(updated);
+            }}
           />
         )}
       </main>
