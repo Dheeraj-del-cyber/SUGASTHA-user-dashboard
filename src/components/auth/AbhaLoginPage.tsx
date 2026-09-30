@@ -32,7 +32,7 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
     te: { overview: 'మీ ఆరోగ్యం, కనెక్ట్ చేయబడింది', connectedCare: 'కనెక్ట్‌డ్ కేర్ నెట్‌వర్క్', secureAccess: 'సురక్షిత ప్రాప్యత', protected: 'సురక్షిత', welcome: 'మళ్లీ స్వాగతం', accessTitle: 'మీ ఆరోగ్య ప్రయాణాన్ని సురక్షితంగా యాక్సెస్ చేయండి', betterHealthcare: 'మంచి ఆరోగ్య సేవ' },
   };
   // Demo/test ABHA ID only for evaluation. Not a real patient's ABHA identifier.
-  const DEMO_TEST_ABHA_ID = '12-3456-7890-1234';
+  const DEMO_TEST_ABHA_ID = '91-1001-2001-3001';
   const [identifier, setIdentifier] = useState(DEMO_TEST_ABHA_ID);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -64,8 +64,11 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
       return;
     }
 
+    // Accept ABHA address (contains @), 10-digit mobile, or 14-digit ABHA number.
     const digitsOnly = trimmed.replace(/[-\s]/g, '');
-    if (digitsOnly.length < 5) {
+    const isAddress = trimmed.includes('@');
+    const isValidNumber = /^\d+$/.test(digitsOnly) && (digitsOnly.length === 10 || digitsOnly.length === 14);
+    if (!isAddress && !isValidNumber) {
       setErrorMsg(t('auth.login.errorInvalid'));
       triggerShake();
       return;

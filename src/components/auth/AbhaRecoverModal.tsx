@@ -20,6 +20,7 @@ export const AbhaRecoverModal: React.FC<AbhaRecoverModalProps> = ({
   const { t } = useTranslation();
   const [mobileOrAadhaar, setMobileOrAadhaar] = useState('9876543210');
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const [recoveredData, setRecoveredData] = useState<{
     abhaNumber: string;
     abhaAddress: string;
@@ -28,6 +29,7 @@ export const AbhaRecoverModal: React.FC<AbhaRecoverModalProps> = ({
 
   const handleRecover = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
     setLoading(true);
     try {
       const data = await abhaService.recoverAbhaId(mobileOrAadhaar);
@@ -35,6 +37,7 @@ export const AbhaRecoverModal: React.FC<AbhaRecoverModalProps> = ({
       setLoading(false);
     } catch {
       setLoading(false);
+      setErrorMsg('No ABHA found for this mobile number. Please check and try again.');
     }
   };
 
@@ -66,6 +69,7 @@ export const AbhaRecoverModal: React.FC<AbhaRecoverModalProps> = ({
                 onChange={(e) => setMobileOrAadhaar(e.target.value)}
                 required
               />
+              {errorMsg && <div role="alert" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)', color: '#f87171', padding: '0.6rem', borderRadius: '8px', fontSize: '0.82rem', marginTop: '0.5rem' }}>{errorMsg}</div>}
             </div>
 
             <button type="submit" className="btn btn-primary btn-lg w-full" disabled={loading}>

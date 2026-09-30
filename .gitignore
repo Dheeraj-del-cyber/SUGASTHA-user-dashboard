@@ -73,3 +73,10 @@ temp/
 # Antigravity / AI workspace files
 .agents/
 .gemini/
+
+# Nested copy of the hospital dashboard
+SUGASTHA-hospital-dashboard-main/
+
+# Env variants
+.env.*
+!.env.example
