@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { User, Bell, Check, CheckCircle2, ChevronDown, Home, FileText, Ticket } from 'lucide-react';
+import { User, Bell, Check, CheckCircle2, ChevronDown, Home, FileText, Ticket, LogOut } from 'lucide-react';
 import { AbhaProfile, ConsultationRequest } from '../../types';
 import { ActiveTab } from './BottomNav';
 import logoImage from '../../../images/logo.png';
@@ -23,6 +23,8 @@ export const Header: React.FC<HeaderProps> = ({
   profile,
   activeConsultation,
   onOpenLogin,
+  onLogout,
+  onOpenProfile,
   onGoHome,
   activeTab,
   activeSubView,
@@ -95,9 +97,8 @@ export const Header: React.FC<HeaderProps> = ({
         <nav className="desktop-nav-menu" aria-label="Main Navigation">
           <button
             onClick={() => onSelectTab?.('dashboard')}
-            className={`desktop-nav-item ${
-              activeTab === 'dashboard' || activeSubView === 'DASHBOARD' ? 'active' : ''
-            }`}
+            className={`desktop-nav-item ${activeTab === 'dashboard' || activeSubView === 'DASHBOARD' ? 'active' : ''
+              }`}
           >
             <Home size={17} className="desktop-nav-icon" />
             <span>{t('nav.home')}</span>
@@ -105,9 +106,8 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={() => onSelectTab?.('records')}
-            className={`desktop-nav-item ${
-              activeTab === 'records' || activeSubView === 'RECORDS' ? 'active' : ''
-            }`}
+            className={`desktop-nav-item ${activeTab === 'records' || activeSubView === 'RECORDS' ? 'active' : ''
+              }`}
           >
             <FileText size={17} className="desktop-nav-icon" />
             <span>{t('nav.records')}</span>
@@ -118,14 +118,13 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={() => onSelectTab?.('tracking')}
-            className={`desktop-nav-item ${
-              activeTab === 'tracking' ||
-              activeTab === 'appointments' ||
-              activeSubView === 'TRACKER' ||
-              activeSubView === 'HISTORY'
+            className={`desktop-nav-item ${activeTab === 'tracking' ||
+                activeTab === 'appointments' ||
+                activeSubView === 'TRACKER' ||
+                activeSubView === 'HISTORY'
                 ? 'active'
                 : ''
-            }`}
+              }`}
           >
             <Ticket size={17} className="desktop-nav-icon" />
             <span>{t('nav.hospitalPasses')}</span>
@@ -208,8 +207,40 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             )}
           </div>
-          
+
           <div id="google_translate_element" className="translate-widget"></div>
+
+          {profile && (
+            <div className="user-profile-chip">
+              <div
+                className="profile-info-trigger"
+                role="button"
+                tabIndex={0}
+                title={t('nav.profile')}
+                onClick={() => onOpenProfile?.()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') onOpenProfile?.();
+                }}
+              >
+                <div className="avatar-mini">{profile.fullName.charAt(0).toUpperCase()}</div>
+                <div className="profile-text-group">
+                  <div className="name-status-row">
+                    <span className="user-name-text">{profile.fullName}</span>
+                  </div>
+                  <span className="abha-number-text">{profile.abhaNumber}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onLogout}
+                className="btn-icon-head logout-btn"
+                title={t('nav.logout')}
+                aria-label={t('nav.logout')}
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
+          )}
 
           {!profile && (
             <button onClick={onOpenLogin} className="btn btn-primary btn-sm">
