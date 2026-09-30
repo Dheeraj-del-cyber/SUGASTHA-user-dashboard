@@ -1,5 +1,9 @@
 import { AbhaProfile, HealthRecord, ChronicCondition, Allergy, HealthcareJourneySummary } from '../types';
 import { MOCK_ABHA_PROFILES, DEFAULT_ABHA_NUMBER } from '../data/mockAbhaData';
+import { DEMO_ABHA_PROFILES } from '../data/demoAbhaProfiles';
+
+// Udupi demo patients first, then the older Delhi demo profiles.
+const SEED_PROFILES: typeof MOCK_ABHA_PROFILES = { ...DEMO_ABHA_PROFILES, ...MOCK_ABHA_PROFILES };
 
 const ABHA_STORAGE_KEY = 'sugastha_active_abha_user';
 const ABHA_DATASTORE_KEY = 'sugastha_abha_profiles_store';
@@ -9,13 +13,16 @@ function getStoredDataStore(): typeof MOCK_ABHA_PROFILES {
   try {
     const saved = localStorage.getItem(ABHA_DATASTORE_KEY);
     if (saved) {
-      return JSON.parse(saved);
+      // Merge so demo profiles added later still appear in browsers that
+      // already have an older saved store.
+      const merged = { ...SEED_PROFILES, ...JSON.parse(saved) };
+      return merged;
     }
   } catch {
     // fallback
   }
-  localStorage.setItem(ABHA_DATASTORE_KEY, JSON.stringify(MOCK_ABHA_PROFILES));
-  return MOCK_ABHA_PROFILES;
+  localStorage.setItem(ABHA_DATASTORE_KEY, JSON.stringify(SEED_PROFILES));
+  return SEED_PROFILES;
 }
 
 function saveToDataStore(data: typeof MOCK_ABHA_PROFILES) {
@@ -49,21 +56,26 @@ export const abhaService = {
     const store = getStoredDataStore();
     const cleanId = identifier.trim().toLowerCase();
 
-    // Look for match by ABHA number or address
+    const digits = (v: string) => v.replace(/\D/g, '');
     let matchedKey: string | undefined;
     for (const [key, value] of Object.entries(store)) {
+      const idDigits = digits(cleanId);
       if (
         key.toLowerCase() === cleanId ||
+        (idDigits.length >= 10 && digits(key) === idDigits) ||
         value.profile.abhaAddress.toLowerCase() === cleanId ||
-        value.profile.mobileNumber.replace(/\s+/g, '').includes(cleanId.replace(/\s+/g, ''))
+        (idDigits.length >= 10 && digits(value.profile.mobileNumber).endsWith(idDigits.slice(-10)))
       ) {
         matchedKey = key;
         break;
       }
     }
 
-    // If identifier is not found, fallback gracefully to default profile for testing convenience
-    const targetKey = matchedKey || DEFAULT_ABHA_NUMBER;
+    // No silent fallback to a default person: unknown IDs must fail.
+    if (!matchedKey) {
+      throw new Error('No ABHA profile found for this ID or mobile number.');
+    }
+    const targetKey = matchedKey;
     const session = store[targetKey];
 
     localStorage.setItem(ABHA_STORAGE_KEY, targetKey);
