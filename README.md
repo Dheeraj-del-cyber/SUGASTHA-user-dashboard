@@ -27,21 +27,24 @@
 SUGASTHA is the **patient-side** app. A citizen logs in with ABHA, describes symptoms, gets an automatic triage level, and is routed to teleconsultation or a hospital, with a backup-hospital safety net and a scannable pass.
 
 ```mermaid
-journey
-    title A patient's journey through SUGASTHA
-    section Identify
-      Log in with ABHA ID / Address: 5: Patient
-      Health records auto-fetched: 5: System
-    section Assess
-      Enter symptoms: 4: Patient
-      AI triage (Green / Yellow / Red): 5: System
-    section Act
-      eSanjeevani or hospital recommendation: 5: System
-      Book with 3-tier queue buffer: 4: Patient
-      Receive QR + 5-digit token: 5: System
-    section Close the loop
-      Live status tracking: 4: Patient
-      Journey synced to ABHA Locker: 5: System
+flowchart LR
+    A([ABHA Login]) --> B[Health records auto-fetched]
+    B --> C[Symptoms entered]
+    C --> D{AI triage}
+    D -->|Green| E[eSanjeevani / routine care]
+    D -->|Yellow| F[Same-day hospital review]
+    D -->|Red| G[Immediate care pathway]
+    E --> H[Book consultation / queue buffer]
+    F --> H
+    G --> H
+    H --> I[QR + 5-digit token]
+    I --> J[Live status tracking]
+    J --> K[Sync to ABHA Health Locker]
+
+    classDef patient fill:#e0f2fe,stroke:#0f766e,color:#0f172a
+    classDef system fill:#dcfce7,stroke:#166534,color:#14532d
+    class A,C,H,I,J patient
+    class B,D,E,F,G,K system
 ```
 
 > ⚠️ **Scope:** The hospital dashboard is a separate app (`SUGASTHA-hospital-dashboard-main/`). The two talk over the REST API described in [Hospital Integration](#-hospital-integration).
