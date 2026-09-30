@@ -64,8 +64,11 @@ export const AbhaLoginPage: React.FC<AbhaLoginPageProps> = ({
       return;
     }
 
+    // Accept ABHA address (contains @), 10-digit mobile, or 14-digit ABHA number.
     const digitsOnly = trimmed.replace(/[-\s]/g, '');
-    if (digitsOnly.length < 5) {
+    const isAddress = trimmed.includes('@');
+    const isValidNumber = /^\d+$/.test(digitsOnly) && (digitsOnly.length === 10 || digitsOnly.length === 14);
+    if (!isAddress && !isValidNumber) {
       setErrorMsg(t('auth.login.errorInvalid'));
       triggerShake();
       return;
