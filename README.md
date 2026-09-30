@@ -1,499 +1,376 @@
-# SUGASTHA — Citizen Healthcare & AI Triage Platform
+<div align="center">
 
-> **An Ayushman Bharat Digital Mission (ABDM) compliant, citizen-centric healthcare web application featuring AI clinical triage, ABHA ID integration, 3-tier hospital queue buffering, QR-based consultation tokens, and ABHA health record synchronization.**
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f766e,100:1d4ed8&height=200&section=header&text=SUGASTHA&fontSize=64&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Citizen%20Healthcare%20%26%20AI%20Triage%20Platform&descAlignY=60&descSize=18" alt="SUGASTHA banner" width="100%"/>
 
----
+<a href="https://git.io/typing-svg">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&pac=3&duration=3200&pause=900&color=0F766E&center=true&vCenter=true&width=720&lines=ABHA+login+%E2%86%92+auto-fetched+health+records;AI+triage%3A+Green+%7C+Yellow+%7C+Red+(zero+manual+selection);3-tier+hospital+queue+with+automatic+failover;QR+%2B+5-digit+token+for+hospital+check-in;Journey+synced+back+to+your+ABHA+Health+Locker" alt="Typing animation of key features"/>
+</a>
 
-## Table of Contents
+<br/>
 
-- [Overview](#overview)
-- [Key Features](#key-features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Setup & Installation](#setup--installation)
-- [Running the Application](#running-the-application)
-- [Full User Workflow](#full-user-workflow)
-- [Architecture & Mobile-Readiness](#architecture--mobile-readiness)
-- [API Contracts & Hospital Integration](#api-contracts--hospital-integration)
-- [Development Notes](#development-notes)
-- [Environment Variables](#environment-variables)
-- [Scripts](#scripts)
-- [Contributing](#contributing)
-- [License](#license)
+![ABDM](https://img.shields.io/badge/ABDM-Compliant-0f766e?style=for-the-badge)
+![React](https://img.shields.io/badge/React-19-61dafb?style=for-the-badge&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178c6?style=for-the-badge&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-6.4-646cff?style=for-the-badge&logo=vite&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+
+**An Ayushman Bharat Digital Mission (ABDM) compliant, citizen-centric web app: ABHA login, AI clinical triage, hospital queue buffering, QR consultation tokens, and ABHA record sync.**
+
+[Overview](#-overview) · [Architecture](#-architecture) · [Quick Start](#-quick-start) · [Flows](#-flows-at-a-glance) · [Integration](#-hospital-integration) · [Config](#-configuration)
+
+</div>
 
 ---
 
-## Overview
+## 🌟 Overview
 
-SUGASTHA is a premium user-side healthcare web application designed for Indian citizens under the Ayushman Bharat Digital Mission ecosystem. It enables patients to:
+SUGASTHA is the **patient-side** app. A citizen logs in with ABHA, describes symptoms, gets an automatic triage level, and is routed to teleconsultation or a hospital, with a backup-hospital safety net and a scannable pass.
 
-1. **Log in or register** using their 14-digit ABHA ID or ABHA Address (`user@abdm`)
-2. **Auto-fetch** their complete ABDM-linked health records (prescriptions, diagnoses, lab reports, allergies, chronic conditions)
-3. **Enter current symptoms** through an intuitive interface
-4. **Receive automated AI clinical triage** — Green / Yellow / Red — without ever asking the user to manually select a priority
-5. **Get intelligent recommendations** — eSanjeevani teleconsultation or a physical hospital visit
-6. **Book a consultation** with a 3-tier backup hospital queue buffer ensuring fallover if the primary hospital is busy
-7. **Receive a unique QR Code + 5-digit verification token** for hospital check-in
-8. **Track live consultation status** as it progresses through the hospital system
-9. **Sync a complete healthcare journey summary** back to their permanent ABHA Health Locker
+```mermaid
+journey
+    title A patient's journey through SUGASTHA
+    section Identify
+      Log in with ABHA ID / Address: 5: Patient
+      Health records auto-fetched: 5: System
+    section Assess
+      Enter symptoms: 4: Patient
+      AI triage (Green / Yellow / Red): 5: System
+    section Act
+      eSanjeevani or hospital recommendation: 5: System
+      Book with 3-tier queue buffer: 4: Patient
+      Receive QR + 5-digit token: 5: System
+    section Close the loop
+      Live status tracking: 4: Patient
+      Journey synced to ABHA Locker: 5: System
+```
 
-> ⚠️ **Scope Note:** The hospital-side dashboard is intentionally **NOT** built here. It will be developed separately and integrated via clean REST/Webhook API contracts already scaffolded in this codebase.
-
----
-
-## Key Features
-
-| Feature | Description |
-|---|---|
-| 🪪 **ABHA Authentication** | Login via ABHA Number or ABHA Address with OTP / Password flow |
-| 📋 **ABHA Registration** | Step-by-step guided registration using Aadhaar KYC + OTP |
-| 🔍 **ABHA Recovery** | Retrieve forgotten ABHA ID via linked mobile / Aadhaar |
-| 🏥 **ABDM Health Records** | Auto-fetch prescriptions, diagnoses, lab reports, chronic conditions, allergies |
-| 🤖 **AI Clinical Triage** | Automated rule-based engine classifying Green / Yellow / Red — zero manual selection |
-| 🟢🟡🔴 **Triage Rationale** | Detailed clinical factors considered, sourced from both current symptoms and ABHA history |
-| 📡 **eSanjeevani Integration-Ready** | "Connect to eSanjeevani" button with full API payload contract, ready for MoHFW gateway |
-| 🏨 **Hospital Recommendation** | Filtered by condition, triage, distance (km), auto/cab fare estimates, specialist availability |
-| 📊 **3-Tier Queue Buffer** | Primary hospital + 2 automatic fallback hospitals with state machine failover |
-| 🎫 **Unique QR + 5-Digit Token** | Generated on booking; cryptographic ABDM-compliant QR payload for hospital verification |
-| 📍 **Live Status Tracker** | Full consultation lifecycle: `Request Created → Pending → Confirmed → Completed` |
-| 📁 **ABHA Journey Sync** | Complete healthcare journey summary persisted to user's ABHA Health Locker with FHIR bundle structure |
-| 📱 **Mobile-First Responsive** | Desktop sidebar + mobile bottom navigation; ready for Capacitor/React Native porting |
+> ⚠️ **Scope:** The hospital dashboard is a separate app (`SUGASTHA-hospital-dashboard-main/`). The two talk over the REST API described in [Hospital Integration](#-hospital-integration).
 
 ---
 
-## Tech Stack
+## ✨ Key Features
 
-| Layer | Technology |
-|---|---|
-| **Framework** | React 19 + TypeScript (Vite 6) |
-| **Styling** | Vanilla CSS (custom design system with CSS variables) |
-| **Icons** | Lucide React |
-| **QR Code** | qrcode.react (SVG-based, offline-capable) |
-| **State** | React useState / useEffect (local component state) |
-| **Persistence** | Browser `localStorage` (mock ABDM data store) |
-| **Build Tool** | Vite 6.4 |
-| **Type Checking** | TypeScript 5.7 (strict mode) |
-| **Node Version** | v18+ recommended (tested on v24.11.1) |
+| | Feature | What it does |
+|---|---|---|
+| 🪪 | **ABHA Auth** | Login, Aadhaar-KYC registration, and ID recovery |
+| 🏥 | **Health Records** | Prescriptions, diagnoses, labs, allergies, chronic conditions |
+| 🤖 | **AI Triage** | Rule-based engine, Green / Yellow / Red, with clinical rationale |
+| 📡 | **eSanjeevani-ready** | Teleconsult referral with inspectable API payload |
+| 🏨 | **Hospital Ranking** | By condition, triage, distance, fare estimate, specialist availability |
+| 📊 | **3-Tier Queue** | Primary + 2 fallback hospitals, automatic failover |
+| 🎫 | **QR + Token** | ABDM-style QR payload and 5-digit verification token |
+| 📍 | **Live Tracker** | Request → Pending → Confirmed → Completed |
+| 📁 | **ABHA Sync** | FHIR R4 `Encounter` bundle to the Health Locker |
+| 📱 | **Mobile-first** | Desktop sidebar, mobile bottom-nav, Capacitor/RN-ready |
 
 ---
 
-## Project Structure
+## 🏗 Architecture
+
+### System context
+
+```mermaid
+flowchart LR
+    P([👤 Patient]) --> APP["SUGASTHA<br/>Patient App<br/>React + TS"]
+    APP <-->|ABHA login & records| ABDM[(ABDM Gateway<br/>mock in dev)]
+    APP -->|teleconsult referral| ES[eSanjeevani<br/>MoHFW]
+    APP <-->|hospitals · doctors · appointments| API["Hospital Backend<br/>FastAPI :8000"]
+    HD["🏥 Hospital Dashboard<br/>React :5174"] <--> API
+    APP -.->|fallback| OSM[OpenStreetMap<br/>demo hospitals]
+
+    classDef core fill:#0f766e,stroke:#0f766e,color:#fff
+    classDef ext fill:#e0f2fe,stroke:#1d4ed8,color:#0c4a6e
+    class APP core
+    class ABDM,ES,API,HD,OSM ext
+```
+
+### Layered design
+
+```mermaid
+flowchart TB
+    subgraph PRES["🎨 Presentation"]
+        C["React components · Vanilla CSS · mobile-first"]
+    end
+    subgraph SVC["⚙️ Service layer (pure TypeScript)"]
+        S1[abhaService]
+        S2[triageEngine]
+        S3[hospitalQueueService]
+        S4[consultationService]
+    end
+    subgraph DOM["📐 Domain"]
+        T["types/index.ts<br/>AbhaProfile · TriageResult · ConsultationRequest"]
+    end
+    subgraph DATA["💾 Data"]
+        D["mockAbhaData · mockHospitals · localStorage"]
+    end
+    PRES --> SVC --> DOM
+    SVC --> DATA
+```
+
+> Services are framework-agnostic, so they port to React Native unchanged. Swap `abhaService.ts` method bodies for real ABDM Gateway calls when going live.
+
+### Component map
+
+```mermaid
+flowchart LR
+    App[App.tsx<br/>state machine] --> Auth[auth/<br/>Login · Register · Recover]
+    App --> Dash[dashboard/<br/>UserDashboard]
+    Dash --> Prof[profile/<br/>AbhaCard · HealthRecords]
+    Dash --> Tri[triage/<br/>SymptomForm · ResultCard]
+    Tri --> Rec[recommendations/<br/>Teleconsult · HospitalList]
+    Rec --> Con[consultation/<br/>Booking · QR · Tracker]
+    Con --> Sum[summary/<br/>JourneySummary]
+    Dash --> Hist[history/<br/>ConsultationHistory]
+```
+
+<details>
+<summary><b>📂 Project structure</b></summary>
 
 ```
 SUGASTHA-user-dashboard/
-├── index.html                        # App entry HTML (fonts, viewport, SEO meta)
-├── vite.config.ts                    # Vite configuration
-├── tsconfig.json                     # TypeScript configuration
-├── package.json                      # Dependencies & scripts
-├── .gitignore
-├── README.md
-│
+├── index.html · vite.config.ts · tsconfig.json · package.json
 └── src/
-    ├── main.tsx                      # React app entry point
-    ├── App.tsx                       # Root component: state machine & view orchestrator
-    │
-    ├── types/
-    │   └── index.ts                  # All TypeScript domain models
-    │                                 # (AbhaProfile, TriageResult, ConsultationRequest, etc.)
-    │
-    ├── styles/
-    │   ├── variables.css             # CSS design tokens (colors, fonts, radii, shadows)
-    │   └── global.css                # Reset, layout utilities, buttons, animations
-    │
-    ├── data/
-    │   ├── mockAbhaData.ts           # 2 sample ABDM citizen profiles with past records
-    │   └── mockHospitals.ts          # 5 hospitals with doctors, distances, fare estimates
-    │
-    ├── services/
-    │   ├── abhaService.ts            # ABHA login, registration, recovery, health record sync
-    │   ├── triageEngine.ts           # AI rule-based clinical triage (Green/Yellow/Red)
-    │   ├── hospitalQueueService.ts   # Hospital ranking + 3-tier queue buffer + failover
-    │   └── consultationService.ts   # Booking, QR/token generation, state machine, journey sync
-    │
+    ├── main.tsx · App.tsx
+    ├── types/index.ts              # domain models
+    ├── styles/                     # variables.css (tokens) · global.css
+    ├── data/                       # mockAbhaData · mockHospitals
+    ├── services/                   # abha · triage · hospitalQueue · consultation
     └── components/
-        ├── common/
-        │   ├── Header.tsx            # App header with ABHA user badge & SOS button
-        │   ├── BottomNav.tsx         # Mobile bottom navigation bar
-        │   └── Modal.tsx             # Reusable accessible modal dialog
-        │
-        ├── auth/
-        │   ├── AbhaLoginModal.tsx    # ABHA ID / ABHA Address login with OTP flow
-        │   ├── AbhaRegisterModal.tsx # 3-step Aadhaar KYC registration wizard
-        │   └── AbhaRecoverModal.tsx  # Forgotten ABHA ID recovery flow
-        │
-        ├── profile/
-        │   ├── AbhaCard.tsx          # Digital ABHA Card (with photo, QR, number, blood group)
-        │   └── HealthRecordsView.tsx # Tabbed view of ABDM-linked records, conditions, allergies
-        │
-        ├── triage/
-        │   ├── SymptomInputForm.tsx  # Symptom chips, pain scale, body region, red flags
-        │   └── TriageResultCard.tsx  # AI triage result display with clinical rationale
-        │
-        ├── recommendations/
-        │   ├── TeleconsultationCard.tsx  # eSanjeevani recommendation with API payload inspector
-        │   └── HospitalList.tsx          # Ranked hospital list with doctor selection
-        │
-        ├── consultation/
-        │   ├── BookingConfirmationModal.tsx  # 3-tier queue preview before booking
-        │   ├── QrCodeDisplay.tsx            # QR pass + 5-digit token verification slip
-        │   ├── ActiveConsultationCard.tsx   # Live consultation widget on dashboard
-        │   └── ConsultationTracker.tsx      # Full tracker with queue state & hospital simulator
-        │
-        ├── summary/
-        │   └── HealthcareJourneySummaryModal.tsx  # Complete journey report + ABHA sync
-        │
-        ├── history/
-        │   └── ConsultationHistory.tsx  # Archived passes with QR re-display
-        │
-        └── dashboard/
-            └── UserDashboard.tsx        # Main patient dashboard (home view)
+        ├── common/  auth/  profile/  triage/
+        └── recommendations/  consultation/  summary/  history/  dashboard/
 ```
 
----
-
-## Prerequisites
-
-Before setting up, ensure you have the following installed:
-
-- **Node.js** `v18.0.0` or higher (v20+ recommended)
-  ```bash
-  node -v    # Should print v18.x.x or higher
-  ```
-- **npm** `v9.0.0` or higher
-  ```bash
-  npm -v     # Should print 9.x.x or higher
-  ```
-- **Git** (for cloning)
-  ```bash
-  git --version
-  ```
+</details>
 
 ---
 
-## Setup & Installation
+## 🚀 Quick Start
 
-### 1. Clone the Repository
+**Requires:** Node.js ≥ 18 (20+ recommended), npm ≥ 9.
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/SUGASTHA-user-dashboard.git
 cd SUGASTHA-user-dashboard
-```
-
-### 2. Install Dependencies
-
-```bash
 npm install
+npm run dev          # → http://localhost:5173
 ```
 
-This will install all required packages including:
-- React 19 & React DOM
-- TypeScript 5.7
-- Vite 6.4
-- Lucide React (icons)
-- qrcode.react (QR code generation)
-- clsx (class name utilities)
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Dev server with hot reload |
+| `npm run build` | Type-check + production bundle in `dist/` |
+| `npm run preview` | Serve the production build locally |
+| `npx tsc --noEmit` | Type-check only |
 
-### 3. Verify Installation
+📱 To test on a phone, open `http://YOUR_LOCAL_IP:5173` on the same Wi-Fi.
 
-```bash
-npm list --depth=0
-```
+### 🧪 Demo profiles
 
-You should see all top-level packages listed without errors.
-
----
-
-## Running the Application
-
-### Development Mode (Hot Reload)
-
-```bash
-npm run dev
-```
-
-The app will start at:
-```
-http://localhost:5173
-```
-
-Network access (for testing on mobile device on same Wi-Fi):
-```
-http://YOUR_LOCAL_IP:5173
-```
-
-### Production Build
-
-```bash
-npm run build
-```
-
-Output will be in the `dist/` folder. The build is optimized, tree-shaken, and ready for deployment.
-
-### Preview Production Build Locally
-
-```bash
-npm run preview
-```
-
-Serves the production `dist/` bundle locally for final verification before deployment.
-
-### Type Check Only (No Build)
-
-```bash
-npx tsc --noEmit
-```
-
----
-
-## Full User Workflow
-
-Once the app is running, follow this journey to test the complete SUGASTHA flow:
-
-### Step 1 — ABHA Login
-
-1. Open `http://localhost:5173`
-2. Click **ABHA Login** in the header
-3. Use one of the **pre-filled test profiles**:
-
-| Profile | ABHA Number | Scenario |
+| Patient | ABHA Number | Expected triage |
 |---|---|---|
-| Rajesh Kumar Verma | `91-4523-8901-2345` | Diabetic + Hypertensive + Cardiac symptoms → **RED triage** |
-| Ananya Sen | `91-7890-1234-5678` | Young adult + allergic rhinitis → **GREEN/YELLOW triage** |
+| Rajesh Kumar Verma | `91-4523-8901-2345` | 🔴 **RED** (diabetes + hypertension + cardiac symptoms) |
+| Ananya Sen | `91-7890-1234-5678` | 🟢🟡 **GREEN / YELLOW** (allergic rhinitis) |
 
-4. Click **Generate 6-Digit OTP** (demo OTP auto-fills `482910`)
-5. Click **Verify & Sign In**
-
-**Result:** Dashboard loads with the patient's Digital ABHA Card and auto-fetched health records.
+Demo OTP auto-fills as `482910`.
 
 ---
 
-### Step 2 — Enter Symptoms & AI Triage
+## 🔄 Flows at a glance
 
-1. Click **Start New AI Triage & Consultation**
-2. The form pre-selects `Chest Pain / Discomfort` + `Shortness of Breath`
-3. Notice the pain scale slider at 7/10 and checked red-flag checkboxes
-4. Click **Generate AI Triage & Clinical Recommendation**
+### End-to-end sequence
 
-**Result:** After ~1 second analysis, a **RED Emergency triage** card appears with:
-- Clinical factors from current symptoms
-- ABHA comorbidity multiplier (Diabetes + Hypertension flagged)
-- Urgency window: `Immediate (0-1 Hour)`
+```mermaid
+sequenceDiagram
+    autonumber
+    actor P as Patient
+    participant A as SUGASTHA App
+    participant B as ABDM (mock)
+    participant H as Hospital Backend
+    participant D as Hospital Dashboard
 
-> The system never asks the user to manually pick Green/Yellow/Red.
-
----
-
-### Step 3 — Hospital Recommendation
-
-1. Click **Proceed to Recommendation**
-2. A ranked list of hospitals appears, showing:
-   - Distance from user in km
-   - Estimated travel time
-   - Auto fare / Cab fare estimates (e.g. Auto: ₹55 | Cab: ₹140)
-   - Available specialist doctors with ratings
-3. Select a doctor (e.g. **Dr. Vivek Sharma – Cardiology**)
-4. Click **Proceed with Consultation Request** on the sticky footer
-
----
-
-### Step 4 — Book Consultation & 3-Tier Queue
-
-1. The **Booking Confirmation Modal** shows:
-   - **Priority 1:** Your selected hospital (Primary)
-   - **Backup #1:** Next nearest hospital (Auto-selected)
-   - **Backup #2:** Third nearest hospital (Auto-selected)
-2. Click **Book Consultation & Generate Token**
-
-**Result:**
-- Unique **Consultation ID** generated (e.g. `SUG-2026-4829`)
-- Unique **5-Digit Verification Token** generated (e.g. `#38291`)
-- Encrypted **ABDM-compliant QR code** generated
-- Initial status: **PENDING**
-
----
-
-### Step 5 — Track Live Status & Simulate Hospital Actions
-
-In the **Active Queue Tracker**:
-
-1. Click **View QR Pass** to see the scannable QR slip with 5-digit token
-2. Use the **Hospital Backend Testing Suite** (since hospital system is separate):
-   - Click **"Simulate: Hospital Accepts Request (Confirm)"** → Status becomes **CONFIRMED**
-   - Or click **"Simulate: Hospital Busy → Failover to Backup"** → Queue cascades to Backup Hospital #1
-3. Once confirmed, click **"Complete Consultation Journey & Sync to ABHA Record"**
-
----
-
-### Step 6 — Healthcare Journey Summary & ABHA Sync
-
-The **Healthcare Journey Summary Modal** displays:
-- All reported symptoms
-- Triage outcome & clinical rationale
-- Hospital, doctor, and queue progression
-- Complete events timeline
-- Click **Sync to ABHA Record** to persist the encounter to the permanent ABHA health store
-
----
-
-### Step 7 — Review Updated Records & Pass History
-
-- **ABHA Health Records tab:** The new SUGASTHA consultation appears as the latest record
-- **Consultation Passes tab:** The archived 5-digit token and QR are stored for future hospital desk verification
-
----
-
-## Architecture & Mobile-Readiness
-
-SUGASTHA is designed with a **Clean Architecture** pattern to ensure easy extensibility to mobile platforms (Capacitor / React Native):
-
-```
-┌─────────────────────────────────────────────┐
-│               Presentation Layer             │
-│    React Components + Vanilla CSS            │
-│    (Mobile-first responsive, touch targets) │
-├─────────────────────────────────────────────┤
-│               Service Layer                  │
-│    Pure TypeScript business logic            │
-│    abhaService / triageEngine /              │
-│    hospitalQueueService / consultationService│
-├─────────────────────────────────────────────┤
-│               Domain / Type Layer            │
-│    src/types/index.ts                        │
-│    (AbhaProfile, TriageResult,               │
-│    ConsultationRequest, etc.)                │
-├─────────────────────────────────────────────┤
-│               Data / Mock Layer              │
-│    src/data/mockAbhaData.ts                  │
-│    src/data/mockHospitals.ts                 │
-│    (Swap with real ABDM API calls later)     │
-└─────────────────────────────────────────────┘
+    P->>A: ABHA login + OTP
+    A->>B: Verify & fetch records
+    B-->>A: Profile + health history
+    P->>A: Enter symptoms
+    A->>A: Triage engine → 🟢 🟡 🔴
+    A-->>P: Result + rationale + recommendation
+    P->>A: Pick hospital & doctor
+    A->>H: POST /appointments
+    H-->>D: Appears in hospital inbox
+    A-->>P: QR + 5-digit token (PENDING)
+    D->>H: Accept appointment
+    loop every 15 s
+        A->>H: Poll appointment status
+    end
+    H-->>A: CONFIRMED
+    P->>A: Complete journey
+    A->>B: Sync FHIR Encounter to Health Locker
 ```
 
-**Mobile porting path:**
-- Services are framework-agnostic pure TypeScript — reusable in React Native as-is
-- Components follow mobile-first CSS — bottom navigation, touch-friendly tap targets
-- API contracts are already defined as typed interfaces for direct SDK integration
+### Triage decision
+
+```mermaid
+flowchart TD
+    S([Symptoms + pain scale + red flags]) --> E{AI Triage Engine}
+    H[(ABHA history<br/>comorbidities · allergies)] --> E
+    E -->|Mild, stable| G["🟢 GREEN<br/>Routine"]
+    E -->|Moderate / risk factors| Y["🟡 YELLOW<br/>Same-day"]
+    E -->|Severe / red flags| R["🔴 RED<br/>Immediate 0–1 hr"]
+    G --> T["📡 eSanjeevani<br/>teleconsult"]
+    Y --> T
+    Y --> HV["🏨 Hospital visit"]
+    R --> HV
+    classDef g fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef y fill:#fef9c3,stroke:#ca8a04,color:#713f12
+    classDef r fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+    class G g
+    class Y y
+    class R r
+```
+
+> The user is **never** asked to choose a priority. Triage is computed from current symptoms + ABHA history.
+
+### 3-tier queue failover
+
+```mermaid
+stateDiagram-v2
+    [*] --> Primary: Booking created
+    Primary --> Confirmed: Hospital accepts
+    Primary --> Backup1: Busy / no response
+    Backup1 --> Confirmed: Accepts
+    Backup1 --> Backup2: Busy / no response
+    Backup2 --> Confirmed: Accepts
+    Backup2 --> Exhausted: All declined
+    Exhausted --> [*]
+    Confirmed --> [*]
+```
+
+### Consultation lifecycle
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> RequestCreated
+    RequestCreated --> Pending: Token + QR issued
+    Pending --> Confirmed: Hospital accepts
+    Confirmed --> Completed: Consultation done
+    Completed --> SyncedToABHA: Journey saved
+    SyncedToABHA --> [*]
+```
+
+### QR pass & token
+
+```mermaid
+flowchart LR
+    Q["QR payload (JSON)"] --- a[Consultation ID<br/>SUG-2026-4829]
+    Q --- b[5-digit token<br/>#38291]
+    Q --- c[ABHA number + name]
+    Q --- d[Hospital ID]
+    Q --- e[Triage level]
+    Q --- f[Signature placeholder]
+```
 
 ---
 
-## API Contracts & Hospital Integration
+## 🔌 Hospital Integration
 
-The patient dashboard connects to the separate hospital dashboard through its FastAPI backend. Set `VITE_HOSPITAL_API_BASE_URL` to the backend API root; local development defaults to `http://localhost:8000/api/v1`.
+The patient app connects to the hospital FastAPI backend. Default base URL: `http://localhost:8000/api/v1`.
 
-The connected flow uses these endpoints:
+| Method | Endpoint | Used for |
+|---|---|---|
+| `GET` | `/hospitals/nearby-govt?lat=&lng=&limit=8` | Nearby registered hospitals |
+| `GET` | `/doctors?hospital_id=` | Doctors at a hospital |
+| `POST` | `/appointments` | Create booking (shows in hospital inbox) |
+| `GET` | `/appointments?hospital_id=` | Poll status (every 15 s) |
+| `POST` | `/appointments/{id}/accept` | Hospital accepts |
 
-```
-GET  /hospitals/nearby-govt?lat={latitude}&lng={longitude}&limit=8
-GET  /doctors?hospital_id={hospitalId}
-POST /appointments
-GET  /appointments?hospital_id={hospitalId}
-POST /appointments/{appointmentId}/accept
-```
-
-Registered backend hospitals and doctors are used for connected bookings. The patient dashboard submits the appointment to the backend, which makes it visible in the hospital inbox. The patient app polls the backend for acceptance updates every 15 seconds. OpenStreetMap/demo hospital results remain available when no registered hospital with doctors can be loaded; those bookings are local-only and are labelled as such before confirmation.
-
-### Local Development
-
-1. Start the hospital backend from `SUGASTHA-hospital-dashboard-main/backend` with `DATABASE_URL=sqlite:///./sugastha.db`, a local `JWT_SECRET_KEY`, and `uvicorn app.main:app --reload --port 8000`.
-2. Seed the bundled demo database once with `python -m app.db.seed` if it has not already been seeded.
-3. Start the hospital frontend from `SUGASTHA-hospital-dashboard-main/frontend` with `npm run dev -- --port 5174`.
-4. Start this patient frontend with `npm run dev` (normally port `5173`). It will use the local backend by default. For a different backend, set `VITE_HOSPITAL_API_BASE_URL` in `.env.local` to its `/api/v1` URL and restart Vite.
-
-This backend is a prototype integration, not production-ready for real patient records. Its appointment endpoints currently lack write authentication and the backend CORS policy is permissive; use synthetic data locally until authentication, authorization, and deployment CORS restrictions are configured.
-
-### Acceptance Flow
-
-The hospital dashboard changes the appointment status through its backend. The patient dashboard reads the appointment status from that same backend and updates the consultation tracker; no direct browser-to-browser connection or webhook is used.
-
-```http
-GET /api/v1/appointments?hospital_id={hospitalId}
-POST /api/v1/appointments/{appointmentId}/accept
+```mermaid
+flowchart LR
+    U[Patient App] -->|POST /appointments| API[(FastAPI<br/>backend)]
+    API --> HI[Hospital inbox]
+    HI -->|Accept| API
+    API -->|GET /appointments<br/>polled every 15 s| U
 ```
 
-### eSanjeevani Teleconsultation Referral
+No webhooks or direct browser-to-browser links are used. If no registered hospital with doctors is available, the app falls back to OpenStreetMap/demo hospitals; those bookings are **local-only** and labelled as such before confirmation.
+
+<details>
+<summary><b>🛠 Local development with the hospital backend</b></summary>
+
+1. Backend (`SUGASTHA-hospital-dashboard-main/backend`):
+   ```bash
+   # DATABASE_URL=sqlite:///./sugastha.db and a local JWT_SECRET_KEY must be set
+   python -m app.db.seed                      # once, to seed demo data
+   uvicorn app.main:app --reload --port 8000
+   ```
+2. Hospital frontend (`.../frontend`): `npm run dev -- --port 5174`
+3. Patient frontend (this repo): `npm run dev`
+
+To use a different backend, set `VITE_HOSPITAL_API_BASE_URL` in `.env.local` and restart Vite.
+
+</details>
+
+> ⚠️ **Prototype notice:** appointment write endpoints currently have no authentication and CORS is permissive. Use **synthetic data only** until auth and CORS restrictions are in place.
+
+### eSanjeevani referral
 
 ```
 POST https://esanjeevani.mohfw.gov.in/api/v2/patient/teleconsult-referral
 ```
 
-Full payload contract is visible within the app via the **"Inspect API Contract"** toggle on the Teleconsultation recommendation card.
+The full payload is viewable in-app via **Inspect API Contract** on the Teleconsultation card.
 
 ---
 
-## Development Notes
-
-- **Mock ABHA Data:** All ABDM profiles are stored in `localStorage` via `mockAbhaData.ts`. The service layer is structured so real ABDM Gateway API calls can be substituted by replacing `abhaService.ts` method bodies.
-- **Hospital Dashboard:** The separate hospital app and FastAPI backend are in `SUGASTHA-hospital-dashboard-main/`. Hospital booking and acceptance updates use the API described above; OpenStreetMap fallback bookings remain local-only.
-- **QR Code Payload:** Each QR encodes a JSON object with consultation ID, 5-digit token, ABHA number, patient name, hospital ID, triage level, and a cryptographic signature placeholder compliant with ABDM verification standards.
-- **FHIR Bundle:** The `HealthcareJourneySummary.fhirBundlePayload` field contains a starter FHIR R4-compatible `Encounter` resource structure ready for ABDM Health Locker submission.
-
----
-
-## Environment Variables
-
-For local development, the hospital API defaults to `http://localhost:8000/api/v1`. For deployment, configure `VITE_HOSPITAL_API_BASE_URL` in the patient frontend's hosting-provider environment settings to the deployed backend API root. For example:
+## ⚙️ Configuration
 
 ```env
+# Hospital backend (defaults to http://localhost:8000/api/v1 in dev)
 VITE_HOSPITAL_API_BASE_URL=https://your-hospital-api.example.com/api/v1
-```
 
-The deployed hospital dashboard website URL is not the API URL. Verify the backend first at `https://your-hospital-api.example.com/health`, then redeploy the patient frontend after setting the variable; Vite embeds it at build time.
-
-For production ABDM integration, create a `.env.local` file:
-
-```env
-# ABDM Gateway
+# ABDM Gateway (production)
 VITE_ABDM_GATEWAY_URL=https://dev.abdm.gov.in
 VITE_ABDM_CLIENT_ID=your_client_id
 VITE_ABDM_CLIENT_SECRET=your_client_secret
 
-# eSanjeevani
+# eSanjeevani & maps
 VITE_ESANJEEVANI_URL=https://esanjeevani.mohfw.gov.in/api/v2
-
-# Map / Geolocation
 VITE_MAPS_API_KEY=your_maps_api_key
 ```
 
-> `.env.local` is already in `.gitignore` — your secrets will never be committed.
+- Put these in `.env.local` (already git-ignored).
+- The API URL is the **backend**, not the hospital dashboard website. Verify it at `<API_ROOT>/health`.
+- Vite embeds variables at **build time**, so redeploy after changing them.
 
 ---
 
-## Scripts
+## 📝 Development Notes
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start development server with hot reload at `localhost:5173` |
-| `npm run build` | TypeScript type-check + Vite production bundle into `dist/` |
-| `npm run preview` | Serve production `dist/` bundle locally |
+- **Mock data:** ABHA profiles live in `localStorage` via `mockAbhaData.ts`.
+- **QR payload:** consultation ID, token, ABHA number, patient name, hospital ID, triage level, signature placeholder.
+- **FHIR:** `HealthcareJourneySummary.fhirBundlePayload` holds a starter R4 `Encounter` structure for Health Locker submission.
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Make your changes
-4. Run type checks: `npx tsc --noEmit`
-5. Build to verify: `npm run build`
-6. Commit: `git commit -m "feat: add my feature"`
-7. Push & open a Pull Request
+```bash
+git checkout -b feature/my-feature
+npx tsc --noEmit && npm run build     # verify
+git commit -m "feat: add my feature"
+```
 
-**Branch naming conventions:**
-- `feature/` — new features
-- `fix/` — bug fixes
-- `refactor/` — code improvements
-- `docs/` — documentation updates
+Branch prefixes: `feature/` · `fix/` · `refactor/` · `docs/`
 
----
+## 📄 License
 
-## License
+MIT. See [LICENSE](./LICENSE).
 
-MIT License — see [LICENSE](./LICENSE) for details.
+<div align="center">
 
----
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:1d4ed8,100:0f766e&height=120&section=footer" alt="footer wave" width="100%"/>
 
-<p align="center">
-  <strong>SUGASTHA</strong> — Built for the citizens of India 🇮🇳<br/>
-  Compliant with Ayushman Bharat Digital Mission (ABDM) standards
-</p>
+**SUGASTHA** — Built for the citizens of India 🇮🇳
+<br/>Aligned with Ayushman Bharat Digital Mission (ABDM) standards
+
+</div>
