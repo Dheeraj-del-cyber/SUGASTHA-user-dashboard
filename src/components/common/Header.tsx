@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { User, Bell, Check, CheckCircle2, ChevronDown, Home, FileText, Ticket, LogOut } from 'lucide-react';
+import { User, Bell, Check, CheckCircle2, ChevronDown, Home, FileText, Ticket } from 'lucide-react';
 import { AbhaProfile, ConsultationRequest } from '../../types';
 import { ActiveTab } from './BottomNav';
 import logoImage from '../../../images/logo.png';
@@ -23,7 +23,6 @@ export const Header: React.FC<HeaderProps> = ({
   profile,
   activeConsultation,
   onOpenLogin,
-  onLogout,
   onOpenProfile,
   onGoHome,
   activeTab,
@@ -224,21 +223,9 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <div className="avatar-mini">{profile.fullName.charAt(0).toUpperCase()}</div>
                 <div className="profile-text-group">
-                  <div className="name-status-row">
-                    <span className="user-name-text">{profile.fullName}</span>
-                  </div>
                   <span className="abha-number-text">{profile.abhaNumber}</span>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={onLogout}
-                className="btn-icon-head logout-btn"
-                title={t('nav.logout')}
-                aria-label={t('nav.logout')}
-              >
-                <LogOut size={16} />
-              </button>
             </div>
           )}
 
@@ -740,6 +727,9 @@ export const Header: React.FC<HeaderProps> = ({
             display: none;
           }
           .abha-number-text {
+            display: none;
+          }
+          .user-profile-chip {
             display: none;
           }
           .language-selector-wrap {
