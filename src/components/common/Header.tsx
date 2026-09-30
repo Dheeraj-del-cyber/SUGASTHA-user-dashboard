@@ -97,8 +97,9 @@ export const Header: React.FC<HeaderProps> = ({
         <nav className="desktop-nav-menu" aria-label="Main Navigation">
           <button
             onClick={() => onSelectTab?.('dashboard')}
-            className={`desktop-nav-item ${activeTab === 'dashboard' || activeSubView === 'DASHBOARD' ? 'active' : ''
-              }`}
+            className={`desktop-nav-item ${
+              activeTab === 'dashboard' || activeSubView === 'DASHBOARD' ? 'active' : ''
+            }`}
           >
             <Home size={17} className="desktop-nav-icon" />
             <span>{t('nav.home')}</span>
@@ -106,8 +107,9 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={() => onSelectTab?.('records')}
-            className={`desktop-nav-item ${activeTab === 'records' || activeSubView === 'RECORDS' ? 'active' : ''
-              }`}
+            className={`desktop-nav-item ${
+              activeTab === 'records' || activeSubView === 'RECORDS' ? 'active' : ''
+            }`}
           >
             <FileText size={17} className="desktop-nav-icon" />
             <span>{t('nav.records')}</span>
@@ -118,13 +120,14 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={() => onSelectTab?.('tracking')}
-            className={`desktop-nav-item ${activeTab === 'tracking' ||
-                activeTab === 'appointments' ||
-                activeSubView === 'TRACKER' ||
-                activeSubView === 'HISTORY'
+            className={`desktop-nav-item ${
+              activeTab === 'tracking' ||
+              activeTab === 'appointments' ||
+              activeSubView === 'TRACKER' ||
+              activeSubView === 'HISTORY'
                 ? 'active'
                 : ''
-              }`}
+            }`}
           >
             <Ticket size={17} className="desktop-nav-icon" />
             <span>{t('nav.hospitalPasses')}</span>
@@ -207,7 +210,7 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             )}
           </div>
-
+          
           <div id="google_translate_element" className="translate-widget"></div>
 
           {profile && (
