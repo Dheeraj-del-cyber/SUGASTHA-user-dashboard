@@ -1,4 +1,6 @@
-<img src="images/logo.png" alt="SUGASTHA banner" width="280" />
+<div align="center">
+  <img src="images/logo.png" alt="SUGASTHA banner" width="280" />
+</div>
 
 <a href="https://git.io/typing-svg">
   <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&pac=3&duration=3200&pause=900&color=0F766E&center=true&vCenter=true&width=720&lines=ABHA+login+%E2%86%92+auto-fetched+health+records;AI+triage%3A+Green+%7C+Yellow+%7C+Red+(zero+manual+selection);3-tier+hospital+queue+with+automatic+failover;QR+%2B+5-digit+token+for+hospital+check-in;Journey+synced+back+to+your+ABHA+Health+Locker" alt="Typing animation of key features"/>
